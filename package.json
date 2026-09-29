@@ -15,14 +15,18 @@
     "db:seed": "node --import tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1142.0",
+    "@aws-sdk/s3-request-presigner": "^3.1142.0",
     "@prisma/client": "^6.19.3",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-dropdown-menu": "^2.1.24",
     "clsx": "^2.1.1",
+    "hls.js": "^1.7.3",
     "ioredis": "^6.0.0",
     "jose": "^6.2.12",
     "lucide-react": "^1.48.0",
     "next": "16.3.6",
+    "pino": "^10.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwind-merge": "^3.7.0"

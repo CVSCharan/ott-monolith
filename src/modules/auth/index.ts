@@ -16,9 +16,12 @@ export {
 export {
   requireSession,
   requireAdmin,
+  getSessionUser,
   signUpAction,
   loginAction,
   logoutAction,
   selectProfileAction,
   verifyPinAction,
 } from './actions'
+
+export type { AccessTokenPayload as SessionUser } from '@/lib/jwt'

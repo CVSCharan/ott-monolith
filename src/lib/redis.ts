@@ -24,11 +24,25 @@ export function getRedisClient(): Redis | null {
       })
     } catch {
       console.warn('[Redis] Failed to initialize client')
-      redisClient = null
     }
   }
 
   return redisClient
+}
+
+export const redis = {
+  async get(key: string): Promise<string | null> {
+    const client = getRedisClient()
+    return client ? client.get(key) : null
+  },
+  async setex(key: string, seconds: number, value: string): Promise<string | null> {
+    const client = getRedisClient()
+    return client ? client.setex(key, seconds, value) : null
+  },
+  async del(key: string): Promise<number> {
+    const client = getRedisClient()
+    return client ? client.del(key) : 0
+  },
 }
 
 export interface RateLimitOptions {

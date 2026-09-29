@@ -169,14 +169,53 @@ async function main() {
   ]
 
   for (const t of sampleTitles) {
-    await prisma.title.upsert({
+    const createdTitle = await prisma.title.upsert({
       where: { slug: t.slug },
       update: {},
       create: t,
     })
+
+    // Upsert active video asset for each title
+    const existingAsset = await prisma.videoAsset.findFirst({
+      where: { titleId: createdTitle.id },
+    })
+
+    if (!existingAsset) {
+      await prisma.videoAsset.create({
+        data: {
+          titleId: createdTitle.id,
+          isActive: true,
+          status: 'ready',
+          durationSeconds: createdTitle.durationSeconds,
+          hlsBasePath: `videos/${createdTitle.id}/hls`,
+          renditions: [
+            { height: 360, vbr: '400k', abr: '64k' },
+            { height: 480, vbr: '900k', abr: '96k' },
+            { height: 720, vbr: '2500k', abr: '128k' },
+            { height: 1080, vbr: '5000k', abr: '192k' },
+          ],
+          subtitles: {
+            create: [
+              {
+                languageCode: 'en',
+                label: 'English [CC]',
+                vttS3Key: `subtitles/${createdTitle.id}/en.vtt`,
+                isDefault: true,
+              },
+              {
+                languageCode: 'hi',
+                label: 'Hindi',
+                vttS3Key: `subtitles/${createdTitle.id}/hi.vtt`,
+                isDefault: false,
+              },
+            ],
+          },
+        },
+      })
+    }
   }
 
-  console.log('✓ Sample catalog seeded successfully.')
+  console.log('✓ Sample catalog and active VideoAssets seeded successfully.')
   console.log('✨ Seed complete!')
 }
 

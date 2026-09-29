@@ -19,6 +19,27 @@ import {
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { MOCK_TITLES, type MockTitle } from '@/lib/mock-data'
 import { MaturityBadge } from '@/components/ui/badge'
+import type HlsType from 'hls.js'
+
+interface PlaybackData {
+  hlsMasterUrl: string
+  subtitles: Array<{
+    languageCode: string
+    label: string
+    isDefault: boolean
+    vttUrl: string
+  }>
+  maxQualityP: number
+  durationSeconds: number
+}
+
+interface QualityOption {
+  label: string
+  height: number
+  levelIndex: number
+  locked: boolean
+  plan?: string
+}
 
 export default function WatchPlayerPage() {
   const router = useRouter()
@@ -30,6 +51,8 @@ export default function WatchPlayerPage() {
 
   const videoRef = React.useRef<HTMLVideoElement | null>(null)
   const containerRef = React.useRef<HTMLDivElement | null>(null)
+  const hlsRef = React.useRef<HlsType | null>(null)
+  const sessionIdRef = React.useRef<string>(crypto.randomUUID())
 
   const [isPlaying, setIsPlaying] = React.useState(true)
   const [currentTime, setCurrentTime] = React.useState(0)
@@ -38,10 +61,16 @@ export default function WatchPlayerPage() {
   const [volume, setVolume] = React.useState(1)
   const [isFullscreen, setIsFullscreen] = React.useState(false)
   const [showControls, setShowControls] = React.useState(true)
-  const [selectedQuality, setSelectedQuality] = React.useState('1080p')
+  const [selectedQuality, setSelectedQuality] = React.useState<string>('Auto')
+  const [availableQualities, setAvailableQualities] = React.useState<QualityOption[]>([])
   const [selectedSubtitle, setSelectedSubtitle] = React.useState('Off')
+  const [subtitlesList, setSubtitlesList] = React.useState<Array<{ code: string; label: string }>>([
+    { code: 'off', label: 'Off' },
+  ])
+  const [playbackData, setPlaybackData] = React.useState<PlaybackData | null>(null)
 
   const controlsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const beaconIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
 
   const hideControlsAfterDelay = React.useCallback(() => {
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
@@ -64,15 +93,193 @@ export default function WatchPlayerPage() {
     }
   }, [hideControlsAfterDelay])
 
+  // ── Send Player Beacon (Progress & QoE) ──────────────────────
+  const sendBeacon = React.useCallback(
+    (eventType = 'heartbeat') => {
+      if (!videoRef.current) return
+      const currentPos = videoRef.current.currentTime
+      const currentDur = videoRef.current.duration || duration || 1
+
+      const payload = {
+        titleId: title.id,
+        videoAssetId: slug,
+        playbackSessionId: sessionIdRef.current,
+        progress: {
+          positionSeconds: currentPos,
+          durationSeconds: currentDur,
+          isCompleted: currentPos > currentDur * 0.9,
+        },
+        events: [
+          {
+            eventType,
+            positionSeconds: currentPos,
+            quality: selectedQuality,
+            deviceType: 'desktop',
+            occurredAt: new Date().toISOString(),
+          },
+        ],
+      }
+
+      // Try sendBeacon on unload, fallback to fetch with keepalive
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/player/beacon', blob)
+      } else {
+        fetch('/api/player/beacon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        }).catch(() => {})
+      }
+    },
+    [title.id, slug, duration, selectedQuality]
+  )
+
+  // ── 10s Debounced Beacon Loop ────────────────────────────────
+  React.useEffect(() => {
+    beaconIntervalRef.current = setInterval(() => {
+      if (isPlaying) {
+        sendBeacon('heartbeat')
+      }
+    }, 10000)
+
+    const handleBeforeUnload = () => sendBeacon('pause')
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      if (beaconIntervalRef.current) clearInterval(beaconIntervalRef.current)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      sendBeacon('pause')
+    }
+  }, [isPlaying, sendBeacon])
+
+  // ── Fetch Playback Info & Attach HLS ─────────────────────────
+  React.useEffect(() => {
+    let isCancelled = false
+
+    async function initializePlayer() {
+      const video = videoRef.current
+      if (!video) return
+
+      try {
+        // Fetch signed playback info
+        const res = await fetch(`/api/video/playback/${slug}`)
+        let data: PlaybackData | null = null
+        if (res.ok) {
+          const json = await res.json()
+          data = json.data
+        }
+
+        if (isCancelled) return
+
+        if (data) {
+          setPlaybackData(data)
+          if (data.durationSeconds) setDuration(data.durationSeconds)
+
+          if (data.subtitles && data.subtitles.length > 0) {
+            setSubtitlesList([
+              { code: 'off', label: 'Off' },
+              ...data.subtitles.map((s) => ({ code: s.languageCode, label: s.label })),
+            ])
+          }
+        }
+
+        const streamUrl = data?.hlsMasterUrl || title.trailerUrl
+        const HlsModule = (await import('hls.js')).default
+
+        if (HlsModule.isSupported() && data?.hlsMasterUrl) {
+          if (hlsRef.current) {
+            hlsRef.current.destroy()
+          }
+
+          const hls = new HlsModule({
+            enableWorker: true,
+            lowLatencyMode: true,
+          })
+          hlsRef.current = hls
+
+          hls.loadSource(streamUrl)
+          hls.attachMedia(video)
+
+          hls.on(HlsModule.Events.MANIFEST_PARSED, (_, manifestData) => {
+            const maxP = data?.maxQualityP ?? 1080
+            const qualities: QualityOption[] = [
+              { label: 'Auto', height: 0, levelIndex: -1, locked: false },
+            ]
+
+            manifestData.levels.forEach((lvl, idx) => {
+              const h = lvl.height
+              const isLocked = h > maxP
+              qualities.push({
+                label: `${h}p`,
+                height: h,
+                levelIndex: idx,
+                locked: isLocked,
+                plan: isLocked ? (h >= 1080 ? 'PREMIUM' : 'STANDARD') : undefined,
+              })
+            })
+
+            // Add standard options if levels are sparse
+            if (qualities.length <= 1) {
+              qualities.push(
+                { label: '480p SD', height: 480, levelIndex: 0, locked: false },
+                { label: '720p HD', height: 720, levelIndex: 1, locked: maxP < 720, plan: 'STANDARD' },
+                { label: '1080p FHD', height: 1080, levelIndex: 2, locked: maxP < 1080, plan: 'PREMIUM' }
+              )
+            }
+
+            setAvailableQualities(qualities)
+            video.play().catch(() => setIsPlaying(false))
+          })
+
+          hls.on(HlsModule.Events.ERROR, (_, errorData) => {
+            if (errorData.fatal) {
+              // Fallback gracefully to direct trailer MP4
+              video.src = title.trailerUrl
+              video.play().catch(() => setIsPlaying(false))
+            }
+          })
+        } else if (video.canPlayType('application/vnd.apple.mpegurl') && data?.hlsMasterUrl) {
+          // Native Safari HLS
+          video.src = data.hlsMasterUrl
+          video.play().catch(() => setIsPlaying(false))
+        } else {
+          // Fallback to direct MP4
+          video.src = title.trailerUrl
+          video.play().catch(() => setIsPlaying(false))
+        }
+      } catch {
+        // Network or module error fallback
+        if (video) {
+          video.src = title.trailerUrl
+          video.play().catch(() => setIsPlaying(false))
+        }
+      }
+    }
+
+    initializePlayer()
+
+    return () => {
+      isCancelled = true
+      if (hlsRef.current) {
+        hlsRef.current.destroy()
+        hlsRef.current = null
+      }
+    }
+  }, [slug, title.trailerUrl])
+
   const togglePlay = () => {
     if (!videoRef.current) return
     if (videoRef.current.paused) {
       videoRef.current.play()
       setIsPlaying(true)
+      sendBeacon('play')
     } else {
       videoRef.current.pause()
       setIsPlaying(false)
       setShowControls(true)
+      sendBeacon('pause')
     }
   }
 
@@ -91,6 +298,7 @@ export default function WatchPlayerPage() {
     const newTime = parseFloat(e.target.value)
     videoRef.current.currentTime = newTime
     setCurrentTime(newTime)
+    sendBeacon('seek')
   }
 
   const skipSeconds = (seconds: number) => {
@@ -99,6 +307,7 @@ export default function WatchPlayerPage() {
       0,
       Math.min(videoRef.current.currentTime + seconds, duration)
     )
+    sendBeacon('seek')
   }
 
   const toggleMute = () => {
@@ -127,6 +336,15 @@ export default function WatchPlayerPage() {
     }
   }
 
+  const handleQualityChange = (q: QualityOption) => {
+    if (q.locked) return
+    setSelectedQuality(q.label)
+    if (hlsRef.current) {
+      hlsRef.current.currentLevel = q.levelIndex
+    }
+    sendBeacon('quality_change')
+  }
+
   const formatTime = (timeInSeconds: number) => {
     const mins = Math.floor(timeInSeconds / 60)
     const secs = Math.floor(timeInSeconds % 60)
@@ -142,14 +360,24 @@ export default function WatchPlayerPage() {
       {/* ── HTML5 / HLS Video Element ── */}
       <video
         ref={videoRef}
-        src={title.trailerUrl}
         autoPlay
         playsInline
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onClick={togglePlay}
         className="w-full h-full object-contain cursor-pointer"
-      />
+      >
+        {playbackData?.subtitles?.map((s) => (
+          <track
+            key={s.languageCode}
+            kind="subtitles"
+            label={s.label}
+            srcLang={s.languageCode}
+            src={s.vttUrl}
+            default={s.isDefault}
+          />
+        ))}
+      </video>
 
       {/* ── Overlay Scrim for Controls ── */}
       <div
@@ -297,16 +525,18 @@ export default function WatchPlayerPage() {
                   <p className="px-3 py-1.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">
                     Subtitles
                   </p>
-                  {['Off', 'English [CC]', 'Spanish', 'Hindi'].map((sub) => (
+                  {subtitlesList.map((sub) => (
                     <DropdownMenu.Item
-                      key={sub}
-                      onClick={() => setSelectedSubtitle(sub)}
+                      key={sub.code}
+                      onClick={() => setSelectedSubtitle(sub.label)}
                       className={`px-3 py-1.5 rounded-sm cursor-pointer hover:bg-bg-surface outline-none flex items-center justify-between ${
-                        selectedSubtitle === sub ? 'text-accent-300 font-semibold' : ''
+                        selectedSubtitle === sub.label ? 'text-accent-300 font-semibold' : ''
                       }`}
                     >
-                      <span>{sub}</span>
-                      {selectedSubtitle === sub && <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />}
+                      <span>{sub.label}</span>
+                      {selectedSubtitle === sub.label && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />
+                      )}
                     </DropdownMenu.Item>
                   ))}
                 </DropdownMenu.Content>
@@ -333,21 +563,24 @@ export default function WatchPlayerPage() {
                   <p className="px-3 py-1.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">
                     Video Quality
                   </p>
-                  {[
-                    { label: 'Auto (1080p)', val: 'Auto', locked: false },
-                    { label: '1080p Full HD', val: '1080p', locked: false },
-                    { label: '720p HD', val: '720p', locked: false },
-                    { label: '4K Ultra HD', val: '4k', locked: true, plan: 'PREMIUM' },
-                  ].map((q) => (
+                  {(availableQualities.length > 0
+                    ? availableQualities
+                    : [
+                        { label: 'Auto (1080p)', height: 0, levelIndex: -1, locked: false },
+                        { label: '1080p Full HD', height: 1080, levelIndex: 2, locked: false },
+                        { label: '720p HD', height: 720, levelIndex: 1, locked: false },
+                        { label: '4K Ultra HD', height: 2160, levelIndex: 3, locked: true, plan: 'PREMIUM' },
+                      ]
+                  ).map((q) => (
                     <DropdownMenu.Item
-                      key={q.val}
-                      onClick={() => !q.locked && setSelectedQuality(q.val)}
+                      key={q.label}
+                      onClick={() => handleQualityChange(q)}
                       disabled={q.locked}
                       className={`px-3 py-1.5 rounded-sm flex items-center justify-between ${
                         q.locked
                           ? 'opacity-50 cursor-not-allowed'
                           : 'cursor-pointer hover:bg-bg-surface'
-                      } ${selectedQuality === q.val ? 'text-accent-300 font-semibold' : ''}`}
+                      } ${selectedQuality === q.label ? 'text-accent-300 font-semibold' : ''}`}
                     >
                       <span>{q.label}</span>
                       {q.locked ? (
@@ -355,7 +588,7 @@ export default function WatchPlayerPage() {
                           <Lock className="w-2.5 h-2.5" />
                           {q.plan}
                         </span>
-                      ) : selectedQuality === q.val ? (
+                      ) : selectedQuality === q.label ? (
                         <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />
                       ) : null}
                     </DropdownMenu.Item>

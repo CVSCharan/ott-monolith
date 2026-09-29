@@ -24,6 +24,20 @@ export async function requireSession() {
   return payload
 }
 
+export async function getSessionUser() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('access_token')?.value
+  if (!token) {
+    return null
+  }
+
+  try {
+    return await verifyAccessToken(token)
+  } catch {
+    return null
+  }
+}
+
 export async function requireAdmin() {
   const session = await requireSession()
   if (session.role !== 'admin') {
