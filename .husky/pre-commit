@@ -1,0 +1,8 @@
+#!/bin/sh
+export PATH="/Library/Developer/CommandLineTools/usr/bin:$PATH"
+
+# Run lint-staged on changed files
+npx lint-staged
+
+# Verify strict TypeScript types across the monolith
+npm run type-check

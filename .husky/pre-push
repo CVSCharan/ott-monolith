@@ -1,0 +1,5 @@
+#!/bin/sh
+export PATH="/Library/Developer/CommandLineTools/usr/bin:$PATH"
+
+# Run full Vitest suite before pushing to remote
+npm test

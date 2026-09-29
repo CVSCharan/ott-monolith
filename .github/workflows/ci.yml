@@ -1,0 +1,53 @@
+name: StreamForge CI Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, Types, Tests & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/streamforge?schema=public"
+      DATABASE_DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/streamforge?schema=public"
+      JWT_ACCESS_SECRET: "ci_jwt_access_secret_key_minimum_32_characters_long"
+      JWT_REFRESH_SECRET: "ci_jwt_refresh_secret_key_minimum_32_characters_long"
+      HMAC_MANIFEST_SECRET: "ci_hmac_manifest_signing_secret_minimum_32_chars"
+      REDIS_URL: "redis://localhost:6379"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: ESLint & Module Boundary Verification
+        run: npm run lint
+
+      - name: TypeScript Strict Type Check
+        run: npm run type-check
+
+      - name: Vitest Unit Test Suite
+        run: npm test
+
+      - name: Next.js Production Build
+        run: npm run build
