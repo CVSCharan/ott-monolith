@@ -53,6 +53,7 @@ npm test                   # Vitest unit tests
 npm run test:e2e           # Playwright integration tests
 npm run test:a11y          # axe-core a11y audit
 npm run test:visual        # Playwright visual regression snapshots
+npm run test:lhci          # Lighthouse CI automated performance audit
 npm run lint               # ESLint (module boundary rules enforced — CI gate)
 npm run lint:fix           # ESLint auto-format & fix
 npm run format             # Prettier format all files

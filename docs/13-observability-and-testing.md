@@ -53,7 +53,24 @@ steps:
     run: npm test
   - name: Next.js Production Build
     run: npm run build
+  - name: Lighthouse CI Automated Performance Gate
+    run: npm run test:lhci
 ```
+
+### Lighthouse CI Automated Performance Gate ([`.lighthouserc.json`](../.lighthouserc.json))
+
+Lighthouse CI (`@lhci/cli`) audits production-built Next.js routes (`/`, `/plans`) to enforce hard Core Web Vitals and quality thresholds prior to merging:
+
+- **Desktop Preset:** 3 audit runs per target URL with median aggregation.
+- **Enforced Assertions:**
+  - `categories:performance`: $\ge 0.90$
+  - `categories:accessibility`: $\ge 0.95$
+  - `categories:best-practices`: $\ge 0.90$
+  - `categories:seo`: $\ge 0.95$
+  - `total-blocking-time`: $\le 150\text{ ms}$
+  - `cumulative-layout-shift`: $\le 0.1$
+  - `first-contentful-paint`: warn if $> 2000\text{ ms}$
+  - `largest-contentful-paint`: warn if $> 2500\text{ ms}$
 
 ### Automated Security & Dependency Scanning
 
@@ -142,6 +159,7 @@ Split health checking into standard liveness and readiness endpoints with **mini
 ### Client Error Boundaries & Fault Isolation
 
 To prevent single component failures from taking down the whole page:
+
 1. **Global Error Boundary ([`src/app/global-error.tsx`](../src/app/global-error.tsx)):** Catches catastrophic root layout failures and presents a clean fallback HTML shell.
 2. **Route Segment Error Boundary ([`src/app/error.tsx`](../src/app/error.tsx)):** Recovers from page runtime errors with a `Try Again` (`reset()`) retry button and automatically reports error digests to `/api/telemetry/rum`.
 3. **Section Error Boundary ([`src/components/common/SectionErrorBoundary.tsx`](../src/components/common/SectionErrorBoundary.tsx)):** Reusable boundary wrapping individual carousels and rails; provides inline retry without crashing the billboard or adjacent rails.

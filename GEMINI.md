@@ -82,6 +82,7 @@ npm test                   # Vitest unit test suite
 npm run test:e2e           # Playwright end-to-end matrix tests
 npm run test:a11y          # axe-core accessibility audit
 npm run test:visual        # Playwright visual regression snapshots
+npm run test:lhci          # Lighthouse CI automated performance audit
 ```
 
 For the complete contributor contract, consult [AGENTS.md](./AGENTS.md).

@@ -206,6 +206,7 @@ CREATE INDEX idx_audit_log_priority ON admin_audit_log(priority, occurred_at DES
 ```
 
 ### Audit Priority Levels
+
 - **`CRITICAL`:** Account suspension/ban, privilege escalation, hard deletion of master assets or published titles.
 - **`HIGH`:** Publishing/unpublishing catalog titles, admin force-upgrading user plan tier, parental PIN administrative reset.
 - **`MEDIUM`:** Updating home rails, modifying title metadata/genres, manually re-enqueueing transcode jobs.

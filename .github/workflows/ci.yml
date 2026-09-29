@@ -51,3 +51,6 @@ jobs:
 
       - name: Next.js Production Build
         run: npm run build
+
+      - name: Lighthouse CI Automated Performance Gate
+        run: npm run test:lhci
