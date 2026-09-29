@@ -73,8 +73,8 @@ Queue           Postgres-backed job queue (pg-boss) for transcoding + stats aggr
 Search          Postgres FTS + pg_trgm; pgvector (Phase 2)
 Rate Limiting   Redis token bucket (Phase 1: docker compose + Upstash; replaces Edge in-memory)
 Observability   Pino logging · OpenTelemetry · Core Web Vitals RUM
-Testing         Vitest (Unit) · Playwright (E2E & axe-core a11y)
-CI/CD           GitHub Actions (lint, type-check, vitest, build) · Husky + lint-staged
+Testing         Vitest (Unit) · Playwright (E2E & axe-core a11y) · Lighthouse CI (LHCI)
+CI/CD           GitHub Actions (lint, type-check, vitest, build, LHCI gate) · Husky + lint-staged
 Local Dev       docker compose (Postgres + MinIO + Redis + pg-boss worker)
 ```
 

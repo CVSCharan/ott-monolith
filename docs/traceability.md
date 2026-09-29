@@ -187,6 +187,7 @@ WHERE status = 'published'
 | System     | OpenAPI 3.1 JSON Specification      | Route Handler (`GET /api/docs/spec`)      | Route Handler call                        | Public                                   | None                               | `src/app/api/docs/spec/route.ts`     | OpenAPI Spec                           | Completed | `[MVP]`   |
 | System     | Dynamic Sitemap XML                 | Route Handler (`GET /sitemap.xml`)        | Static / ISR revalidated                  | Published titles, genres                 | `titles`, `genres`                 | `src/app/sitemap.ts`                 | Next.js Metadata Route                 | Active    | `[MVP]`   |
 | System     | Robots Exclusion Protocol           | Route Handler (`GET /robots.txt`)         | Static Route                              | Public                                   | None                               | `src/app/robots.ts`                  | Next.js Metadata Route                 | Active    | `[MVP]`   |
+| System     | Lighthouse CI Performance Gate      | CLI / CI Gate (`npm run test:lhci`)       | Chrome Headless Audit                     | Public surfaces (`/`, `/plans`)          | None                               | `.lighthouserc.json`                 | Automated CI Gate                      | Completed | `[MVP]`   |
 
 ---
 
