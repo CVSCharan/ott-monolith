@@ -28,18 +28,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!data || !data.name || typeof data.value !== 'number') {
-      return NextResponse.json(
-        { error: 'Invalid web vitals telemetry payload' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'Invalid web vitals telemetry payload' }, { status: 400 })
     }
 
     // Only accept recognized Core Web Vitals
     if (!ALLOWED_METRICS.has(data.name.toUpperCase())) {
-      return NextResponse.json(
-        { error: 'Unsupported metric name' },
-        { status: 422 },
-      )
+      return NextResponse.json({ error: 'Unsupported metric name' }, { status: 422 })
     }
 
     // Log structured RUM metric with Pino (Morgan/Datadog compliant)

@@ -28,7 +28,8 @@ export default function NotFound() {
             Scene Not Found
           </h1>
           <p className="text-body-md text-[var(--color-text-secondary)] leading-relaxed">
-            The film reel, asset, or page you were looking for doesn&apos;t exist, has expired from our streaming catalog, or was moved.
+            The film reel, asset, or page you were looking for doesn&apos;t exist, has expired from
+            our streaming catalog, or was moved.
           </p>
         </div>
 

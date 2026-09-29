@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     if (!filename || typeof sizeBytes !== 'number') {
       return NextResponse.json(
         { error: 'Missing required parameters: filename, sizeBytes' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 

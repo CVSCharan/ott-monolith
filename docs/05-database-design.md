@@ -568,7 +568,7 @@ await db.$executeRaw`
     is_completed     = EXCLUDED.is_completed,
     watched_at       = EXCLUDED.watched_at,
     updated_at       = now()
-`;
+`
 // Note: choose the correct constraint name based on whether episodeId is null
 ```
 
@@ -630,19 +630,19 @@ Prisma generates correct migrations for most columns, but several PostgreSQL fea
 
 ```typescript
 // prisma.config.ts
-import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: 'prisma/schema.prisma',
   datasource: {
-    url: env("DATABASE_URL"),
+    url: env('DATABASE_URL'),
   },
   migrations: {
-    path: "prisma/migrations",
-    seed: "node --import tsx prisma/seed.ts",
+    path: 'prisma/migrations',
+    seed: 'node --import tsx prisma/seed.ts',
   },
-});
+})
 ```
 
 ```prisma

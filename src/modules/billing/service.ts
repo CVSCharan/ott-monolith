@@ -89,10 +89,7 @@ export async function getPlansList(): Promise<PlanDisplay[]> {
 /**
  * Check whether a user tier satisfies content minimum tier rank.
  */
-export function checkContentEntitlement(
-  userTierRank: number,
-  contentMinTierRank: number,
-): boolean {
+export function checkContentEntitlement(userTierRank: number, contentMinTierRank: number): boolean {
   return userTierRank >= contentMinTierRank
 }
 
@@ -132,10 +129,7 @@ export async function getAccountSubscription(accountId: string) {
 /**
  * Subscribes or upgrades an account to a specific plan.
  */
-export async function subscribeAccountToPlan(
-  accountId: string,
-  planId: string,
-) {
+export async function subscribeAccountToPlan(accountId: string, planId: string) {
   const plan = await findPlanById(planId)
   if (!plan) {
     throw new Error('PLAN_NOT_FOUND')

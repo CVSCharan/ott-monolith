@@ -14,12 +14,7 @@ export interface ContentCardProps {
   rank?: number // for Top 10 rails
 }
 
-export function ContentCard({
-  title,
-  aspectRatio = 'video',
-  onMoreInfo,
-  rank,
-}: ContentCardProps) {
+export function ContentCard({ title, aspectRatio = 'video', onMoreInfo, rank }: ContentCardProps) {
   const [inList, setInList] = React.useState(false)
 
   const handleToggleList = (e: React.MouseEvent) => {
@@ -77,9 +72,7 @@ export function ContentCard({
       {/* ── Top-10 Numeral Badge if specified in card ── */}
       {rank && (
         <div className="absolute top-2 left-2 z-10 pointer-events-none bg-bg-base/70 backdrop-blur-xs px-2 py-0.5 rounded-sm border border-border">
-          <span className="font-display font-bold text-caption text-accent-300">
-            #{rank}
-          </span>
+          <span className="font-display font-bold text-caption text-accent-300">#{rank}</span>
         </div>
       )}
 
@@ -89,9 +82,7 @@ export function ContentCard({
           {title.title}
         </p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-caption font-semibold text-success">
-            {title.matchScore}% Match
-          </span>
+          <span className="text-caption font-semibold text-success">{title.matchScore}% Match</span>
           <MaturityBadge rating={title.maturityRating} className="text-[10px] py-0 px-1" />
         </div>
       </div>
@@ -131,7 +122,9 @@ export function ContentCard({
                   ? 'bg-accent-soft border-accent-400 text-accent-300'
                   : 'bg-bg-surface border-border hover:border-border-hover text-text-primary'
               }`}
-              aria-label={inList ? `Remove ${title.title} from My List` : `Add ${title.title} to My List`}
+              aria-label={
+                inList ? `Remove ${title.title} from My List` : `Add ${title.title} to My List`
+              }
             >
               {inList ? (
                 <Check className="w-3.5 h-3.5 stroke-[2.5]" />

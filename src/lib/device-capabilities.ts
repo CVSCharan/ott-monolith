@@ -14,7 +14,9 @@ export function shouldAutoplayTrailer(): boolean {
   if (typeof window === 'undefined') return false
 
   // 1. Check Data Saver (Save-Data API) and low-bandwidth connections
-  const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+  const conn = (
+    navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }
+  ).connection
   if (conn?.saveData || conn?.effectiveType === 'slow-2g' || conn?.effectiveType === '2g') {
     return false
   }

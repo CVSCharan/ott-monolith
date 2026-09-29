@@ -17,12 +17,12 @@ jobs:
     timeout-minutes: 15
 
     env:
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/streamforge?schema=public"
-      DATABASE_DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/streamforge?schema=public"
-      JWT_ACCESS_SECRET: "ci_jwt_access_secret_key_minimum_32_characters_long"
-      JWT_REFRESH_SECRET: "ci_jwt_refresh_secret_key_minimum_32_characters_long"
-      HMAC_MANIFEST_SECRET: "ci_hmac_manifest_signing_secret_minimum_32_chars"
-      REDIS_URL: "redis://localhost:6379"
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/streamforge?schema=public'
+      DATABASE_DIRECT_URL: 'postgresql://postgres:postgres@localhost:5432/streamforge?schema=public'
+      JWT_ACCESS_SECRET: 'ci_jwt_access_secret_key_minimum_32_characters_long'
+      JWT_REFRESH_SECRET: 'ci_jwt_refresh_secret_key_minimum_32_characters_long'
+      HMAC_MANIFEST_SECRET: 'ci_hmac_manifest_signing_secret_minimum_32_chars'
+      REDIS_URL: 'redis://localhost:6379'
 
     steps:
       - name: Checkout Repository

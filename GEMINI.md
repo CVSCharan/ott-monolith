@@ -17,23 +17,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 1. Core Architecture & Tech Stack
 
-| Layer | Technology | Key Constraint |
-|---|---|---|
-| **Framework** | Next.js 16 (App Router), React 19, TypeScript | Server Components by default; `src/` directory layout ([ADR-0010](./docs/adr/0010-repo-layout-src-directory.md)). |
-| **Styling** | Tailwind CSS v4 (`@tailwindcss/postcss`) | Top-level `@theme static` tokens only; no raw inline colors/sizes in `.tsx`. |
-| **Database** | PostgreSQL 16 + Prisma 7 (`@prisma/adapter-pg`) | Config in `prisma.config.ts`; driver adapter in `src/lib/db.ts`; partial/GIN indexes in raw migration SQL. |
-| **Auth** | Custom JWT + Argon2id | `httpOnly` cookies; refresh cookie scoped to `Path=/api/auth` with family rotation. |
-| **Storage** | MinIO (local dev) / Cloudflare R2 (prod) | Buckets NOT publicly accessible; all HLS served via manifest proxy route handler. |
-| **Transcoding** | Docker Node worker + FFmpeg | Bounded 50 GB host scratch disk (`worker-scratch`); allowlisted egress; magic-byte check. |
-| **Job Queue** | pg-boss (Postgres-backed) | Worker uses `DATABASE_DIRECT_URL`; 2h timeout; heartbeat monitoring. |
-| **Rate Limiting** | Redis token bucket in `src/proxy.ts` | 100/min general; 10/15m IP + 5/15m account on auth; fail-closed for auth endpoints. |
-| **Video Engine** | `hls.js` + bespoke React controls | Custom player chrome; quality picker with locked plan tiers; dynamically imported. |
+| Layer             | Technology                                      | Key Constraint                                                                                                    |
+| ----------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Framework**     | Next.js 16 (App Router), React 19, TypeScript   | Server Components by default; `src/` directory layout ([ADR-0010](./docs/adr/0010-repo-layout-src-directory.md)). |
+| **Styling**       | Tailwind CSS v4 (`@tailwindcss/postcss`)        | Top-level `@theme static` tokens only; no raw inline colors/sizes in `.tsx`.                                      |
+| **Database**      | PostgreSQL 16 + Prisma 7 (`@prisma/adapter-pg`) | Config in `prisma.config.ts`; driver adapter in `src/lib/db.ts`; partial/GIN indexes in raw migration SQL.        |
+| **Auth**          | Custom JWT + Argon2id                           | `httpOnly` cookies; refresh cookie scoped to `Path=/api/auth` with family rotation.                               |
+| **Storage**       | MinIO (local dev) / Cloudflare R2 (prod)        | Buckets NOT publicly accessible; all HLS served via manifest proxy route handler.                                 |
+| **Transcoding**   | Docker Node worker + FFmpeg                     | Bounded 50 GB host scratch disk (`worker-scratch`); allowlisted egress; magic-byte check.                         |
+| **Job Queue**     | pg-boss (Postgres-backed)                       | Worker uses `DATABASE_DIRECT_URL`; 2h timeout; heartbeat monitoring.                                              |
+| **Rate Limiting** | Redis token bucket in `src/proxy.ts`            | 100/min general; 10/15m IP + 5/15m account on auth; fail-closed for auth endpoints.                               |
+| **Video Engine**  | `hls.js` + bespoke React controls               | Custom player chrome; quality picker with locked plan tiers; dynamically imported.                                |
 
 ---
 
 ## 2. Strict Module Boundary Rules (ESLint Enforced)
 
 Code is partitioned into four explicit module layers:
+
 ```
 src/modules/<name>/index.ts    ← Public API for the module (only allowed export)
 src/modules/<name>/dal.ts      ← Data-Access Layer (ONLY file that may import Prisma/db)

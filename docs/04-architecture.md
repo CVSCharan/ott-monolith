@@ -58,6 +58,7 @@ graph TB
     Transcode -->|Poll jobs| DBDirect
     Transcode -->|Fetch / Store HLS| MinIO
 ```
+
         StatsJob["Stats Aggregator\n(title_stats_daily)"]
     end
 
@@ -74,7 +75,8 @@ graph TB
     WorkerHost --> MinIO
     Browser -->|"S3 multipart PUT\n(presigned)"| MinIO
     Proxy -->|"INCR / check"| RateStore
-```
+
+````
 
 ---
 
@@ -108,11 +110,12 @@ graph LR
     Analytics --> Recommend
     Recommend --> Watchlist
     Recommend --> Analytics
-```
+````
 
 ### Module public interface rule
 
 Each module exposes **only** through:
+
 - `src/modules/[name]/index.ts` — types and read-only query helpers other modules may call
 - `src/modules/[name]/actions.ts` — Server Actions (callable from RSC)
 - `src/modules/[name]/api/` — Route Handlers for REST clients
@@ -125,46 +128,49 @@ Enforced automatically via ESLint 9+ flat config in `eslint.config.mjs` and veri
 export default defineConfig([
   {
     rules: {
-      "no-restricted-imports": [
-        "error",
+      'no-restricted-imports': [
+        'error',
         {
           patterns: [
             {
-              group: ["@/modules/*/*", "!@/modules/*/index", "!@/modules/*/actions"],
-              message: "Deep imports into module internals are forbidden. Import from public index.ts or actions.ts only."
+              group: ['@/modules/*/*', '!@/modules/*/index', '!@/modules/*/actions'],
+              message:
+                'Deep imports into module internals are forbidden. Import from public index.ts or actions.ts only.',
             },
             {
-              group: ["@prisma/client", "@/lib/db"],
-              message: "Direct database access is restricted to DAL files (*.dal.ts)."
-            }
-          ]
-        }
-      ]
-    }
+              group: ['@prisma/client', '@/lib/db'],
+              message: 'Direct database access is restricted to DAL files (*.dal.ts).',
+            },
+          ],
+        },
+      ],
+    },
   },
   {
-    files: ["src/modules/**/*.dal.ts", "src/lib/db.ts", "prisma/**"],
+    files: ['src/modules/**/*.dal.ts', 'src/lib/db.ts', 'prisma/**'],
     rules: {
-      "no-restricted-imports": [
-        "error",
+      'no-restricted-imports': [
+        'error',
         {
           patterns: [
             {
-              group: ["@/modules/*/*", "!@/modules/*/index", "!@/modules/*/actions"],
-              message: "Deep imports into module internals are forbidden."
-            }
-          ]
-        }
-      ]
-    }
-  }
+              group: ['@/modules/*/*', '!@/modules/*/index', '!@/modules/*/actions'],
+              message: 'Deep imports into module internals are forbidden.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])
 ```
+
 Violations immediately fail the `npm run lint` step in GitHub Actions. Deep imports (e.g. `@/modules/billing/queries`) or direct Prisma calls outside `*.dal.ts` break the build.
 
 ### Microservices extraction note
 
 Extracting a module to a microservice requires:
+
 1. Replacing `index.ts` imports with an HTTP/gRPC client
 2. Moving the worker to a separate Docker image
 3. Updating the DAL callers to handle network errors
@@ -280,7 +286,7 @@ ott-monolith/
 ## Proxy (src/proxy.ts) — Node Runtime
 
 ```typescript
-// src/proxy.ts   ← Next.js config points here via `experimental.serverMiddlewarePath` 
+// src/proxy.ts   ← Next.js config points here via `experimental.serverMiddlewarePath`
 // NOT Edge runtime — runs on Node so it can hit Redis synchronously
 
 export const config = {
@@ -295,7 +301,7 @@ export const config = {
     '/api/progress/:path*',
     '/api/admin/:path*',
     '/api/auth/logout',
-  ]
+  ],
 }
 
 // Responsibilities (in order):
@@ -311,6 +317,7 @@ export const config = {
 ```
 
 ### Profile Switching & Session Claims in JWT
+
 - Active profile state is stored directly in the `access_token` JWT payload:
   ```typescript
   interface SessionJwtPayload {
@@ -329,12 +336,12 @@ export const config = {
 
 ### Defence-in-depth layers
 
-| Layer | What it checks | How |
-|-------|---------------|-----|
-| Proxy (`proxy.ts`) | JWT shape, expiry, RBAC role, profile headers | `jose` verify, no DB |
+| Layer                         | What it checks                                                                                 | How                          |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- |
+| Proxy (`proxy.ts`)            | JWT shape, expiry, RBAC role, profile headers                                                  | `jose` verify, no DB         |
 | Route Handler / Server Action | Session exists + profile belongs to account + plan entitlement + PIN clearance if leaving kids | `requireSession()` → DB read |
-| Prisma DAL | Row-level scoping (always filter by `profileId` / `accountId`) | Query includes |
-| DB | CHECK constraints, NOT NULL, FK cascades | Postgres |
+| Prisma DAL                    | Row-level scoping (always filter by `profileId` / `accountId`)                                 | Query includes               |
+| DB                            | CHECK constraints, NOT NULL, FK cascades                                                       | Postgres                     |
 
 ---
 
@@ -345,22 +352,22 @@ export const config = {
 import { Redis } from 'ioredis'
 
 export async function checkRateLimit(
-  key: string,            // e.g. "rl:ip:1.2.3.4" or "rl:auth:1.2.3.4"
-  limit: number,          // max requests
-  windowSec: number       // window in seconds
+  key: string, // e.g. "rl:ip:1.2.3.4" or "rl:auth:1.2.3.4"
+  limit: number, // max requests
+  windowSec: number, // window in seconds
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   // Lua script — atomic token bucket in Redis
   // Uses INCR + EXPIRE pattern (sliding counter)
 }
 ```
 
-| Route group | Key pattern | Limit | Window |
-|-------------|-------------|-------|--------|
-| `POST /api/auth/*` | `rl:auth:{ip}` | 10 | 60 s |
-| `POST /api/auth/signup` | `rl:signup:{ip}` | 5 | 3600 s |
-| `POST /api/video/multipart/*` | `rl:upload:{accountId}` | 5 | 3600 s |
-| `POST /api/analytics/events` | `rl:analytics:{profileId}` | 60 | 60 s |
-| All others | `rl:general:{ip}` | 100 | 60 s |
+| Route group                   | Key pattern                | Limit | Window |
+| ----------------------------- | -------------------------- | ----- | ------ |
+| `POST /api/auth/*`            | `rl:auth:{ip}`             | 10    | 60 s   |
+| `POST /api/auth/signup`       | `rl:signup:{ip}`           | 5     | 3600 s |
+| `POST /api/video/multipart/*` | `rl:upload:{accountId}`    | 5     | 3600 s |
+| `POST /api/analytics/events`  | `rl:analytics:{profileId}` | 60    | 60 s   |
+| All others                    | `rl:general:{ip}`          | 100   | 60 s   |
 
 Rate-limit state is in Redis. In local dev, Redis runs in docker compose. In production, Redis on the same worker VPS (or Upstash Redis for Vercel serverless).
 
@@ -391,13 +398,13 @@ sequenceDiagram
 ```
 
 **Grace window implementation:**
+
 ```typescript
 // Within /api/auth/refresh handler:
 const token = await db.refreshToken.findUnique({ where: { tokenHash } })
 
 if (token.isRevoked) {
-  const replacedRecently = token.replacedAt && 
-    Date.now() - token.replacedAt.getTime() < 5_000  // 5-second grace
+  const replacedRecently = token.replacedAt && Date.now() - token.replacedAt.getTime() < 5_000 // 5-second grace
 
   if (replacedRecently && token.replacedBy) {
     // Return the already-issued replacement (idempotent for parallel tabs)
@@ -405,9 +412,9 @@ if (token.isRevoked) {
     return issueNewAccessToken(replacement)
   }
   // Reuse detected beyond grace window → revoke family
-  await db.refreshToken.updateMany({ 
-    where: { familyId: token.familyId }, 
-    data: { isRevoked: true } 
+  await db.refreshToken.updateMany({
+    where: { familyId: token.familyId },
+    data: { isRevoked: true },
   })
   throw new AppError(401, 'SESSION_COMPROMISED')
 }
@@ -437,11 +444,11 @@ sequenceDiagram
 
 ```typescript
 // src/app/(public)/page.tsx
-export const revalidate = 3600  // ISR: 1 hour for static shell
+export const revalidate = 3600 // ISR: 1 hour for static shell
 
 // The page renders:
 // 1. <Billboard /> — static, in ISR cache
-// 2. <ContentRail /> × N — static genre rails, in ISR cache  
+// 2. <ContentRail /> × N — static genre rails, in ISR cache
 // 3. <Suspense fallback={<RailSkeleton />}>
 //      <ProfileRails />   ← 'use client', fetches /api/profile-rails after hydration
 //    </Suspense>
@@ -468,23 +475,25 @@ export const revalidate = 3600  // ISR: 1 hour for static shell
 
 ### Cache Invalidation Table
 
-| Event / Mutation | Affected Tags & Paths | Invalidation Method | Fallback TTL |
-|------------------|-----------------------|---------------------|--------------|
-| **Title Published / Scheduled Live** | `tag: title-{id}`, `tag: rails-general`, `tag: rails-kids`, `tag: genres` | `revalidateTag()`, `revalidatePath('/title/[slug]')` | 1 hour |
-| **Title Metadata / Poster Updated** | `tag: title-{id}` | `revalidateTag('title-' + id)`, `revalidatePath('/title/[slug]')` | 6 hours |
-| **Rail Reordered / Curation Change** | `tag: rails-general`, `tag: rails-kids` | `revalidateTag('rails-general')`, `revalidateTag('rails-kids')` | 1 hour |
-| **Hero Billboard Updated** | `tag: billboard` | `revalidateTag('billboard')` | 1 hour |
-| **Top-10 Daily Recalculation** | `tag: rails-top10` | Daily worker calls `revalidateTag('rails-top10')` | 6 hours |
-| **Title Soft-Deleted / Archived** | `tag: title-{id}`, `tag: rails-general`, `tag: rails-kids` | `revalidateTag()` on all associated content tags | Immediate |
+| Event / Mutation                     | Affected Tags & Paths                                                     | Invalidation Method                                               | Fallback TTL |
+| ------------------------------------ | ------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------ |
+| **Title Published / Scheduled Live** | `tag: title-{id}`, `tag: rails-general`, `tag: rails-kids`, `tag: genres` | `revalidateTag()`, `revalidatePath('/title/[slug]')`              | 1 hour       |
+| **Title Metadata / Poster Updated**  | `tag: title-{id}`                                                         | `revalidateTag('title-' + id)`, `revalidatePath('/title/[slug]')` | 6 hours      |
+| **Rail Reordered / Curation Change** | `tag: rails-general`, `tag: rails-kids`                                   | `revalidateTag('rails-general')`, `revalidateTag('rails-kids')`   | 1 hour       |
+| **Hero Billboard Updated**           | `tag: billboard`                                                          | `revalidateTag('billboard')`                                      | 1 hour       |
+| **Top-10 Daily Recalculation**       | `tag: rails-top10`                                                        | Daily worker calls `revalidateTag('rails-top10')`                 | 6 hours      |
+| **Title Soft-Deleted / Archived**    | `tag: title-{id}`, `tag: rails-general`, `tag: rails-kids`                | `revalidateTag()` on all associated content tags                  | Immediate    |
 
 ### Scheduled-Publish Mechanism
+
 Titles can be scheduled for future release (`status = 'scheduled'`, `publish_at = future_timestamp`):
+
 1. **Query-level enforcement:** All catalog queries strictly enforce `status = 'published' AND publish_at <= NOW()`. Even if cached, an unpublished title is never returned by the DAL.
 2. **pg-boss Background Cron (`publish-scheduler`):**
    - Runs every 60 seconds on the worker VPS:
      ```sql
-     UPDATE titles 
-     SET status = 'published' 
+     UPDATE titles
+     SET status = 'published'
      WHERE status = 'scheduled' AND publish_at <= NOW()
      RETURNING id, is_kids;
      ```
@@ -492,18 +501,18 @@ Titles can be scheduled for future release (`status = 'scheduled'`, `publish_at 
 
 ### Caching Table
 
-| Data | Strategy | TTL | Session in render? |
-|------|----------|-----|--------------------|
-| Home page static shell (General) | ISR (`tag: rails-general`, `revalidate: 3600`) | 1 hour | ❌ No |
-| Home page static shell (Kids) | ISR (`tag: rails-kids`, `revalidate: 3600`) | 1 hour | ❌ No |
-| Title detail page | ISR (`tag: title-{id}`, `revalidate: 21600`) | 6 hours | ❌ No |
-| Top-10 / trending rail | ISR (`tag: rails-top10`, `revalidate: 21600`) | 6 hours | ❌ No |
-| New releases rail | ISR (`revalidate: 3600`) | 1 hour | ❌ No |
-| Per-profile rails (continue watching, My List) | Dynamic (client fetch after hydration) | No cache | ✅ Yes |
-| Search results | Dynamic (no cache) | — | Optional |
-| Thumbnail / poster images | CDN (immutable) | 1 year | ❌ No |
-| HLS `.ts` segments | CDN / MinIO | Immutable | ❌ No (token in URL) |
-| API `/api/content` list | `Cache-Control: s-maxage=300` | 5 min | ❌ No |
+| Data                                           | Strategy                                       | TTL       | Session in render?   |
+| ---------------------------------------------- | ---------------------------------------------- | --------- | -------------------- |
+| Home page static shell (General)               | ISR (`tag: rails-general`, `revalidate: 3600`) | 1 hour    | ❌ No                |
+| Home page static shell (Kids)                  | ISR (`tag: rails-kids`, `revalidate: 3600`)    | 1 hour    | ❌ No                |
+| Title detail page                              | ISR (`tag: title-{id}`, `revalidate: 21600`)   | 6 hours   | ❌ No                |
+| Top-10 / trending rail                         | ISR (`tag: rails-top10`, `revalidate: 21600`)  | 6 hours   | ❌ No                |
+| New releases rail                              | ISR (`revalidate: 3600`)                       | 1 hour    | ❌ No                |
+| Per-profile rails (continue watching, My List) | Dynamic (client fetch after hydration)         | No cache  | ✅ Yes               |
+| Search results                                 | Dynamic (no cache)                             | —         | Optional             |
+| Thumbnail / poster images                      | CDN (immutable)                                | 1 year    | ❌ No                |
+| HLS `.ts` segments                             | CDN / MinIO                                    | Immutable | ❌ No (token in URL) |
+| API `/api/content` list                        | `Cache-Control: s-maxage=300`                  | 5 min     | ❌ No                |
 
 ---
 
@@ -539,6 +548,7 @@ sequenceDiagram
 ```
 
 ### Auth: Refresh Token Sequence (simplified)
+
 Already shown above in the grace window section.
 
 ### Analytics: Batch Insert (no pg-boss)
@@ -549,15 +559,15 @@ Already shown above in the grace window section.
 // best handled as a direct batched INSERT.
 
 export async function POST(req: Request) {
-  const { events } = await req.json()  // up to 50 events per call
-  
+  const { events } = await req.json() // up to 50 events per call
+
   // Fire-and-forget: don't await, don't fail the response on DB error
   db.$executeRaw`
     INSERT INTO play_events (profile_id, anonymous_id, title_id, episode_id, 
       video_asset_id, event_type, position_seconds, quality, device_type, occurred_at)
     SELECT * FROM jsonb_to_recordset(${JSON.stringify(events)}::jsonb) AS ...
-  `.catch(logger.error)  // log but don't surface to client
-  
+  `.catch(logger.error) // log but don't surface to client
+
   return Response.json({ accepted: events.length }, { status: 202 })
 }
 ```
@@ -599,6 +609,7 @@ services:
 ```
 
 **Neon connection note:** The worker uses `DATABASE_DIRECT_URL` (non-pooled Neon connection) because:
+
 1. pg-boss requires advisory locks and `LISTEN/NOTIFY` — not supported through PgBouncer/pooled connections
 2. FFmpeg jobs are long-lived; pooled connections are recycled aggressively
 3. Prisma migrations also require `directUrl` in `schema.prisma`
@@ -615,11 +626,11 @@ datasource db {
 
 ## Environment Matrix
 
-| Env | DB connection | Storage | Rate limit | Worker | Notes |
-|-----|--------------|---------|-----------|--------|-------|
-| Local (`docker compose`) | Postgres container (direct) | MinIO container | Redis container | Docker service | FFmpeg in worker image |
-| Preview (Vercel PR) | Neon branch (pooled) | R2 staging bucket | Upstash Redis | Not running | Uploads queue but don't transcode |
-| Production (Vercel + VPS) | Neon prod (pooled for app, direct for worker) | R2 prod bucket | Upstash Redis | VPS Docker container | Same image as local |
+| Env                       | DB connection                                 | Storage           | Rate limit      | Worker               | Notes                             |
+| ------------------------- | --------------------------------------------- | ----------------- | --------------- | -------------------- | --------------------------------- |
+| Local (`docker compose`)  | Postgres container (direct)                   | MinIO container   | Redis container | Docker service       | FFmpeg in worker image            |
+| Preview (Vercel PR)       | Neon branch (pooled)                          | R2 staging bucket | Upstash Redis   | Not running          | Uploads queue but don't transcode |
+| Production (Vercel + VPS) | Neon prod (pooled for app, direct for worker) | R2 prod bucket    | Upstash Redis   | VPS Docker container | Same image as local               |
 
 ---
 
@@ -627,12 +638,12 @@ datasource db {
 
 See [ADR-0008](./adr/0008-monolith-to-services.md).
 
-| Signal to extract | Module | Approach |
-|------------------|--------|---------|
+| Signal to extract              | Module           | Approach                                                   |
+| ------------------------------ | ---------------- | ---------------------------------------------------------- |
 | Transcode queue > 100 jobs/day | `video` / worker | Standalone Docker service + SQS or pg-boss on dedicated DB |
-| Search p95 > 200ms | `search` | Typesense or OpenSearch; replace `dal.ts` HTTP client |
-| Recommendation CPU expensive | `recommend` | Python FastAPI + pgvector; called via HTTP from RSC |
-| Analytics > 1M events/day | `analytics` | ClickHouse ingestion; keep play_events as landing zone |
+| Search p95 > 200ms             | `search`         | Typesense or OpenSearch; replace `dal.ts` HTTP client      |
+| Recommendation CPU expensive   | `recommend`      | Python FastAPI + pgvector; called via HTTP from RSC        |
+| Analytics > 1M events/day      | `analytics`      | ClickHouse ingestion; keep play_events as landing zone     |
 
 The module discipline makes the **interface** extraction straightforward. The work is: choosing the protocol, adding the HTTP client, moving the DB queries. Expect 1–2 days per module extraction, not a flag-flip.
 
@@ -640,21 +651,21 @@ The module discipline makes the **interface** extraction straightforward. The wo
 
 ## Open Questions
 
-| # | Status | Question |
-|---|--------|---------|
-| OQ1 | ✅ Closed | Worker is always-on Docker service / VPS — not Vercel Cron |
-| OQ2 | Open | WebSockets for real-time transcode status, or polling (30s)? Default: polling |
+| #   | Status    | Question                                                                         |
+| --- | --------- | -------------------------------------------------------------------------------- |
+| OQ1 | ✅ Closed | Worker is always-on Docker service / VPS — not Vercel Cron                       |
+| OQ2 | Open      | WebSockets for real-time transcode status, or polling (30s)? Default: polling    |
 | OQ3 | ✅ Closed | Rate limiting uses Redis (docker compose + Upstash in prod) — not in-memory Edge |
 
 ---
 
 ## Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Module boundary violations | High | ESLint `no-restricted-imports`; CI gate |
-| Proxy bypass (direct Route Handler call) | Medium | DAL `requireSession()` in every handler — proxy is a UX layer, not the sole security layer |
-| Redis unavailable → rate limiting skipped | Low | Fail open (log error, allow request); Redis is not on critical path |
-| pg-boss + pooled Neon = advisory lock failure | High | Worker always uses `DATABASE_DIRECT_URL` |
-| Grace-window race condition on refresh | Low | Lua atomic swap possible; current 5s window is safe for typical network jitter |
-| Vercel ISR stale on content publish | Medium | Admin `publishContent` action calls `revalidatePath` on publish + revalidateTag |
+| Risk                                          | Impact | Mitigation                                                                                 |
+| --------------------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| Module boundary violations                    | High   | ESLint `no-restricted-imports`; CI gate                                                    |
+| Proxy bypass (direct Route Handler call)      | Medium | DAL `requireSession()` in every handler — proxy is a UX layer, not the sole security layer |
+| Redis unavailable → rate limiting skipped     | Low    | Fail open (log error, allow request); Redis is not on critical path                        |
+| pg-boss + pooled Neon = advisory lock failure | High   | Worker always uses `DATABASE_DIRECT_URL`                                                   |
+| Grace-window race condition on refresh        | Low    | Lua atomic swap possible; current 5s window is safe for typical network jitter             |
+| Vercel ISR stale on content publish           | Medium | Admin `publishContent` action calls `revalidatePath` on publish + revalidateTag            |

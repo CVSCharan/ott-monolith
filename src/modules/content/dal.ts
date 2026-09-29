@@ -77,7 +77,10 @@ export async function findRailsWithItems(ctx?: VisibilityContext) {
           title: {
             include: {
               genres: { include: { genre: true } },
-              videoAssets: { where: { isActive: true }, select: { id: true, durationSeconds: true } },
+              videoAssets: {
+                where: { isActive: true },
+                select: { id: true, durationSeconds: true },
+              },
             },
           },
         },
@@ -138,7 +141,11 @@ export async function findTitleBySlugWithDetails(slug: string, ctx?: VisibilityC
   return title
 }
 
-export async function findMoreLikeThis(titleId: string, genreIds: string[], ctx?: VisibilityContext) {
+export async function findMoreLikeThis(
+  titleId: string,
+  genreIds: string[],
+  ctx?: VisibilityContext,
+) {
   const visibilityWhere = buildVisibilityFilter(ctx)
 
   return db.title.findMany({
@@ -163,7 +170,7 @@ export async function findMoreLikeThis(titleId: string, genreIds: string[], ctx?
 export async function searchTitlesInDb(
   query: string,
   filters?: { genre?: string; type?: string; minAge?: number },
-  ctx?: VisibilityContext
+  ctx?: VisibilityContext,
 ) {
   const visibilityWhere = buildVisibilityFilter(ctx)
   const trimmed = query.trim()

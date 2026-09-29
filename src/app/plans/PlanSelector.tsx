@@ -77,7 +77,8 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
           Choose the plan that fits your entertainment
         </h1>
         <p className="text-body-md text-text-secondary">
-          Enjoy unlimited blockbuster movies, award-winning originals, and ad-free 4K Ultra HD streaming across all your devices.
+          Enjoy unlimited blockbuster movies, award-winning originals, and ad-free 4K Ultra HD
+          streaming across all your devices.
         </p>
       </div>
 
@@ -154,7 +155,9 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
                   </div>
                   <div className="flex items-center justify-between text-body-sm">
                     <span className="text-text-secondary">Simultaneous Streams:</span>
-                    <span className="font-semibold text-text-primary">{plan.maxStreams} devices</span>
+                    <span className="font-semibold text-text-primary">
+                      {plan.maxStreams} devices
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-body-sm">
                     <span className="text-text-secondary">Profiles:</span>
@@ -165,7 +168,10 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
                 {/* Features List */}
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-body-sm text-text-secondary">
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2.5 text-body-sm text-text-secondary"
+                    >
                       <Check className="w-4 h-4 text-accent-400 shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
@@ -183,8 +189,8 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
                     isCurrent
                       ? 'bg-bg-surface border border-border text-text-muted cursor-default'
                       : isPopular
-                      ? 'bg-accent-500 hover:bg-accent-600 text-white shadow-md'
-                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                        ? 'bg-accent-500 hover:bg-accent-600 text-white shadow-md'
+                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                   }`}
                 >
                   {isLoading && isSelected ? (
@@ -196,7 +202,9 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
                     <span>Current Active Plan</span>
                   ) : (
                     <>
-                      <span>{plan.pricePaise > 0 ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}</span>
+                      <span>
+                        {plan.pricePaise > 0 ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
+                      </span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -217,9 +225,14 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border/80">
-                <th className="py-4 px-4 text-body-sm font-semibold text-text-secondary">Feature</th>
+                <th className="py-4 px-4 text-body-sm font-semibold text-text-secondary">
+                  Feature
+                </th>
                 {plans.map((p) => (
-                  <th key={p.id} className="py-4 px-4 text-body-sm font-bold text-text-primary text-center">
+                  <th
+                    key={p.id}
+                    className="py-4 px-4 text-body-sm font-bold text-text-primary text-center"
+                  >
                     {p.name}
                   </th>
                 ))}
@@ -304,17 +317,23 @@ export function PlanSelector({ plans, currentPlanSlug = 'free' }: PlanSelectorPr
         <div className="p-4 rounded-lg bg-bg-surface/40 border border-border/50 flex flex-col items-center">
           <Shield className="w-6 h-6 text-accent-400 mb-2" />
           <h4 className="font-semibold text-text-primary text-body-sm">No Long-Term Contracts</h4>
-          <p className="text-caption text-text-muted">Upgrade, downgrade, or cancel with zero hassle online.</p>
+          <p className="text-caption text-text-muted">
+            Upgrade, downgrade, or cancel with zero hassle online.
+          </p>
         </div>
         <div className="p-4 rounded-lg bg-bg-surface/40 border border-border/50 flex flex-col items-center">
           <Tv className="w-6 h-6 text-accent-400 mb-2" />
           <h4 className="font-semibold text-text-primary text-body-sm">Watch Everywhere</h4>
-          <p className="text-caption text-text-muted">Stream seamlessly across smart TVs, phones, tablets, and web.</p>
+          <p className="text-caption text-text-muted">
+            Stream seamlessly across smart TVs, phones, tablets, and web.
+          </p>
         </div>
         <div className="p-4 rounded-lg bg-bg-surface/40 border border-border/50 flex flex-col items-center">
           <Smartphone className="w-6 h-6 text-accent-400 mb-2" />
           <h4 className="font-semibold text-text-primary text-body-sm">Tailored for Profiles</h4>
-          <p className="text-caption text-text-muted">Individual recommendations and statutory parental controls.</p>
+          <p className="text-caption text-text-muted">
+            Individual recommendations and statutory parental controls.
+          </p>
         </div>
       </div>
     </div>

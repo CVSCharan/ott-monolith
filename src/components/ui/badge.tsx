@@ -10,11 +10,11 @@ export interface MaturityBadgeProps extends React.HTMLAttributes<HTMLSpanElement
 
 export function MaturityBadge({ rating, className, ...props }: MaturityBadgeProps) {
   const ratingStyles: Record<MaturityRating, string> = {
-    'U': 'border-maturity-u text-maturity-u bg-maturity-u/10',
+    U: 'border-maturity-u text-maturity-u bg-maturity-u/10',
     'U/A 7+': 'border-maturity-7 text-maturity-7 bg-maturity-7/10',
     'U/A 13+': 'border-maturity-13 text-maturity-13 bg-maturity-13/10',
     'U/A 16+': 'border-maturity-16 text-maturity-16 bg-maturity-16/10',
-    'A': 'border-maturity-18 text-maturity-18 bg-maturity-18/10',
+    A: 'border-maturity-18 text-maturity-18 bg-maturity-18/10',
   }
 
   return (
@@ -23,8 +23,8 @@ export function MaturityBadge({ rating, className, ...props }: MaturityBadgeProp
         clsx(
           'inline-flex items-center justify-center font-ui text-caption font-semibold tracking-wide border px-1.5 py-0.5 rounded-sm select-none',
           ratingStyles[rating],
-          className
-        )
+          className,
+        ),
       )}
       {...props}
     >
@@ -45,8 +45,8 @@ export function PlanLockBadge({ plan, className, ...props }: PlanLockBadgeProps)
       className={twMerge(
         clsx(
           'inline-flex items-center gap-1 font-ui text-caption font-semibold tracking-wide bg-accent-soft text-accent-300 border border-accent-500/40 px-2 py-0.5 rounded-sm select-none shadow-sm backdrop-blur-xs',
-          className
-        )
+          className,
+        ),
       )}
       {...props}
     >
@@ -66,8 +66,8 @@ export function QualityBadge({ quality, className, ...props }: QualityBadgeProps
       className={twMerge(
         clsx(
           'inline-flex items-center justify-center font-ui text-caption font-medium border border-border text-text-muted px-1.5 py-0.5 rounded-sm select-none',
-          className
-        )
+          className,
+        ),
       )}
       {...props}
     >

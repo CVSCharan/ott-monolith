@@ -92,7 +92,8 @@ export default function AdminUsersPage() {
             </h1>
           </div>
           <p className="text-body-sm text-text-secondary mt-1">
-            Manage subscriber accounts, assign subscription tiers, and control account security status.
+            Manage subscriber accounts, assign subscription tiers, and control account security
+            status.
           </p>
         </div>
 
@@ -180,8 +181,8 @@ export default function AdminUsersPage() {
                       user.plan === 'premium'
                         ? 'bg-accent-500/20 text-accent-400 border border-accent-500/30'
                         : user.plan === 'standard'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'bg-white/10 text-text-secondary border border-border'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'bg-white/10 text-text-secondary border border-border'
                     }`}
                   >
                     <Layers className="w-3 h-3" />
@@ -189,9 +190,7 @@ export default function AdminUsersPage() {
                   </span>
                 </td>
 
-                <td className="p-4 font-mono text-text-secondary">
-                  {user.profilesCount} / 5
-                </td>
+                <td className="p-4 font-mono text-text-secondary">{user.profilesCount} / 5</td>
 
                 <td className="p-4">
                   {user.status === 'active' ? (
@@ -205,9 +204,7 @@ export default function AdminUsersPage() {
                   )}
                 </td>
 
-                <td className="p-4 text-text-muted text-caption">
-                  {user.lastActive}
-                </td>
+                <td className="p-4 text-text-muted text-caption">{user.lastActive}</td>
 
                 <td className="p-4 text-right">
                   <div className="inline-flex items-center gap-2">

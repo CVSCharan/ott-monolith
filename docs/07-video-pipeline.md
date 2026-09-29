@@ -37,12 +37,12 @@ flowchart TD
 
 ## Bitrate Ladder
 
-| Rendition | Video Bitrate | Audio Bitrate | Profile / Level | Target Use |
-|-----------|-------------|--------------|----------------|-----------|
-| 360p  | 400 kbps  | 64 kbps  | baseline / 3.0 | Mobile, slow networks |
-| 480p  | 900 kbps  | 96 kbps  | main / 3.1     | Standard mobile |
-| 720p  | 2500 kbps | 128 kbps | main / 4.0     | Desktop / Fast mobile |
-| 1080p | 5000 kbps | 192 kbps | high / 4.1     | Premium / TV |
+| Rendition | Video Bitrate | Audio Bitrate | Profile / Level | Target Use            |
+| --------- | ------------- | ------------- | --------------- | --------------------- |
+| 360p      | 400 kbps      | 64 kbps       | baseline / 3.0  | Mobile, slow networks |
+| 480p      | 900 kbps      | 96 kbps       | main / 3.1      | Standard mobile       |
+| 720p      | 2500 kbps     | 128 kbps      | main / 4.0      | Desktop / Fast mobile |
+| 1080p     | 5000 kbps     | 192 kbps      | high / 4.1      | Premium / TV          |
 
 **BANDWIDTH in master.m3u8** = video bitrate + audio bitrate (in bits/s). E.g., 360p → `BANDWIDTH=464000`.
 
@@ -66,18 +66,31 @@ interface FfprobeResult {
 
 function probeInput(inputPath: string): FfprobeResult {
   const raw = execFileSync('ffprobe', [
-    '-v', 'error',
-    '-select_streams', 'v:0',
-    '-show_entries', 'stream=width,height,bit_rate:format=duration',
-    '-of', 'json',
-    inputPath
+    '-v',
+    'error',
+    '-select_streams',
+    'v:0',
+    '-show_entries',
+    'stream=width,height,bit_rate:format=duration',
+    '-of',
+    'json',
+    inputPath,
   ])
   const info = JSON.parse(raw.toString())
   const stream = info.streams[0]
   const hasAudio = execFileSync('ffprobe', [
-    '-v', 'error', '-select_streams', 'a:0',
-    '-show_entries', 'stream=codec_type', '-of', 'json', inputPath
-  ]).toString().includes('audio')
+    '-v',
+    'error',
+    '-select_streams',
+    'a:0',
+    '-show_entries',
+    'stream=codec_type',
+    '-of',
+    'json',
+    inputPath,
+  ])
+    .toString()
+    .includes('audio')
 
   return {
     sourceHeight: stream.height,
@@ -89,19 +102,47 @@ function probeInput(inputPath: string): FfprobeResult {
 }
 
 const BITRATE_LADDER = [
-  { height: 360,  vbr: '400k',  vmax: '440k',  vbuf: '800k',
-    abr: '64k',  profile: 'baseline', level: '3.0' },
-  { height: 480,  vbr: '900k',  vmax: '990k',  vbuf: '1800k',
-    abr: '96k',  profile: 'main',     level: '3.1' },
-  { height: 720,  vbr: '2500k', vmax: '2750k', vbuf: '5000k',
-    abr: '128k', profile: 'main',     level: '4.0' },
-  { height: 1080, vbr: '5000k', vmax: '5500k', vbuf: '10000k',
-    abr: '192k', profile: 'high',     level: '4.1' },
+  {
+    height: 360,
+    vbr: '400k',
+    vmax: '440k',
+    vbuf: '800k',
+    abr: '64k',
+    profile: 'baseline',
+    level: '3.0',
+  },
+  {
+    height: 480,
+    vbr: '900k',
+    vmax: '990k',
+    vbuf: '1800k',
+    abr: '96k',
+    profile: 'main',
+    level: '3.1',
+  },
+  {
+    height: 720,
+    vbr: '2500k',
+    vmax: '2750k',
+    vbuf: '5000k',
+    abr: '128k',
+    profile: 'main',
+    level: '4.0',
+  },
+  {
+    height: 1080,
+    vbr: '5000k',
+    vmax: '5500k',
+    vbuf: '10000k',
+    abr: '192k',
+    profile: 'high',
+    level: '4.1',
+  },
 ]
 
 // Skip renditions above source height (no upscaling)
 function selectRenditions(sourceHeight: number) {
-  return BITRATE_LADDER.filter(r => r.height <= sourceHeight)
+  return BITRATE_LADDER.filter((r) => r.height <= sourceHeight)
 }
 ```
 
@@ -115,39 +156,44 @@ function buildFfmpegArgs(
   outputDir: string,
   renditions: typeof BITRATE_LADDER,
   durationSeconds: number,
-  hasAudio: boolean
+  hasAudio: boolean,
 ): string[] {
   const filterParts: string[] = []
   const maps: string[] = []
   const perStream: string[] = []
 
   // Split video into N renditions
-  filterParts.push(`[0:v]split=${renditions.length}${renditions.map((_,i) => `[v${i}]`).join('')}`)
+  filterParts.push(`[0:v]split=${renditions.length}${renditions.map((_, i) => `[v${i}]`).join('')}`)
   renditions.forEach((r, i) => {
     filterParts.push(`[v${i}]scale=-2:${r.height}[s${i}]`)
   })
 
   renditions.forEach((r, i) => {
     maps.push('-map', `[s${i}]`)
-    if (hasAudio) maps.push('-map', '0:a:0')  // explicit audio map per output
+    if (hasAudio) maps.push('-map', '0:a:0') // explicit audio map per output
 
     perStream.push(
-      `-c:v:${i}`, 'libx264',
-      `-b:v:${i}`, r.vbr,
-      `-maxrate:v:${i}`, r.vmax,
-      `-bufsize:v:${i}`, r.vbuf,
-      `-profile:v:${i}`, r.profile,
-      `-level:v:${i}`, r.level,
-      `-pix_fmt`, 'yuv420p',
+      `-c:v:${i}`,
+      'libx264',
+      `-b:v:${i}`,
+      r.vbr,
+      `-maxrate:v:${i}`,
+      r.vmax,
+      `-bufsize:v:${i}`,
+      r.vbuf,
+      `-profile:v:${i}`,
+      r.profile,
+      `-level:v:${i}`,
+      r.level,
+      `-pix_fmt`,
+      'yuv420p',
     )
     if (hasAudio) {
       perStream.push(`-c:a:${i}`, 'aac', `-b:a:${i}`, r.abr)
     }
   })
 
-  const varStreamMap = renditions
-    .map((_, i) => hasAudio ? `v:${i},a:${i}` : `v:${i}`)
-    .join(' ')
+  const varStreamMap = renditions.map((_, i) => (hasAudio ? `v:${i},a:${i}` : `v:${i}`)).join(' ')
 
   // Segment TTL = duration + 1h; this is used when signing segment URLs
   const segmentTtl = durationSeconds + 3600
@@ -155,22 +201,34 @@ function buildFfmpegArgs(
   return [
     // FFmpeg input hardening:
     // 1. Restrict protocols to file, pipe, and crypto only (blocks SSRF to http/gopher/subfile/concat)
-    '-protocol_whitelist', 'file,pipe,crypto',
+    '-protocol_whitelist',
+    'file,pipe,crypto',
     // 2. Force demuxer to mp4 to prevent container format misinterpretation attacks
-    '-f', 'mp4',
-    '-i', inputPath,
-    '-filter_complex', filterParts.join(';'),
+    '-f',
+    'mp4',
+    '-i',
+    inputPath,
+    '-filter_complex',
+    filterParts.join(';'),
     ...maps,
     ...perStream,
     // Aligned keyframes every 2s (forces I-frame at segment boundaries)
-    '-force_key_frames', 'expr:gte(t,n_forced*2)',
-    '-hls_time', '4',
-    '-hls_playlist_type', 'vod',
-    '-hls_flags', 'independent_segments',  // each segment is independently decodable
-    '-hls_segment_type', 'mpegts',
-    '-var_stream_map', varStreamMap,
-    '-master_pl_name', 'master.m3u8',
-    '-hls_segment_filename', `${outputDir}/%v/seg_%04d.ts`,
+    '-force_key_frames',
+    'expr:gte(t,n_forced*2)',
+    '-hls_time',
+    '4',
+    '-hls_playlist_type',
+    'vod',
+    '-hls_flags',
+    'independent_segments', // each segment is independently decodable
+    '-hls_segment_type',
+    'mpegts',
+    '-var_stream_map',
+    varStreamMap,
+    '-master_pl_name',
+    'master.m3u8',
+    '-hls_segment_filename',
+    `${outputDir}/%v/seg_%04d.ts`,
     `${outputDir}/%v/stream.m3u8`,
   ]
 }
@@ -192,6 +250,7 @@ export async function validateMp4MagicBytes(filePath: string): Promise<boolean> 
 **Correct `scale=-2:H`:** Width is computed by FFmpeg to preserve aspect ratio; the `-2` ensures it rounds to an even number (required by libx264 for yuv420p).
 
 **FFmpeg output structure:**
+
 ```
 /var/lib/streamforge/scratch/{assetId}/
 ├── master.m3u8
@@ -230,7 +289,7 @@ export interface StreamUrlSigner {
     assetId: string,
     rendition: string,
     rawContent: string,
-    segmentTtl: number
+    segmentTtl: number,
   ): Promise<string>
 
   /** Validates a segment token; throws if invalid or expired */
@@ -266,22 +325,18 @@ Browser → GET /api/hls/{assetId}/0/seg_0001.ts?token=...&exp=...
 // src/modules/video/signing-demo.ts
 import { createHmac, timingSafeEqual } from 'crypto'
 
-const SIGNING_SECRET = env.HLS_SIGNING_SECRET  // 32-byte hex string from .env
+const SIGNING_SECRET = env.HLS_SIGNING_SECRET // 32-byte hex string from .env
 
 function hmacSign(payload: string, ttlSeconds: number): { token: string; exp: number } {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds
-  const token = createHmac('sha256', SIGNING_SECRET)
-    .update(`${payload}:${exp}`)
-    .digest('hex')
+  const token = createHmac('sha256', SIGNING_SECRET).update(`${payload}:${exp}`).digest('hex')
   return { token, exp }
 }
 
 function hmacVerify(payload: string, token: string, exp: string): boolean {
   const expNum = parseInt(exp)
-  if (Date.now() / 1000 > expNum) return false  // expired
-  const expected = createHmac('sha256', SIGNING_SECRET)
-    .update(`${payload}:${exp}`)
-    .digest('hex')
+  if (Date.now() / 1000 > expNum) return false // expired
+  const expected = createHmac('sha256', SIGNING_SECRET).update(`${payload}:${exp}`).digest('hex')
   return timingSafeEqual(Buffer.from(token), Buffer.from(expected))
 }
 
@@ -293,17 +348,18 @@ export function segmentTtl(durationSeconds: number): number {
 ```
 
 **Route Handler:**
+
 ```typescript
 // src/app/api/hls/[assetId]/[...path]/route.ts
 export async function GET(
   req: Request,
-  { params }: { params: { assetId: string; path: string[] } }
+  { params }: { params: { assetId: string; path: string[] } },
 ) {
   const { assetId, path } = params
   const { searchParams } = new URL(req.url)
   const token = searchParams.get('token')
-  const exp   = searchParams.get('exp')
-  const qMax  = parseInt(searchParams.get('qMax') ?? '2160', 10) // Max allowed quality height (e.g. 480, 720, 1080)
+  const exp = searchParams.get('exp')
+  const qMax = parseInt(searchParams.get('qMax') ?? '2160', 10) // Max allowed quality height (e.g. 480, 720, 1080)
   const pathStr = path.join('/')
 
   // 1. Verify HMAC token (signing covers assetId, path, exp, and qMax entitlement)
@@ -330,10 +386,10 @@ export async function GET(
   if (pathStr === 'master.m3u8') {
     const filteredAndRewritten = await signer.rewriteMasterPlaylist(assetId, content, {
       maxQualityP: qMax,
-      tokenExp: exp
+      tokenExp: exp,
     })
     return new Response(filteredAndRewritten, {
-      headers: { 'Content-Type': 'application/vnd.apple.mpegurl', 'Cache-Control': 'no-store' }
+      headers: { 'Content-Type': 'application/vnd.apple.mpegurl', 'Cache-Control': 'no-store' },
     })
   }
 
@@ -341,15 +397,15 @@ export async function GET(
   if (pathStr.endsWith('.m3u8')) {
     const rewritten = await signer.rewriteVariantPlaylist(assetId, path[0], content, exp, qMax)
     return new Response(rewritten, {
-      headers: { 'Content-Type': 'application/vnd.apple.mpegurl', 'Cache-Control': 'no-store' }
+      headers: { 'Content-Type': 'application/vnd.apple.mpegurl', 'Cache-Control': 'no-store' },
     })
   }
 
   return new Response(content, {
     headers: {
       'Content-Type': 'video/mp2t',
-      'Cache-Control': 'no-store'  // segments are signed; no CDN caching in demo
-    }
+      'Cache-Control': 'no-store', // segments are signed; no CDN caching in demo
+    },
   })
 }
 ```
@@ -357,6 +413,7 @@ export async function GET(
 ### Production: HMAC Edge Token (Phase 2+)
 
 In production with a CDN (Cloudflare Workers):
+
 1. **Signed URLs on R2**: `https://cdn.streamforge.dev/videos/{assetId}/hls/0/seg_0001.ts?token=HMAC&exp=UNIX`
 2. **Cache key excludes `token` and `exp`**: Cloudflare Worker strips these params before caching (`cacheKey = url.pathname`). The segment content is the same regardless of token — only the delivery permission varies.
 3. **Segment TTL**: `durationSeconds + 3600`. After this time, the player would need to re-request the playback API for fresh signed URLs.
@@ -364,13 +421,13 @@ In production with a CDN (Cloudflare Workers):
 
 ### Caching Table
 
-| Object | Demo caching | Prod caching | TTL |
-|--------|-------------|-------------|-----|
-| `master.m3u8` | `no-store` (Route Handler) | `no-store` (Route Handler) | n/a |
-| `*/stream.m3u8` (variant) | `no-store` (Route Handler) | `no-store` (Route Handler) | n/a |
-| `*.ts` segments | `no-store` (Route Handler) | CDN immutable (cache key = pathname only) | 1 year |
-| Thumbnails / posters | CDN public | CDN public | 1 year |
-| Subtitle `.vtt` | `no-store` (Route Handler) | Signed URL, short-lived | 4 h |
+| Object                    | Demo caching               | Prod caching                              | TTL    |
+| ------------------------- | -------------------------- | ----------------------------------------- | ------ |
+| `master.m3u8`             | `no-store` (Route Handler) | `no-store` (Route Handler)                | n/a    |
+| `*/stream.m3u8` (variant) | `no-store` (Route Handler) | `no-store` (Route Handler)                | n/a    |
+| `*.ts` segments           | `no-store` (Route Handler) | CDN immutable (cache key = pathname only) | 1 year |
+| Thumbnails / posters      | CDN public                 | CDN public                                | 1 year |
+| Subtitle `.vtt`           | `no-store` (Route Handler) | Signed URL, short-lived                   | 4 h    |
 
 ---
 
@@ -405,12 +462,12 @@ bucket: streamforge-media   [NOT publicly accessible in demo mode]
 
 **Object `Content-Type` and `Cache-Control` on upload (set at `PutObject` time):**
 
-| Object | Content-Type | Cache-Control |
-|--------|-------------|---------------|
-| `*.m3u8` | `application/vnd.apple.mpegurl` | `no-store` (playlists change) |
-| `*.ts` | `video/mp2t` | `public, max-age=31536000, immutable` |
-| `*.jpg / *.webp` | `image/jpeg` / `image/webp` | `public, max-age=31536000, immutable` |
-| `*.vtt` | `text/vtt` | `no-store` (served signed) |
+| Object           | Content-Type                    | Cache-Control                         |
+| ---------------- | ------------------------------- | ------------------------------------- |
+| `*.m3u8`         | `application/vnd.apple.mpegurl` | `no-store` (playlists change)         |
+| `*.ts`           | `video/mp2t`                    | `public, max-age=31536000, immutable` |
+| `*.jpg / *.webp` | `image/jpeg` / `image/webp`     | `public, max-age=31536000, immutable` |
+| `*.vtt`          | `text/vtt`                      | `no-store` (served signed)            |
 
 ---
 
@@ -421,100 +478,118 @@ bucket: streamforge-media   [NOT publicly accessible in demo mode]
 import PgBoss from 'pg-boss'
 
 // pg-boss v9+: 'work' options API
-boss.work('transcode', {
-  teamSize: 2,
-  teamConcurrency: 1,
-  // Long expiry: a 2h transcode must not expire before completion
-  // pg-boss v9: expireInSeconds (not expireIn)
-  expireInSeconds: 7200,            // 2 hours
-}, async (job) => {
-  const { assetId } = job.data as { assetId: string }
-  const isLastAttempt = job.retryCount >= (job.retryLimit ?? 3) - 1
+boss.work(
+  'transcode',
+  {
+    teamSize: 2,
+    teamConcurrency: 1,
+    // Long expiry: a 2h transcode must not expire before completion
+    // pg-boss v9: expireInSeconds (not expireIn)
+    expireInSeconds: 7200, // 2 hours
+  },
+  async (job) => {
+    const { assetId } = job.data as { assetId: string }
+    const isLastAttempt = job.retryCount >= (job.retryLimit ?? 3) - 1
 
-  // 1. ffprobe input
-  await db.transcodeJob.update({ where: { pgBossId: job.id }, data: { status: 'processing', attemptNumber: job.retryCount + 1 } })
+    // 1. ffprobe input
+    await db.transcodeJob.update({
+      where: { pgBossId: job.id },
+      data: { status: 'processing', attemptNumber: job.retryCount + 1 },
+    })
 
-  const probe = probeInput(`/tmp/${assetId}.mp4`)
-  await db.videoAsset.update({
-    where: { id: assetId },
-    data: {
-      status: 'processing',
-      sourceWidth: probe.sourceWidth,
-      sourceHeight: probe.sourceHeight,
-      sourceBitrateKbps: Math.round(probe.videoBitrate / 1000),
-      durationSeconds: probe.durationSeconds,
-      processingStartedAt: new Date(),
+    const probe = probeInput(`/tmp/${assetId}.mp4`)
+    await db.videoAsset.update({
+      where: { id: assetId },
+      data: {
+        status: 'processing',
+        sourceWidth: probe.sourceWidth,
+        sourceHeight: probe.sourceHeight,
+        sourceBitrateKbps: Math.round(probe.videoBitrate / 1000),
+        durationSeconds: probe.durationSeconds,
+        processingStartedAt: new Date(),
+      },
+    })
+
+    const renditions = selectRenditions(probe.sourceHeight)
+    const outputDir = `/tmp/hls-${assetId}`
+
+    // 2. Download raw file from MinIO
+    await downloadFromMinIO(`raw-uploads/${assetId}.mp4`, `/tmp/${assetId}.mp4`)
+
+    // 3. FFmpeg with -progress for live progress reporting
+    await runFfmpegWithProgress(
+      buildFfmpegArgs(
+        `/tmp/${assetId}.mp4`,
+        outputDir,
+        renditions,
+        probe.durationSeconds,
+        probe.hasAudio,
+      ),
+      probe.durationSeconds,
+      async (pct) => {
+        await db.transcodeJob.update({
+          where: { pgBossId: job.id },
+          data: { progressPct: pct },
+        })
+      },
+    )
+
+    // 4. Poster frame at 10% of probed duration (not guessed)
+    const posterTimestamp = Math.floor(probe.durationSeconds * 0.1)
+    await execFile('ffmpeg', [
+      '-ss',
+      String(posterTimestamp),
+      '-i',
+      `/tmp/${assetId}.mp4`,
+      '-vf',
+      'scale=-2:720',
+      '-frames:v',
+      '1',
+      '-q:v',
+      '2',
+      `${outputDir}/poster.jpg`,
+    ])
+    // Sprite thumbnails deferred to Phase 2 (OQ3 closed)
+
+    // 5. Set Content-Type + Cache-Control on upload
+    await uploadHLSDir(assetId, outputDir, renditions)
+    // uploadHLSDir sets:
+    //   *.m3u8 → Content-Type: application/vnd.apple.mpegurl; Cache-Control: no-store
+    //   *.ts   → Content-Type: video/mp2t; Cache-Control: public,max-age=31536000,immutable
+    //   *.jpg  → Content-Type: image/jpeg; Cache-Control: public,max-age=31536000,immutable
+
+    // 6. Write renditions metadata to DB
+    const renditionsMeta = renditions.map((r, i) => ({
+      height: r.height,
+      bandwidth: (parseInt(r.vbr) + parseInt(r.abr)) * 1000, // bits/s for BANDWIDTH tag
+      path: `${i}/stream.m3u8`,
+    }))
+
+    const hlsSize = await measureHlsDirSize(outputDir)
+
+    await db.videoAsset.update({
+      where: { id: assetId },
+      data: {
+        status: 'ready',
+        hlsBasePath: `videos/${assetId}/hls/`,
+        hlsSizeBytes: BigInt(hlsSize),
+        renditions: renditionsMeta,
+        processingCompletedAt: new Date(),
+      },
+    })
+
+    await db.transcodeJob.update({ where: { pgBossId: job.id }, data: { status: 'completed' } })
+
+    // 7. Delete raw upload (configurable)
+    if (process.env.DELETE_RAW_AFTER_TRANSCODE !== 'false') {
+      await deleteFromMinIO(`raw-uploads/${assetId}.mp4`)
     }
-  })
 
-  const renditions = selectRenditions(probe.sourceHeight)
-  const outputDir = `/tmp/hls-${assetId}`
-
-  // 2. Download raw file from MinIO
-  await downloadFromMinIO(`raw-uploads/${assetId}.mp4`, `/tmp/${assetId}.mp4`)
-
-  // 3. FFmpeg with -progress for live progress reporting
-  await runFfmpegWithProgress(
-    buildFfmpegArgs(`/tmp/${assetId}.mp4`, outputDir, renditions, probe.durationSeconds, probe.hasAudio),
-    probe.durationSeconds,
-    async (pct) => {
-      await db.transcodeJob.update({
-        where: { pgBossId: job.id },
-        data: { progressPct: pct }
-      })
-    }
-  )
-
-  // 4. Poster frame at 10% of probed duration (not guessed)
-  const posterTimestamp = Math.floor(probe.durationSeconds * 0.1)
-  await execFile('ffmpeg', [
-    '-ss', String(posterTimestamp),
-    '-i', `/tmp/${assetId}.mp4`,
-    '-vf', 'scale=-2:720',
-    '-frames:v', '1',
-    '-q:v', '2',
-    `${outputDir}/poster.jpg`
-  ])
-  // Sprite thumbnails deferred to Phase 2 (OQ3 closed)
-
-  // 5. Set Content-Type + Cache-Control on upload
-  await uploadHLSDir(assetId, outputDir, renditions)
-  // uploadHLSDir sets:
-  //   *.m3u8 → Content-Type: application/vnd.apple.mpegurl; Cache-Control: no-store
-  //   *.ts   → Content-Type: video/mp2t; Cache-Control: public,max-age=31536000,immutable
-  //   *.jpg  → Content-Type: image/jpeg; Cache-Control: public,max-age=31536000,immutable
-
-  // 6. Write renditions metadata to DB
-  const renditionsMeta = renditions.map((r, i) => ({
-    height: r.height,
-    bandwidth: (parseInt(r.vbr) + parseInt(r.abr)) * 1000,  // bits/s for BANDWIDTH tag
-    path: `${i}/stream.m3u8`
-  }))
-
-  const hlsSize = await measureHlsDirSize(outputDir)
-
-  await db.videoAsset.update({
-    where: { id: assetId },
-    data: {
-      status: 'ready',
-      hlsBasePath: `videos/${assetId}/hls/`,
-      hlsSizeBytes: BigInt(hlsSize),
-      renditions: renditionsMeta,
-      processingCompletedAt: new Date(),
-    }
-  })
-
-  await db.transcodeJob.update({ where: { pgBossId: job.id }, data: { status: 'completed' } })
-
-  // 7. Delete raw upload (configurable)
-  if (process.env.DELETE_RAW_AFTER_TRANSCODE !== 'false') {
-    await deleteFromMinIO(`raw-uploads/${assetId}.mp4`)
-  }
-
-  // 8. Cleanup tmp
-  await rmDir(outputDir)
-  await rmFile(`/tmp/${assetId}.mp4`)
-})
+    // 8. Cleanup tmp
+    await rmDir(outputDir)
+    await rmFile(`/tmp/${assetId}.mp4`)
+  },
+)
 
 // Error handling: only mark asset as 'error' on final attempt
 boss.on('failed', async ({ job }) => {
@@ -524,11 +599,11 @@ boss.on('failed', async ({ job }) => {
     const { assetId } = job.data as { assetId: string }
     await db.videoAsset.update({
       where: { id: assetId },
-      data: { status: 'error', errorMessage: job.output?.message ?? 'Unknown error' }
+      data: { status: 'error', errorMessage: job.output?.message ?? 'Unknown error' },
     })
     await db.transcodeJob.update({
       where: { pgBossId: job.id },
-      data: { status: 'failed', errorMessage: job.output?.message }
+      data: { status: 'failed', errorMessage: job.output?.message },
     })
   }
   // On non-final attempts: pg-boss retries automatically; keep status='processing'
@@ -536,6 +611,7 @@ boss.on('failed', async ({ job }) => {
 ```
 
 **Container limits (Dockerfile.worker):**
+
 ```dockerfile
 FROM node:20-alpine
 RUN apk add --no-cache ffmpeg
@@ -549,18 +625,19 @@ CMD ["node", "workers/index.js"]
 ```
 
 **docker-compose.yml resource & storage limits:**
+
 ```yaml
 worker:
   deploy:
     resources:
       limits:
-        cpus: '2.0'       # leave headroom for Postgres and MinIO
+        cpus: '2.0' # leave headroom for Postgres and MinIO
         memory: '2G'
   volumes:
     # Bounded disk volume sized for 10 GB sources (~50 GB disk scratch space, never RAM/tmpfs)
     - worker-scratch:/var/lib/streamforge/scratch
   networks:
-    - allowlisted-egress  # egress restricted strictly to MinIO/R2 and Postgres pooler
+    - allowlisted-egress # egress restricted strictly to MinIO/R2 and Postgres pooler
 
 volumes:
   worker-scratch:
@@ -576,12 +653,17 @@ volumes:
 const posterTimestamp = Math.floor(probe.durationSeconds * 0.1)
 
 await execFile('ffmpeg', [
-  '-ss', String(posterTimestamp),
-  '-i', inputPath,
-  '-vf', 'scale=-2:720',        // scale=-2:H preserves aspect ratio, even width
-  '-frames:v', '1',
-  '-q:v', '2',                  // JPEG quality ~90%
-  outputPosterPath
+  '-ss',
+  String(posterTimestamp),
+  '-i',
+  inputPath,
+  '-vf',
+  'scale=-2:720', // scale=-2:H preserves aspect ratio, even width
+  '-frames:v',
+  '1',
+  '-q:v',
+  '2', // JPEG quality ~90%
+  outputPosterPath,
 ])
 ```
 
@@ -597,14 +679,14 @@ import Hls from 'hls.js'
 
 const HLS_CONFIG: Partial<Hls.Config> = {
   // VoD-optimised ABR: longer averaging windows, earlier quality step-up
-  abrEwmaFastVoD: 4.0,       // fast EWMA window (seconds) for VoD
-  abrEwmaSlowVoD: 15.0,      // slow EWMA window for VoD
-  abrBandWidthFactor: 0.95,  // use 95% of estimated bandwidth (conservative)
+  abrEwmaFastVoD: 4.0, // fast EWMA window (seconds) for VoD
+  abrEwmaSlowVoD: 15.0, // slow EWMA window for VoD
+  abrBandWidthFactor: 0.95, // use 95% of estimated bandwidth (conservative)
   abrBandWidthUpFactor: 0.7, // require 70% of next level's bandwidth before upgrading
 
   // Buffer
-  maxBufferLength: 60,            // seconds of forward buffer
-  maxMaxBufferLength: 120,        // cap
+  maxBufferLength: 60, // seconds of forward buffer
+  maxMaxBufferLength: 120, // cap
   maxBufferSize: 60 * 1024 * 1024, // 60 MB
 
   // Start auto; let ABR pick the right rendition
@@ -620,9 +702,9 @@ const HLS_CONFIG: Partial<Hls.Config> = {
 }
 
 function initPlayer(
-  videoEl: HTMLVideoElement, 
-  masterUrl: string, 
-  onLevelsLoaded?: (levels: Array<{ index: number; height: number; label: string }>) => void
+  videoEl: HTMLVideoElement,
+  masterUrl: string,
+  onLevelsLoaded?: (levels: Array<{ index: number; height: number; label: string }>) => void,
 ) {
   if (Hls.isSupported()) {
     const hls = new Hls(HLS_CONFIG)
@@ -634,7 +716,7 @@ function initPlayer(
       const parsedLevels = data.levels.map((lvl, idx) => ({
         index: idx,
         height: lvl.height,
-        label: `${lvl.height}p`
+        label: `${lvl.height}p`,
       }))
       onLevelsLoaded?.(parsedLevels)
     })
@@ -658,10 +740,10 @@ function initPlayer(
 function addSubtitleTracks(videoEl: HTMLVideoElement, subtitles: SubtitleTrack[]) {
   subtitles.forEach((sub, i) => {
     const track = document.createElement('track')
-    track.kind    = 'subtitles'
-    track.label   = sub.label
+    track.kind = 'subtitles'
+    track.label = sub.label
     track.srclang = sub.languageCode
-    track.src     = sub.signedVttUrl   // 4h signed URL from playback API
+    track.src = sub.signedVttUrl // 4h signed URL from playback API
     track.default = sub.isDefault
     videoEl.appendChild(track)
   })
@@ -673,12 +755,14 @@ function addSubtitleTracks(videoEl: HTMLVideoElement, subtitles: SubtitleTrack[]
 ```json
 // MinIO / R2 CORS policy on the bucket
 {
-  "CORSRules": [{
-    "AllowedOrigins": ["http://localhost:3000", "https://streamforge.dev"],
-    "AllowedMethods": ["GET", "HEAD"],
-    "AllowedHeaders": ["*"],
-    "MaxAgeSeconds": 3600
-  }]
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["http://localhost:3000", "https://streamforge.dev"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedHeaders": ["*"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
 }
 ```
 
@@ -717,15 +801,16 @@ flowchart TD
 
 > **hls.js supports EME (Encrypted Media Extensions)** — you do not need to switch to Shaka Player to add DRM. Shaka is an alternative, not a requirement.
 
-| Component | Phase 1 | Phase 2 (DRM) |
-|-----------|---------|--------------|
-| Encryption | None (HMAC URL signing only) | AES-128 per-segment (`EXT-X-KEY`) or CENC |
-| Key server | N/A | Key endpoint: `/api/hls/key/{assetId}` (entitlement check → return AES key) |
-| Player | hls.js (current) | hls.js + EME config **or** Shaka Player |
-| Manifest | Plain HLS | HLS + `EXT-X-KEY:METHOD=AES-128,URI=...,IV=...` |
-| Key rotation | N/A | Per-rendition or per-session |
+| Component    | Phase 1                      | Phase 2 (DRM)                                                               |
+| ------------ | ---------------------------- | --------------------------------------------------------------------------- |
+| Encryption   | None (HMAC URL signing only) | AES-128 per-segment (`EXT-X-KEY`) or CENC                                   |
+| Key server   | N/A                          | Key endpoint: `/api/hls/key/{assetId}` (entitlement check → return AES key) |
+| Player       | hls.js (current)             | hls.js + EME config **or** Shaka Player                                     |
+| Manifest     | Plain HLS                    | HLS + `EXT-X-KEY:METHOD=AES-128,URI=...,IV=...`                             |
+| Key rotation | N/A                          | Per-rendition or per-session                                                |
 
 Steps to add DRM:
+
 1. Add `EXT-X-KEY` to `.ts` segments during transcode (FFmpeg `-hls_key_info_file`)
 2. Serve key via authenticated endpoint (entitlement check per request)
 3. hls.js `loader` config can intercept key requests to add auth headers
@@ -770,22 +855,22 @@ async function seedMedia() {
 
 ## Open Questions
 
-| # | Status | Question | Decision |
-|---|--------|---------|---------|
-| OQ1 | ✅ Closed | HLS from MinIO directly or CDN proxy? | **Demo:** Route Handler proxy (no public bucket). **Prod:** Cloudflare R2 + Worker edge validation. |
-| OQ2 | ✅ Closed | Worker VPS or Vercel Cron? | **Always-on Docker service** (VPS in prod; compose in dev). Vercel 60s limit is insufficient. |
-| OQ3 | ✅ Closed | Sprite seek preview needed for MVP? | **Deferred to Phase 2.** Poster frame at 10% duration is sufficient for MVP. |
-| OQ4 | ✅ Closed | Keep raw MP4 after transcode? | **Delete by default** (configurable via `DELETE_RAW_AFTER_TRANSCODE=false`). R2 lifecycle aborts incomplete multiparts after 24h. |
+| #   | Status    | Question                              | Decision                                                                                                                          |
+| --- | --------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| OQ1 | ✅ Closed | HLS from MinIO directly or CDN proxy? | **Demo:** Route Handler proxy (no public bucket). **Prod:** Cloudflare R2 + Worker edge validation.                               |
+| OQ2 | ✅ Closed | Worker VPS or Vercel Cron?            | **Always-on Docker service** (VPS in prod; compose in dev). Vercel 60s limit is insufficient.                                     |
+| OQ3 | ✅ Closed | Sprite seek preview needed for MVP?   | **Deferred to Phase 2.** Poster frame at 10% duration is sufficient for MVP.                                                      |
+| OQ4 | ✅ Closed | Keep raw MP4 after transcode?         | **Delete by default** (configurable via `DELETE_RAW_AFTER_TRANSCODE=false`). R2 lifecycle aborts incomplete multiparts after 24h. |
 
 ---
 
 ## Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| FFmpeg OOM on large files in worker container | High | Container `memory: 2G` limit; stream processing with `-i` reads in chunks; monitor with Docker stats |
-| pg-boss job expires before transcode completes | High | `expireInSeconds: 7200` (2h) — sufficient for all expected content lengths |
-| HMAC signing secret rotation | Medium | Secret is env var; rotation requires re-signing all active sessions (accept 1h disruption or dual-key verification) |
-| hls.js native HLS fallback (Safari) + HMAC tokens | Low | Safari's `<video src>` follows signed master URL; token is in the URL, not a cookie — works correctly |
-| Demo Route Handler adds latency per segment request | Medium | Acceptable for demo; mitigated by ABR buffering ahead. Switch to CDN in production |
-| `scale=-2:H` produces non-even width on some sources | Low | `-2` guarantees even width; libx264 accepts this; test with portrait-mode sources |
+| Risk                                                 | Impact | Mitigation                                                                                                          |
+| ---------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| FFmpeg OOM on large files in worker container        | High   | Container `memory: 2G` limit; stream processing with `-i` reads in chunks; monitor with Docker stats                |
+| pg-boss job expires before transcode completes       | High   | `expireInSeconds: 7200` (2h) — sufficient for all expected content lengths                                          |
+| HMAC signing secret rotation                         | Medium | Secret is env var; rotation requires re-signing all active sessions (accept 1h disruption or dual-key verification) |
+| hls.js native HLS fallback (Safari) + HMAC tokens    | Low    | Safari's `<video src>` follows signed master URL; token is in the URL, not a cookie — works correctly               |
+| Demo Route Handler adds latency per segment request  | Medium | Acceptable for demo; mitigated by ABR buffering ahead. Switch to CDN in production                                  |
+| `scale=-2:H` produces non-even width on some sources | Low    | `-2` guarantees even width; libx264 accepts this; test with portrait-mode sources                                   |

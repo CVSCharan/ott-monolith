@@ -23,7 +23,9 @@ const refreshSecret = new TextEncoder().encode(env.JWT_REFRESH_SECRET)
 /**
  * Signs a 15-minute access token.
  */
-export async function signAccessToken(payload: Omit<AccessTokenPayload, 'iat' | 'exp'>): Promise<string> {
+export async function signAccessToken(
+  payload: Omit<AccessTokenPayload, 'iat' | 'exp'>,
+): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setIssuedAt()
@@ -48,7 +50,9 @@ export async function verifyAccessToken(token: string): Promise<AccessTokenPaylo
 /**
  * Signs a 7-day refresh token.
  */
-export async function signRefreshToken(payload: Omit<RefreshTokenPayload, 'iat' | 'exp'>): Promise<string> {
+export async function signRefreshToken(
+  payload: Omit<RefreshTokenPayload, 'iat' | 'exp'>,
+): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setIssuedAt()

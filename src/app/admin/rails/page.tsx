@@ -109,9 +109,7 @@ export default function AdminRailsPage() {
 
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h3 className="font-semibold text-text-primary text-body-md">
-                    {rail.title}
-                  </h3>
+                  <h3 className="font-semibold text-text-primary text-body-md">{rail.title}</h3>
                   <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-500/10 border border-accent-500/20 text-accent-300">
                     {rail.badge}
                   </span>

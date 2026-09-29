@@ -16,11 +16,7 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-bg-base text-text-primary flex flex-col md:flex-row">
       {/* Sidebar Navigation */}
@@ -144,9 +140,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-        {children}
-      </main>
+      <main className="flex-1 p-6 md:p-10 overflow-y-auto">{children}</main>
     </div>
   )
 }

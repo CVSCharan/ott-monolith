@@ -69,7 +69,7 @@ class StorageService {
     key: string,
     body: Uint8Array | Buffer | string,
     contentType: string,
-    cacheControl?: string
+    cacheControl?: string,
   ): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
@@ -125,7 +125,7 @@ class StorageService {
     key: string,
     uploadId: string,
     partNumber: number,
-    expiresIn = 1800
+    expiresIn = 1800,
   ): Promise<string> {
     const command = new UploadPartCommand({
       Bucket: this.bucket,
@@ -143,7 +143,7 @@ class StorageService {
   async completeMultipartUpload(
     key: string,
     uploadId: string,
-    parts: Array<{ partNumber: number; etag: string }>
+    parts: Array<{ partNumber: number; etag: string }>,
   ): Promise<void> {
     const command = new CompleteMultipartUploadCommand({
       Bucket: this.bucket,

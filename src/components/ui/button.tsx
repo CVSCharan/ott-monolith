@@ -20,8 +20,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-bg-elevated hover:bg-bg-surface text-text-primary border border-border hover:border-border-hover',
       glass:
         'glass text-text-primary border border-border hover:border-border-hover hover:bg-bg-elevated',
-      ghost:
-        'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-elevated',
+      ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-elevated',
       'accent-outline':
         'bg-transparent border border-accent-500 text-accent-400 hover:bg-accent-soft hover:text-accent-300',
     }
@@ -36,13 +35,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={twMerge(
-          clsx(baseStyles, variantStyles[variant], sizeStyles[size], className)
-        )}
+        className={twMerge(clsx(baseStyles, variantStyles[variant], sizeStyles[size], className))}
         {...props}
       />
     )
-  }
+  },
 )
 
 Button.displayName = 'Button'

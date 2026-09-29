@@ -41,7 +41,8 @@ export default async function AdminContentPage() {
             Content Library & Metadata
           </h1>
           <p className="text-body-sm text-text-secondary mt-1">
-            Browse, manage, and inspect all {titles.length} movies and episodic titles across all tiers.
+            Browse, manage, and inspect all {titles.length} movies and episodic titles across all
+            tiers.
           </p>
         </div>
 

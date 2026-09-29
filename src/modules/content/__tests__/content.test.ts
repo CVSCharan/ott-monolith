@@ -75,14 +75,18 @@ describe('Content Service & Transformation Unit Tests', () => {
       const filter = buildVisibilityFilter({ isKids: true })
       expect(filter.AND).toBeDefined()
       const conditions = filter.AND as Array<Record<string, unknown>>
-      const hasKidsGate = conditions.some((c) => 'minAge' in c && (c.minAge as { lte: number }).lte === 7)
+      const hasKidsGate = conditions.some(
+        (c) => 'minAge' in c && (c.minAge as { lte: number }).lte === 7,
+      )
       expect(hasKidsGate).toBe(true)
     })
 
     it('applies adult profile custom maturity rating', () => {
       const filter = buildVisibilityFilter({ isKids: false, maxMaturityRank: 16 })
       const conditions = filter.AND as Array<Record<string, unknown>>
-      const hasMaturityGate = conditions.some((c) => 'minAge' in c && (c.minAge as { lte: number }).lte === 16)
+      const hasMaturityGate = conditions.some(
+        (c) => 'minAge' in c && (c.minAge as { lte: number }).lte === 16,
+      )
       expect(hasMaturityGate).toBe(true)
     })
   })

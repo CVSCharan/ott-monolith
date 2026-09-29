@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/modules/auth'
 import { getVideoAssetStatus } from '@/modules/video'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ assetId: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ assetId: string }> }) {
   try {
     await requireAdmin()
     const { assetId } = await params

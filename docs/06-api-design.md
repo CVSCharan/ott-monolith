@@ -72,16 +72,16 @@ All content reads must pass through a single repository function (`findVisibleTi
 // src/modules/content/visibility.ts
 
 export interface ProfileContext {
-  isKids: boolean; // profile.is_kids
-  maxMaturityRank?: number; // profile max maturity rating rank (e.g. 1=U, 2=U/A 7+, 3=U/A 13+, 4=U/A 16+, 5=A)
-  profileId?: string; // undefined for anonymous
+  isKids: boolean // profile.is_kids
+  maxMaturityRank?: number // profile max maturity rating rank (e.g. 1=U, 2=U/A 7+, 3=U/A 13+, 4=U/A 16+, 5=A)
+  profileId?: string // undefined for anonymous
 }
 
 export interface EntitlementContext {
-  accountId?: string;
-  tierRank: number; // 0=free, 1=standard, 2=premium (0 for anonymous)
-  isSubscriptionActive: boolean;
-  expiresAt?: Date;
+  accountId?: string
+  tierRank: number // 0=free, 1=standard, 2=premium (0 for anonymous)
+  isSubscriptionActive: boolean
+  expiresAt?: Date
 }
 
 /**
@@ -91,20 +91,20 @@ export interface EntitlementContext {
  */
 export function buildVisibilityFilter(ctx: ProfileContext) {
   return {
-    status: "published" as const,
+    status: 'published' as const,
     publishAt: { lte: new Date() },
     ...(ctx.isKids
       ? {
           OR: [
             { isKids: true },
-            { maturityRating: { in: ["U", "U/A 7+"] } },
+            { maturityRating: { in: ['U', 'U/A 7+'] } },
             { minAge: { lte: 7 } },
           ],
         }
       : ctx.maxMaturityRank
         ? { maturityRatingRank: { lte: ctx.maxMaturityRank } }
         : {}),
-  };
+  }
 }
 
 /**
@@ -115,20 +115,19 @@ export function checkEntitlement(
   title: { minTierRank: number },
 ): { entitled: boolean; maxQualityP: number; reason?: string } {
   if (title.minTierRank === 0) {
-    return { entitled: true, maxQualityP: 720 }; // Free tier title
+    return { entitled: true, maxQualityP: 720 } // Free tier title
   }
   if (!ctx.accountId || !ctx.isSubscriptionActive) {
-    return { entitled: false, maxQualityP: 0, reason: "SUBSCRIPTION_REQUIRED" };
+    return { entitled: false, maxQualityP: 0, reason: 'SUBSCRIPTION_REQUIRED' }
   }
   if (ctx.expiresAt && ctx.expiresAt < new Date()) {
-    return { entitled: false, maxQualityP: 0, reason: "PLAN_EXPIRED" };
+    return { entitled: false, maxQualityP: 0, reason: 'PLAN_EXPIRED' }
   }
   if (ctx.tierRank < title.minTierRank) {
-    return { entitled: false, maxQualityP: 0, reason: "UPGRADE_REQUIRED" };
+    return { entitled: false, maxQualityP: 0, reason: 'UPGRADE_REQUIRED' }
   }
-  const maxQualityP =
-    ctx.tierRank >= 2 ? 2160 : ctx.tierRank === 1 ? 1080 : 720;
-  return { entitled: true, maxQualityP };
+  const maxQualityP = ctx.tierRank >= 2 ? 2160 : ctx.tierRank === 1 ? 1080 : 720
+  return { entitled: true, maxQualityP }
 }
 
 /**
@@ -139,10 +138,10 @@ export async function findVisibleTitles(
   ctx: ProfileContext,
   whereClause: Prisma.TitleWhereInput = {},
   options: {
-    take?: number;
-    skip?: number;
-    cursor?: Prisma.TitleWhereUniqueInput;
-    orderBy?: any;
+    take?: number
+    skip?: number
+    cursor?: Prisma.TitleWhereUniqueInput
+    orderBy?: any
   } = {},
 ) {
   return db.title.findMany({
@@ -150,7 +149,7 @@ export async function findVisibleTitles(
       AND: [buildVisibilityFilter(ctx), whereClause],
     },
     ...options,
-  });
+  })
 }
 ```
 
@@ -189,7 +188,7 @@ A dedicated integration test suite (`tests/integration/kids-visibility.test.ts`)
 
 **Rate limit per account+IP:** 10 attempts per IP per 15 min AND 5 attempts per account (email) per 15 min. Both must pass.
 
-```typescript
+````typescript
 // Request
 { "email": string, "password": string }
 
@@ -219,7 +218,7 @@ A dedicated integration test suite (`tests/integration/kids-visibility.test.ts`)
 { "data": { "rotated": true } }
 
 // Errors: UNAUTHORIZED (SESSION_COMPROMISED)
-```
+````
 
 ### `POST /api/auth/logout`
 
@@ -364,31 +363,31 @@ Sets the active profile for the session.
 ```typescript
 // PUBLIC (cacheable, no session data) — served with ISR / s-maxage
 interface TitlePublicPayload {
-  id: string;
-  slug: string;
-  type: string;
-  title: string;
-  description: string;
-  releaseYear: number;
-  durationSeconds: number | null;
-  minAge: number; // internal value; display label computed client-side
-  thumbnailUrl: string;
-  posterUrl: string;
-  trailerUrl: string | null;
-  likeCount: number;
-  dislikeCount: number;
-  playCount: number;
-  genres: Genre[];
-  cast: CastMember[];
-  seasons?: SeasonSummary[]; // for series
+  id: string
+  slug: string
+  type: string
+  title: string
+  description: string
+  releaseYear: number
+  durationSeconds: number | null
+  minAge: number // internal value; display label computed client-side
+  thumbnailUrl: string
+  posterUrl: string
+  trailerUrl: string | null
+  likeCount: number
+  dislikeCount: number
+  playCount: number
+  genres: Genre[]
+  cast: CastMember[]
+  seasons?: SeasonSummary[] // for series
 }
 
 // PER-PROFILE (no-store) — fetched dynamically after hydration
 interface TitleProfileState {
-  isInWatchlist: boolean;
-  userRating: "like" | "dislike" | null;
-  watchProgress: { positionSeconds: number; durationSeconds: number } | null;
-  isLocked: boolean; // true if plan.max_tier_rank < title.min_tier_rank
+  isInWatchlist: boolean
+  userRating: 'like' | 'dislike' | null
+  watchProgress: { positionSeconds: number; durationSeconds: number } | null
+  isLocked: boolean // true if plan.max_tier_rank < title.min_tier_rank
 }
 ```
 
@@ -534,6 +533,7 @@ Removes all watch_progress rows for this title+profile (movie) or all episodes o
 ### `POST /api/player/beacon`
 
 Single consolidated beacon handling:
+
 1. **Watch Progress:** Position save (10s debounce, immediate flush on pause/seek/exit).
 2. **QoE & Analytics:** Batched playback events (`play`, `pause`, `seek`, `buffer`, `quality_change`, `complete`, `error`).
 3. **Playback-Session Heartbeat:** Updates active stream timestamp (for concurrent stream validation).
@@ -730,28 +730,27 @@ Server Actions handle all authenticated mutations from React Server Components. 
 ```typescript
 // src/types/actions.ts
 export type ActionResult<T = void> =
-  | { success: true; data: T }
-  | { success: false; code: string; message: string; details?: unknown };
+  { success: true; data: T } | { success: false; code: string; message: string; details?: unknown }
 
 // Example: addToWatchlist
 // src/modules/watchlist/actions.ts
-("use server");
+;('use server')
 export async function addToWatchlist(titleId: string): Promise<ActionResult> {
-  const session = await requireSession(); // throws → 401 if not authed
+  const session = await requireSession() // throws → 401 if not authed
   if (!session.profileId)
     return {
       success: false,
-      code: "NO_PROFILE",
-      message: "Select a profile first",
-    };
+      code: 'NO_PROFILE',
+      message: 'Select a profile first',
+    }
 
   await db.watchlistItem.upsert({
     where: { profileId_titleId: { profileId: session.profileId, titleId } },
     update: {},
     create: { profileId: session.profileId, titleId, addedAt: new Date() },
-  });
-  revalidatePath("/my-list");
-  return { success: true, data: undefined };
+  })
+  revalidatePath('/my-list')
+  return { success: true, data: undefined }
 }
 ```
 
@@ -777,6 +776,7 @@ export async function subscribeToPlan(
 ### `GET /api/health/live`
 
 Process-level liveness probe. Verifies that the Node.js/Next.js HTTP server process is running and accepting requests.
+
 - **Access:** Public
 - **Checks:** Zero external subsystem dependency checks (avoids false-positive restarts if DB is momentarily unavailable).
 - **Response 200 OK:**
@@ -787,6 +787,7 @@ Process-level liveness probe. Verifies that the Node.js/Next.js HTTP server proc
 ### `GET /api/health/ready`
 
 Subsystem readiness probe for ingress routers and deployment controllers.
+
 - **Access:** Public
 - **Checks:**
   - Neon PostgreSQL: executes `SELECT 1` via `health.dal.ts`
@@ -811,12 +812,14 @@ Subsystem readiness probe for ingress routers and deployment controllers.
 ### `GET /api/docs`
 
 Interactive Swagger UI documentation explorer. Renders dark-theme Swagger UI with authorization modal for JWT testing.
+
 - **Access:** Public
 - **Content-Type:** `text/html; charset=utf-8`
 
 ### `GET /api/docs/spec`
 
 Machine-readable OpenAPI 3.1 JSON specification.
+
 - **Access:** Public
 - **Content-Type:** `application/json`
 

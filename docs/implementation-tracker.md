@@ -22,16 +22,16 @@ Overall Progress: [███████████████████░]
 
 ### Milestone Roadmap Overview
 
-| Milestone | Focus Area | Target Deliverables | Current Status | Primary Gates |
-|-----------|------------|---------------------|----------------|---------------|
-| **Phase 0** | **System Architecture & Design** | Docs 00–16, `design/*`, ADRs 0001–0010, `traceability.md`, `decision-register.md`. | ✅ **Completed** | Full review, no unrecorded conflicts. |
-| **Milestone 0** | **Design System & Static Prototype** | Tailwind v4 `@theme static`, fonts, Radix primitives, mock Home shell, Billboard trailer, Quick-view modal, Watch Player. | ✅ **Completed** | `npm run lint`, `tsc --noEmit`, `npm run build` passing cleanly. |
-| **Milestone 1** | **Walking Skeleton & Auth** | Neon DB migration, Prisma 6, Redis token bucket in `proxy.ts`, JWT family rotation, Auth module & DAL, Profile switching & Parental PIN. | ✅ **Completed** | Schema synced, seed passed, unit tests passing. |
-| **Milestone 2** | **Video Pipeline & Streaming** | S3 SDK storage client (MinIO/R2), multipart upload API, HMAC manifest proxy with plan tier gating, Hls.js player engine with 10s QoS beacon. | ✅ **Completed** | Unit tests passing, manifest rewrite verified. |
-| **Milestone 3** | **Discovery, Rails & Browsing** | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), Title detail modal with recommendations, Watchlist & Ratings. | ✅ **Completed** | Unit tests passing, live `/api/rails` wired to home. |
-| **Standards** | **Production Standards & Docs** | Helmet-grade security headers, Pino structured request logger, `/api/health/live` & `/ready` probes, Swagger UI & OpenAPI 3.1 spec. | ✅ **Completed** | Route Handlers passing, clean type-check & lint. |
-| **Milestone 4** | **Subscriptions & Admin CMS** | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics. | ✅ **Completed** | Admin routes compiled, billing unit tests passing. |
-| **Milestone 5** | **Hardening & Production Launch** | LHCI performance audit (TBT < 150 ms), Pino log redaction, RUM beaconing, CI/CD deployment. | 🟡 **In Progress** | LHCI score $\ge 90$, 100% axe-core clean. |
+| Milestone       | Focus Area                           | Target Deliverables                                                                                                                            | Current Status     | Primary Gates                                                    |
+| --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------- |
+| **Phase 0**     | **System Architecture & Design**     | Docs 00–16, `design/*`, ADRs 0001–0010, `traceability.md`, `decision-register.md`.                                                             | ✅ **Completed**   | Full review, no unrecorded conflicts.                            |
+| **Milestone 0** | **Design System & Static Prototype** | Tailwind v4 `@theme static`, fonts, Radix primitives, mock Home shell, Billboard trailer, Quick-view modal, Watch Player.                      | ✅ **Completed**   | `npm run lint`, `tsc --noEmit`, `npm run build` passing cleanly. |
+| **Milestone 1** | **Walking Skeleton & Auth**          | Neon DB migration, Prisma 6, Redis token bucket in `proxy.ts`, JWT family rotation, Auth module & DAL, Profile switching & Parental PIN.       | ✅ **Completed**   | Schema synced, seed passed, unit tests passing.                  |
+| **Milestone 2** | **Video Pipeline & Streaming**       | S3 SDK storage client (MinIO/R2), multipart upload API, HMAC manifest proxy with plan tier gating, Hls.js player engine with 10s QoS beacon.   | ✅ **Completed**   | Unit tests passing, manifest rewrite verified.                   |
+| **Milestone 3** | **Discovery, Rails & Browsing**      | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), Title detail modal with recommendations, Watchlist & Ratings. | ✅ **Completed**   | Unit tests passing, live `/api/rails` wired to home.             |
+| **Standards**   | **Production Standards & Docs**      | Helmet-grade security headers, Pino structured request logger, `/api/health/live` & `/ready` probes, Swagger UI & OpenAPI 3.1 spec.            | ✅ **Completed**   | Route Handlers passing, clean type-check & lint.                 |
+| **Milestone 4** | **Subscriptions & Admin CMS**        | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics.                   | ✅ **Completed**   | Admin routes compiled, billing unit tests passing.               |
+| **Milestone 5** | **Hardening & Production Launch**    | LHCI performance audit (TBT < 150 ms), Pino log redaction, RUM beaconing, CI/CD deployment.                                                    | 🟡 **In Progress** | LHCI score $\ge 90$, 100% axe-core clean.                        |
 
 ---
 
@@ -51,26 +51,26 @@ flowchart LR
 
 ### Detailed Video Pipeline Breakdown
 
-| Pipeline Stage | Component / Item | Spec Reference | Status | Artifact / Target Location | Acceptance Criteria & Quality Gates |
-|----------------|------------------|----------------|--------|----------------------------|-------------------------------------|
-| **1. Ingest Client** | Multipart Uploader Dropzone | `doc 07`, `design/frontend-stack-and-libraries.md` | ⚪ Ready to build | `src/modules/content/admin/UploadDropzone.tsx` | Uses `@uppy/core` + `@uppy/aws-s3-multipart`; splits files into 10 MB chunks; supports pause, resume, auto-retry on 5xx. |
-| **1. Ingest Client** | Upload API Route Handlers | `doc 06`, `doc 07` | ⚪ Ready to build | `src/app/api/admin/videos/upload/*` | `initiate` (validates $\le 10\text{ GB}$), `sign-part` (presigns S3 URL), `complete` (HEAD-verifies all parts and enqueues transcode job). |
-| **2. Storage Ingest** | S3 / MinIO Raw Bucket | `doc 05`, `doc 07`, `ADR-0005` | 🟡 Configured | `docker-compose.yml` (`minio`), `src/lib/storage.ts` | MinIO bucket created on boot via `docker-compose`; non-public access; presigned PUT URLs expire in 30 min. |
-| **3. Job Queue** | pg-boss Task Orchestration | `doc 04`, `doc 07` | ⚪ Ready to build | `src/lib/queue.ts`, `workers/transcode.worker.ts` | Uses `DATABASE_DIRECT_URL`; job name `transcode`; timeout `expireInSeconds: 7200`; retries up to 3; error status written on final failure only. |
-| **4. Worker Hardening** | Magic-Byte Inspection | `doc 07`, `doc 11` | ⚪ Ready to build | `workers/validation.ts` (`validateMp4MagicBytes`) | Reads first 8 bytes of source file before invoking FFmpeg; verifies bytes 4..7 equal `ftyp` (ISO BMFF). |
-| **4. Worker Hardening** | Bounded Scratch Disk Volume | `doc 07`, `doc 11` | 🟡 Configured | `docker-compose.yml` (`worker-scratch`) | Host volume `/var/lib/streamforge/scratch` capped at 50 GB; eliminates RAM `tmpfs` OOM failures on 10 GB source uploads. |
-| **4. Worker Hardening** | Allowlisted Egress Network | `doc 11` | 🟡 Configured | `docker-compose.yml` (`allowlisted-egress`) | Worker container drops root (`USER worker`); networking restricted to `minio:9000` (or R2 HTTPS) and Postgres 5432. All other egress blocked. |
-| **4. Transcoder** | FFmpeg Command Generation | `doc 07` | ⚪ Ready to build | `workers/ffmpeg.ts` (`buildFfmpegArgs`) | Enforces `-protocol_whitelist "file,pipe,crypto"`, forced `-f mp4`, `-force_key_frames expr:gte(t,n_forced*2)`, `independent_segments`. |
-| **4. Transcoder** | Multi-Bitrate Rendition Ladder | `doc 07` | ⚪ Ready to build | `workers/ffmpeg.ts` (`BITRATE_LADDER`) | Generates 360p, 480p, 720p, 1080p renditions; skips renditions exceeding source height; audio resampled to AAC stereo per rendition. |
-| **4. Transcoder** | Artwork & Poster Extraction | `doc 07`, `design/visual-language.md` | ⚪ Ready to build | `workers/transcode.worker.ts` | Extracts seek poster at 10% duration via `scale=-2:720`; saves JPEG quality 90%; writes back to `video_assets.thumbnail_url`. |
-| **5. Delivery Storage** | S3 / MinIO Storage Client | `doc 07` | ✅ **Completed** | `src/lib/storage.ts` | S3 SDK v3 client supporting MinIO and Cloudflare R2 with multipart upload and presigned upload part URLs. |
-| **6. Security Proxy** | Stream URL Signer | `doc 07` | ✅ **Completed** | `src/modules/video/signing.ts` | Generates HMAC-SHA256 tokens covering assetId, path, exp, and `qMax`. Segment TTL = duration + 1h; timing-safe verification. |
-| **6. Security Proxy** | Manifest & Segment Route Handler | `doc 06`, `doc 07` | ✅ **Completed** | `src/app/api/hls/[assetId]/[...path]/route.ts` | Rewrites master playlist URIs; filters variants exceeding plan `qMax`; rejects unauthorized variant/segment URLs with HTTP 403. |
-| **7. Player Engine** | VideoPlayer HLS Engine | `doc 07`, `design/frontend-stack-and-libraries.md` | ✅ **Completed** | `src/app/watch/[slug]/page.tsx` | Dynamically imports `hls.js`; loads custom React controls; entitlement endpoint integration; graceful MP4 fallback. |
-| **7. Player UI** | Quality Selection Menu | `design/frontend-stack-and-libraries.md` | ✅ **Completed** | `src/app/watch/[slug]/page.tsx` | Populated dynamically from `hls.levels`; displays padlocks and badges on renditions exceeding user plan tier (`maxQualityP`). |
-| **7. Player UI** | Subtitle & Audio Track Selectors | `doc 07`, `design/functional-ui-requirements.md` | ✅ **Completed** | `src/app/watch/[slug]/page.tsx` | Native `<track>` and HLS subtitle switcher with signed VTT URLs. |
-| **7. Telemetry** | QoS Beacon Dispatcher | `doc 06`, `doc 13` | ✅ **Completed** | `src/app/api/player/beacon/route.ts` | Consolidated beacon handling: watch progress saving (10s debounce), batched QoE events, active stream Redis heartbeat. |
-| **8. Admin Video Ingest** | Multipart Upload API Handlers | `doc 06`, `doc 07` | ✅ **Completed** | `src/app/api/admin/video/*` | Multipart initiate, sign-part, complete, abort, and transcode status endpoints guarded by `requireAdmin()`. |
+| Pipeline Stage            | Component / Item                 | Spec Reference                                     | Status            | Artifact / Target Location                           | Acceptance Criteria & Quality Gates                                                                                                             |
+| ------------------------- | -------------------------------- | -------------------------------------------------- | ----------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Ingest Client**      | Multipart Uploader Dropzone      | `doc 07`, `design/frontend-stack-and-libraries.md` | ⚪ Ready to build | `src/modules/content/admin/UploadDropzone.tsx`       | Uses `@uppy/core` + `@uppy/aws-s3-multipart`; splits files into 10 MB chunks; supports pause, resume, auto-retry on 5xx.                        |
+| **1. Ingest Client**      | Upload API Route Handlers        | `doc 06`, `doc 07`                                 | ⚪ Ready to build | `src/app/api/admin/videos/upload/*`                  | `initiate` (validates $\le 10\text{ GB}$), `sign-part` (presigns S3 URL), `complete` (HEAD-verifies all parts and enqueues transcode job).      |
+| **2. Storage Ingest**     | S3 / MinIO Raw Bucket            | `doc 05`, `doc 07`, `ADR-0005`                     | 🟡 Configured     | `docker-compose.yml` (`minio`), `src/lib/storage.ts` | MinIO bucket created on boot via `docker-compose`; non-public access; presigned PUT URLs expire in 30 min.                                      |
+| **3. Job Queue**          | pg-boss Task Orchestration       | `doc 04`, `doc 07`                                 | ⚪ Ready to build | `src/lib/queue.ts`, `workers/transcode.worker.ts`    | Uses `DATABASE_DIRECT_URL`; job name `transcode`; timeout `expireInSeconds: 7200`; retries up to 3; error status written on final failure only. |
+| **4. Worker Hardening**   | Magic-Byte Inspection            | `doc 07`, `doc 11`                                 | ⚪ Ready to build | `workers/validation.ts` (`validateMp4MagicBytes`)    | Reads first 8 bytes of source file before invoking FFmpeg; verifies bytes 4..7 equal `ftyp` (ISO BMFF).                                         |
+| **4. Worker Hardening**   | Bounded Scratch Disk Volume      | `doc 07`, `doc 11`                                 | 🟡 Configured     | `docker-compose.yml` (`worker-scratch`)              | Host volume `/var/lib/streamforge/scratch` capped at 50 GB; eliminates RAM `tmpfs` OOM failures on 10 GB source uploads.                        |
+| **4. Worker Hardening**   | Allowlisted Egress Network       | `doc 11`                                           | 🟡 Configured     | `docker-compose.yml` (`allowlisted-egress`)          | Worker container drops root (`USER worker`); networking restricted to `minio:9000` (or R2 HTTPS) and Postgres 5432. All other egress blocked.   |
+| **4. Transcoder**         | FFmpeg Command Generation        | `doc 07`                                           | ⚪ Ready to build | `workers/ffmpeg.ts` (`buildFfmpegArgs`)              | Enforces `-protocol_whitelist "file,pipe,crypto"`, forced `-f mp4`, `-force_key_frames expr:gte(t,n_forced*2)`, `independent_segments`.         |
+| **4. Transcoder**         | Multi-Bitrate Rendition Ladder   | `doc 07`                                           | ⚪ Ready to build | `workers/ffmpeg.ts` (`BITRATE_LADDER`)               | Generates 360p, 480p, 720p, 1080p renditions; skips renditions exceeding source height; audio resampled to AAC stereo per rendition.            |
+| **4. Transcoder**         | Artwork & Poster Extraction      | `doc 07`, `design/visual-language.md`              | ⚪ Ready to build | `workers/transcode.worker.ts`                        | Extracts seek poster at 10% duration via `scale=-2:720`; saves JPEG quality 90%; writes back to `video_assets.thumbnail_url`.                   |
+| **5. Delivery Storage**   | S3 / MinIO Storage Client        | `doc 07`                                           | ✅ **Completed**  | `src/lib/storage.ts`                                 | S3 SDK v3 client supporting MinIO and Cloudflare R2 with multipart upload and presigned upload part URLs.                                       |
+| **6. Security Proxy**     | Stream URL Signer                | `doc 07`                                           | ✅ **Completed**  | `src/modules/video/signing.ts`                       | Generates HMAC-SHA256 tokens covering assetId, path, exp, and `qMax`. Segment TTL = duration + 1h; timing-safe verification.                    |
+| **6. Security Proxy**     | Manifest & Segment Route Handler | `doc 06`, `doc 07`                                 | ✅ **Completed**  | `src/app/api/hls/[assetId]/[...path]/route.ts`       | Rewrites master playlist URIs; filters variants exceeding plan `qMax`; rejects unauthorized variant/segment URLs with HTTP 403.                 |
+| **7. Player Engine**      | VideoPlayer HLS Engine           | `doc 07`, `design/frontend-stack-and-libraries.md` | ✅ **Completed**  | `src/app/watch/[slug]/page.tsx`                      | Dynamically imports `hls.js`; loads custom React controls; entitlement endpoint integration; graceful MP4 fallback.                             |
+| **7. Player UI**          | Quality Selection Menu           | `design/frontend-stack-and-libraries.md`           | ✅ **Completed**  | `src/app/watch/[slug]/page.tsx`                      | Populated dynamically from `hls.levels`; displays padlocks and badges on renditions exceeding user plan tier (`maxQualityP`).                   |
+| **7. Player UI**          | Subtitle & Audio Track Selectors | `doc 07`, `design/functional-ui-requirements.md`   | ✅ **Completed**  | `src/app/watch/[slug]/page.tsx`                      | Native `<track>` and HLS subtitle switcher with signed VTT URLs.                                                                                |
+| **7. Telemetry**          | QoS Beacon Dispatcher            | `doc 06`, `doc 13`                                 | ✅ **Completed**  | `src/app/api/player/beacon/route.ts`                 | Consolidated beacon handling: watch progress saving (10s debounce), batched QoE events, active stream Redis heartbeat.                          |
+| **8. Admin Video Ingest** | Multipart Upload API Handlers    | `doc 06`, `doc 07`                                 | ✅ **Completed**  | `src/app/api/admin/video/*`                          | Multipart initiate, sign-part, complete, abort, and transcode status endpoints guarded by `requireAdmin()`.                                     |
 
 ---
 
@@ -78,36 +78,36 @@ flowchart LR
 
 ### A. Authentication, Session & Access Control
 
-| Item | Description | Spec Ref | Status | Deliverable |
-|------|-------------|----------|--------|-------------|
-| **JWT Session Tokens** | Access token (15 min) carrying `SessionJwtPayload` (`accountId`, `profileId`, `role`, `isKids`, `maxMaturity`). | `doc 04`, `doc 10` | 🟡 Specified / In Progress | `src/lib/jwt.ts` |
-| **Refresh Rotation** | Family-based refresh rotation stored in `refresh_tokens` table; 30-day expiry; 5s grace window for parallel requests. | `doc 04`, `doc 05`, `doc 11` | ⚪ Ready to build | `src/modules/auth/service.ts` |
-| **Scoped Refresh Cookie** | Refresh cookie restricted to `Path=/api/auth` with `httpOnly`, `Secure`, `SameSite=Lax`. Downstream 401 triggers client refresh. | `doc 03`, `doc 11` | ⚪ Ready to build | `src/app/api/auth/*` |
-| **Argon2id Hashing** | OWASP parameters ($m=65536, t=3, p=4$) for passwords and parental PINs. Constant-time dummy-hash verify on unknown email. | `doc 03`, `doc 05`, `doc 11` | ⚪ Ready to build | `src/lib/hash.ts` |
-| **Redis Rate Limiting** | Token bucket in `src/proxy.ts` (100 req/min general; 10/15m IP + 5/15m account on auth). Fail-closed on auth if Redis down. | `doc 01`, `doc 04`, `doc 11` | ⚪ Ready to build | `src/proxy.ts`, `src/lib/redis.ts` |
-| **Parental PIN Guard** | 4-digit PIN required to exit Kids profile or view mature content; lockout after 5 attempts; password override reset endpoint. | `doc 03`, `doc 06`, `design/functional-ui-requirements.md` | ⚪ Ready to build | `src/modules/auth/actions.ts` |
+| Item                      | Description                                                                                                                      | Spec Ref                                                   | Status                     | Deliverable                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------- | ---------------------------------- |
+| **JWT Session Tokens**    | Access token (15 min) carrying `SessionJwtPayload` (`accountId`, `profileId`, `role`, `isKids`, `maxMaturity`).                  | `doc 04`, `doc 10`                                         | 🟡 Specified / In Progress | `src/lib/jwt.ts`                   |
+| **Refresh Rotation**      | Family-based refresh rotation stored in `refresh_tokens` table; 30-day expiry; 5s grace window for parallel requests.            | `doc 04`, `doc 05`, `doc 11`                               | ⚪ Ready to build          | `src/modules/auth/service.ts`      |
+| **Scoped Refresh Cookie** | Refresh cookie restricted to `Path=/api/auth` with `httpOnly`, `Secure`, `SameSite=Lax`. Downstream 401 triggers client refresh. | `doc 03`, `doc 11`                                         | ⚪ Ready to build          | `src/app/api/auth/*`               |
+| **Argon2id Hashing**      | OWASP parameters ($m=65536, t=3, p=4$) for passwords and parental PINs. Constant-time dummy-hash verify on unknown email.        | `doc 03`, `doc 05`, `doc 11`                               | ⚪ Ready to build          | `src/lib/hash.ts`                  |
+| **Redis Rate Limiting**   | Token bucket in `src/proxy.ts` (100 req/min general; 10/15m IP + 5/15m account on auth). Fail-closed on auth if Redis down.      | `doc 01`, `doc 04`, `doc 11`                               | ⚪ Ready to build          | `src/proxy.ts`, `src/lib/redis.ts` |
+| **Parental PIN Guard**    | 4-digit PIN required to exit Kids profile or view mature content; lockout after 5 attempts; password override reset endpoint.    | `doc 03`, `doc 06`, `design/functional-ui-requirements.md` | ⚪ Ready to build          | `src/modules/auth/actions.ts`      |
 
 ### B. Database & Data Access Layer (DAL)
 
-| Item | Description | Spec Ref | Status | Deliverable |
-|------|-------------|----------|--------|-------------|
-| **Prisma 6 Schema** | Complete data model covering Accounts, Profiles, Titles, VideoAssets, WatchProgress, PlayEvents, AdminAuditLog. | `doc 05` | 🟡 Schema drafted | `prisma/schema.prisma` |
-| **Raw SQL Migrations** | Hand-edited migration SQL for `citext`, `pg_trgm`, `search_vector` TSVECTOR, partial unique indexes on `watch_progress`. | `doc 05`, `ADR-0002` | ⚪ Ready to build | `prisma/migrations/*` |
-| **Visibility Repository** | `buildVisibilityFilter` enforcing `status='published'`, `publish_at<=now()`, and `profile.max_maturity_rank`. | `doc 06`, `traceability.md` | ⚪ Ready to build | `src/modules/content/dal.ts` |
-| **Entitlement Evaluator** | `checkEntitlement` comparing title minimum plan tier rank against account active subscription rank. | `doc 06`, `traceability.md` | ⚪ Ready to build | `src/modules/billing/service.ts` |
-| **Module Boundaries** | Strict lint enforcement: only `*.dal.ts` imports Prisma; no cross-module internal imports. | `AGENTS.md`, `doc 04` | ✅ **Enforced & Passing** | `eslint.config.mjs` |
+| Item                      | Description                                                                                                              | Spec Ref                    | Status                    | Deliverable                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------- | -------------------------------- |
+| **Prisma 6 Schema**       | Complete data model covering Accounts, Profiles, Titles, VideoAssets, WatchProgress, PlayEvents, AdminAuditLog.          | `doc 05`                    | 🟡 Schema drafted         | `prisma/schema.prisma`           |
+| **Raw SQL Migrations**    | Hand-edited migration SQL for `citext`, `pg_trgm`, `search_vector` TSVECTOR, partial unique indexes on `watch_progress`. | `doc 05`, `ADR-0002`        | ⚪ Ready to build         | `prisma/migrations/*`            |
+| **Visibility Repository** | `buildVisibilityFilter` enforcing `status='published'`, `publish_at<=now()`, and `profile.max_maturity_rank`.            | `doc 06`, `traceability.md` | ⚪ Ready to build         | `src/modules/content/dal.ts`     |
+| **Entitlement Evaluator** | `checkEntitlement` comparing title minimum plan tier rank against account active subscription rank.                      | `doc 06`, `traceability.md` | ⚪ Ready to build         | `src/modules/billing/service.ts` |
+| **Module Boundaries**     | Strict lint enforcement: only `*.dal.ts` imports Prisma; no cross-module internal imports.                               | `AGENTS.md`, `doc 04`       | ✅ **Enforced & Passing** | `eslint.config.mjs`              |
 
 ### C. Design System & Frontend Architecture
 
-| Item | Description | Spec Ref | Status | Deliverable |
-|------|-------------|----------|--------|-------------|
-| **Design Tokens** | Pure CSS tokens using Tailwind v4 top-level `@theme static` with verified WCAG 2.2 AA contrast ratios. | `design/design-tokens.md` | ✅ **Completed** | `docs/design/design-tokens.md` |
-| **Fonts & Typography** | Variable fonts (`Outfit` display, `Inter` UI) with omitted `weight`; variable Noto Indic subsets via `next/font/google`. | `design/visual-language.md` | 🟡 Configured | `src/app/layout.tsx` |
-| **Reduced-Motion Fallbacks** | Zero 1ms animation loops; explicit `animation: none` and static layout fallbacks in `:root`. | `design/design-tokens.md` | ✅ **Completed** | `docs/design/design-tokens.md` |
-| **Artwork Ingest & Blur** | Ingest-time `sharp` dominant color extraction (clamped L/C, CSS `color-mix`) and base64 WebP blur placeholder generation. | `design/visual-language.md` | ⚪ Ready to build | `src/modules/content/services/artwork.service.ts` |
-| **Billboard Trailer Lifecycle** | Ken Burns zoom $\le 5\text{s}$, visible pause control button, `Paused` state in lifecycle machine, JS `saveData` check. | `design/motion-and-interaction.md` | ✅ **Completed** | `docs/design/motion-and-interaction.md` |
-| **Quick-View Modal** | Next.js intercepting route `@modal/(.)title/[slug]` with URL sync to `/title/[slug]` and full-page fallback on direct hit. | `doc 04`, `design/motion-and-interaction.md` | ⚪ Ready to build | `src/app/(app)/@modal/(.)title/[slug]/page.tsx` |
-| **Client Bundle Budgets** | Strict Gzip budgets: Home < 80 kB, Title Detail < 90 kB, Player < 135 kB, Admin < 195 kB. | `design/frontend-stack-and-libraries.md` | ✅ **Audited & Budgeted** | `docs/design/frontend-stack-and-libraries.md` |
+| Item                            | Description                                                                                                                | Spec Ref                                     | Status                    | Deliverable                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------- | ------------------------------------------------- |
+| **Design Tokens**               | Pure CSS tokens using Tailwind v4 top-level `@theme static` with verified WCAG 2.2 AA contrast ratios.                     | `design/design-tokens.md`                    | ✅ **Completed**          | `docs/design/design-tokens.md`                    |
+| **Fonts & Typography**          | Variable fonts (`Outfit` display, `Inter` UI) with omitted `weight`; variable Noto Indic subsets via `next/font/google`.   | `design/visual-language.md`                  | 🟡 Configured             | `src/app/layout.tsx`                              |
+| **Reduced-Motion Fallbacks**    | Zero 1ms animation loops; explicit `animation: none` and static layout fallbacks in `:root`.                               | `design/design-tokens.md`                    | ✅ **Completed**          | `docs/design/design-tokens.md`                    |
+| **Artwork Ingest & Blur**       | Ingest-time `sharp` dominant color extraction (clamped L/C, CSS `color-mix`) and base64 WebP blur placeholder generation.  | `design/visual-language.md`                  | ⚪ Ready to build         | `src/modules/content/services/artwork.service.ts` |
+| **Billboard Trailer Lifecycle** | Ken Burns zoom $\le 5\text{s}$, visible pause control button, `Paused` state in lifecycle machine, JS `saveData` check.    | `design/motion-and-interaction.md`           | ✅ **Completed**          | `docs/design/motion-and-interaction.md`           |
+| **Quick-View Modal**            | Next.js intercepting route `@modal/(.)title/[slug]` with URL sync to `/title/[slug]` and full-page fallback on direct hit. | `doc 04`, `design/motion-and-interaction.md` | ⚪ Ready to build         | `src/app/(app)/@modal/(.)title/[slug]/page.tsx`   |
+| **Client Bundle Budgets**       | Strict Gzip budgets: Home < 80 kB, Title Detail < 90 kB, Player < 135 kB, Admin < 195 kB.                                  | `design/frontend-stack-and-libraries.md`     | ✅ **Audited & Budgeted** | `docs/design/frontend-stack-and-libraries.md`     |
 
 ---
 
@@ -157,6 +157,7 @@ flowchart LR
 ## 5. Implementation Execution Tracker (Phase-by-Phase Checklist)
 
 ### Milestone 0: Static Visual Prototype `[Completed]`
+
 - [x] Rename `docs/design/` files to drop numeric prefixes and normalize links.
 - [x] Create top-level `@theme static` Tailwind v4 design tokens.
 - [x] Configure variable fonts (`Outfit`, `Inter`) without `weight` in `src/app/layout.tsx`.
@@ -169,6 +170,7 @@ flowchart LR
 - [x] Pass quality gates: zero lint errors (`npm run lint`), TypeScript strict check (`npx tsc --noEmit`), and production build (`npm run build`).
 
 ### Milestone 1: Platform Foundation & Core Services `[Completed]`
+
 - [x] Configure Neon PostgreSQL connection strings (`DATABASE_URL`, `DATABASE_DIRECT_URL`) in local `.env`.
 - [x] Implement `prisma/schema.prisma` covering all 23 database models and relations from doc 05.
 - [x] Synchronize database schema to Neon cloud PostgreSQL (`npx prisma db push`).
@@ -183,6 +185,7 @@ flowchart LR
 - [x] Pass all quality gates: `npm run lint`, `npm run type-check`, and `npm run build`.
 
 ### Milestone 2: Video Processing & Streaming Engine `[Completed]`
+
 - [x] Configure S3 SDK v3 client in `src/lib/storage.ts` supporting MinIO & Cloudflare R2 with multipart upload and presigned part URLs.
 - [x] Implement `src/modules/video/dal.ts` strictly isolating database queries for `VideoAsset`, `SubtitleTrack`, `WatchProgress`, and `PlayEvent`.
 - [x] Implement `src/modules/video/signing.ts` for timing-safe HMAC URL signing and manifest/segment rewriting (`qMax` plan tier gating).
@@ -197,6 +200,7 @@ flowchart LR
 - [x] Implement unit tests in `src/modules/video/__tests__/video.test.ts`.
 
 ### Milestone 3: Discovery, Personalization & Catalog `[Completed]`
+
 - [x] Implement `buildVisibilityFilter` in `src/modules/content/dal.ts` enforcing `status='published'`, `publishAt <= now()`, and statutory age ratings (`minAge <= 7` for Kids mode).
 - [x] Implement `findActiveBillboard`, `findRailsWithItems`, `findTop10Titles`, and `findTitleBySlugWithDetails` in DAL.
 - [x] Implement full-text search (`searchTitlesInDb`) and fuzzy autocomplete (`searchAutocomplete`) with genre & cast filters.
@@ -214,6 +218,7 @@ flowchart LR
 - [x] Implement unit tests in `src/modules/content/__tests__/content.test.ts`.
 
 ### Production Standards & Observability `[Completed]`
+
 - [x] Configure Helmet-equivalent HTTP security headers in `next.config.ts` and `src/proxy.ts` (X-Frame-Options, CSP, HSTS, X-Content-Type-Options).
 - [x] Implement structured request logging (Morgan equivalent) in `src/proxy.ts` using Pino (`src/lib/logger.ts`) with PII redaction.
 - [x] Implement Liveness probe (`GET /api/health/live`) returning process health with zero external failure risk.
@@ -222,6 +227,7 @@ flowchart LR
 - [x] Implement complete OpenAPI 3.1 JSON specification (`GET /api/docs/spec`).
 
 ### Milestone 4: Billing, Entitlements & Admin CMS `[Completed]`
+
 - [x] Implement `src/modules/billing/` DAL & Service for plans, active subscriptions, and tier entitlement checking.
 - [x] Implement Plans comparison page (`/plans`) comparing Free, Standard, Premium with quality badges and pricing.
 - [x] Implement simulated checkout flow and `subscribeToPlan` Server Action.
@@ -232,6 +238,7 @@ flowchart LR
 - [x] Implement Admin user and subscriber access control console (`/admin/users`) with plan assignment and ban controls.
 
 ### Milestone 5: Production Hardening, Observability & Launch `[In Progress - Core Complete]`
+
 - [x] Health check endpoints (`/api/health/live` and `/api/health/ready` verifying Neon DB, Redis, and transcode worker heartbeat).
 - [x] Structured Pino log redaction for sensitive fields with Morgan-style request telemetry.
 - [x] Client-side Core Web Vitals RUM reporter (`src/components/telemetry/WebVitalsReporter.tsx` mounted in root layout, ingesting via `/api/telemetry/rum`).

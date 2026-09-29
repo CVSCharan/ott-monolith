@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     if (!uploadId || !s3Key || !assetId) {
       return NextResponse.json(
         { error: 'Missing required parameters: uploadId, s3Key, assetId' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 

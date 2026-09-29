@@ -4,7 +4,7 @@ import { removeFromWatchlist } from '@/modules/content'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ titleId: string }> }
+  { params }: { params: Promise<{ titleId: string }> },
 ) {
   try {
     const { titleId } = await params

@@ -4,12 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Play, Plus, Check, ThumbsUp, Volume2, VolumeX } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { MaturityBadge, PlanLockBadge, QualityBadge } from '@/components/ui/badge'
 import type { MockTitle } from '@/lib/mock-data'
@@ -36,9 +31,7 @@ export function TitleDetailModal({
 
   // Find similar titles sharing genres
   const similarTitles = MOCK_TITLES.filter(
-    (item) =>
-      item.id !== title.id &&
-      item.genres.some((g) => title.genres.includes(g))
+    (item) => item.id !== title.id && item.genres.some((g) => title.genres.includes(g)),
   ).slice(0, 3)
 
   return (
@@ -90,7 +83,11 @@ export function TitleDetailModal({
                   aria-label={inList ? 'Remove from My List' : 'Add to My List'}
                   className={inList ? 'border-accent-400 text-accent-300' : ''}
                 >
-                  {inList ? <Check className="w-4 h-4 stroke-[2.5]" /> : <Plus className="w-4 h-4 stroke-[2.5]" />}
+                  {inList ? (
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                  ) : (
+                    <Plus className="w-4 h-4 stroke-[2.5]" />
+                  )}
                 </Button>
 
                 <Button
@@ -137,12 +134,10 @@ export function TitleDetailModal({
 
               <div className="pt-2 border-t border-border/40 space-y-1.5 font-ui text-caption text-text-secondary">
                 <p>
-                  <span className="text-text-muted">Audio:</span>{' '}
-                  {title.audioTracks.join(', ')}
+                  <span className="text-text-muted">Audio:</span> {title.audioTracks.join(', ')}
                 </p>
                 <p>
-                  <span className="text-text-muted">Subtitles:</span>{' '}
-                  {title.subtitles.join(', ')}
+                  <span className="text-text-muted">Subtitles:</span> {title.subtitles.join(', ')}
                 </p>
               </div>
             </div>

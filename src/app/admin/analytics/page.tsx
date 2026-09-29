@@ -1,13 +1,5 @@
 import * as React from 'react'
-import {
-  BarChart3,
-  TrendingUp,
-  Play,
-  Clock,
-  Activity,
-  HardDrive,
-  Film,
-} from 'lucide-react'
+import { BarChart3, TrendingUp, Play, Clock, Activity, HardDrive, Film } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,7 +59,8 @@ export default function AdminAnalyticsPage() {
             </h1>
           </div>
           <p className="text-body-sm text-text-secondary mt-1">
-            Aggregated playback telemetry, subscriber engagement, and video delivery quality metrics.
+            Aggregated playback telemetry, subscriber engagement, and video delivery quality
+            metrics.
           </p>
         </div>
 
@@ -84,7 +77,9 @@ export default function AdminAnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Total Plays (7d)</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Total Plays (7d)
+            </span>
             <Play className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -97,7 +92,9 @@ export default function AdminAnalyticsPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Avg Completion Rate</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Avg Completion Rate
+            </span>
             <Activity className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -108,7 +105,9 @@ export default function AdminAnalyticsPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Buffering Ratio</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Buffering Ratio
+            </span>
             <Clock className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -119,7 +118,9 @@ export default function AdminAnalyticsPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Bandwidth Delivered</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Bandwidth Delivered
+            </span>
             <HardDrive className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -149,7 +150,10 @@ export default function AdminAnalyticsPage() {
             { day: 'Mon', count: 16100, height: '74%' },
             { day: 'Tue', count: 18200, height: '82%' },
           ].map((bar) => (
-            <div key={bar.day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
+            <div
+              key={bar.day}
+              className="flex-1 flex flex-col items-center gap-2 h-full justify-end group"
+            >
               <span className="text-[11px] font-mono text-accent-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 {Math.round(bar.count / 1000)}k
               </span>
@@ -200,7 +204,9 @@ export default function AdminAnalyticsPage() {
                           style={{ width: `${t.completionRate}%` }}
                         ></div>
                       </div>
-                      <span className="font-mono text-caption text-text-muted">{t.completionRate}%</span>
+                      <span className="font-mono text-caption text-text-muted">
+                        {t.completionRate}%
+                      </span>
                     </div>
                   </td>
                   <td className="p-4 text-right font-mono text-success text-caption">

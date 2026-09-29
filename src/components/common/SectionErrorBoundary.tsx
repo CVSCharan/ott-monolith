@@ -31,7 +31,10 @@ export class SectionErrorBoundary extends React.Component<Props, State> {
           error: error.message,
           componentStack: errorInfo.componentStack,
         })
-        navigator.sendBeacon('/api/telemetry/rum', new Blob([payload], { type: 'application/json' }))
+        navigator.sendBeacon(
+          '/api/telemetry/rum',
+          new Blob([payload], { type: 'application/json' }),
+        )
       } catch {
         // Ignore telemetry failure
       }

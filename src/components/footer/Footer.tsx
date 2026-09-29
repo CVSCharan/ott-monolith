@@ -123,7 +123,10 @@ export function Footer() {
         {/* Media Attribution Statement */}
         <div className="pt-4 border-t border-border/40 text-[11px] leading-relaxed text-text-muted/80 space-y-1">
           <p>
-            StreamForge sample titles (Big Buck Bunny, Tears of Steel, Sintel, Cosmos Laundromat, Spring, Elephants Dream) are open-source films provided under the Creative Commons Attribution 3.0 / 4.0 licenses by the Blender Foundation (peach.blender.org, mango.blender.org).
+            StreamForge sample titles (Big Buck Bunny, Tears of Steel, Sintel, Cosmos Laundromat,
+            Spring, Elephants Dream) are open-source films provided under the Creative Commons
+            Attribution 3.0 / 4.0 licenses by the Blender Foundation (peach.blender.org,
+            mango.blender.org).
           </p>
           <p>© 2026 StreamForge Technologies Inc. All rights reserved.</p>
         </div>

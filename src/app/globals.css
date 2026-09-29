@@ -1,137 +1,137 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ── Top-Level Tailwind CSS v4 Theme Tokens ─────────── */
 @theme static {
   /* ── Colors: Surfaces ──────────────────────────────── */
-  --color-bg-base:          oklch(10% 0.008 280);
-  --color-bg-surface:       oklch(14% 0.010 280);
-  --color-bg-surface-alpha: oklch(14% 0.010 280 / 80%);
-  --color-bg-elevated:      oklch(18% 0.012 280);
-  --color-bg-elevated-alpha:oklch(18% 0.012 280 / 80%);
-  --color-bg-scrim:         oklch(8% 0.006 280 / 85%);
-  --color-bg-input:         oklch(16% 0.011 280);
+  --color-bg-base: oklch(10% 0.008 280);
+  --color-bg-surface: oklch(14% 0.01 280);
+  --color-bg-surface-alpha: oklch(14% 0.01 280 / 80%);
+  --color-bg-elevated: oklch(18% 0.012 280);
+  --color-bg-elevated-alpha: oklch(18% 0.012 280 / 80%);
+  --color-bg-scrim: oklch(8% 0.006 280 / 85%);
+  --color-bg-input: oklch(16% 0.011 280);
 
   /* ── Colors: Accents ───────────────────────────────── */
-  --color-accent-300:  oklch(76% 0.16 292);
-  --color-accent-400:  oklch(66% 0.20 292);
-  --color-accent-500:  oklch(54% 0.24 292);
-  --color-accent-600:  oklch(46% 0.25 292);
+  --color-accent-300: oklch(76% 0.16 292);
+  --color-accent-400: oklch(66% 0.2 292);
+  --color-accent-500: oklch(54% 0.24 292);
+  --color-accent-600: oklch(46% 0.25 292);
   --color-accent-soft: oklch(54% 0.24 292 / 15%);
   --color-accent-glow: oklch(54% 0.24 292 / 35%);
 
   /* ── Colors: Text ──────────────────────────────────── */
-  --color-text-primary:   oklch(95% 0.008 280);
+  --color-text-primary: oklch(95% 0.008 280);
   --color-text-secondary: oklch(70% 0.012 280);
-  --color-text-muted:     oklch(64% 0.010 280);
+  --color-text-muted: oklch(64% 0.01 280);
   --color-text-on-accent: oklch(100% 0 0);
-  --color-text-on-surface:oklch(90% 0.008 280);
+  --color-text-on-surface: oklch(90% 0.008 280);
 
   /* ── Colors: Semantic ──────────────────────────────── */
-  --color-success:      oklch(65% 0.19 145);
+  --color-success: oklch(65% 0.19 145);
   --color-success-soft: oklch(65% 0.19 145 / 15%);
-  --color-error:        oklch(58% 0.22 25);
-  --color-error-soft:   oklch(58% 0.22 25 / 15%);
-  --color-warning:      oklch(78% 0.17 70);
+  --color-error: oklch(58% 0.22 25);
+  --color-error-soft: oklch(58% 0.22 25 / 15%);
+  --color-warning: oklch(78% 0.17 70);
   --color-warning-soft: oklch(78% 0.17 70 / 15%);
 
   /* ── Colors: Maturity Badges ───────────────────────── */
-  --color-maturity-u:  oklch(65% 0.19 145);
-  --color-maturity-7:  oklch(78% 0.15 145);
+  --color-maturity-u: oklch(65% 0.19 145);
+  --color-maturity-7: oklch(78% 0.15 145);
   --color-maturity-13: oklch(78% 0.17 70);
   --color-maturity-16: oklch(70% 0.18 40);
   --color-maturity-18: oklch(58% 0.22 25);
 
   /* ── Colors: Borders ───────────────────────────────── */
-  --color-border:       oklch(100% 0 0 / 10%);
+  --color-border: oklch(100% 0 0 / 10%);
   --color-border-hover: oklch(100% 0 0 / 20%);
   --color-border-focus: var(--color-accent-400);
   --color-border-error: var(--color-error);
 
   /* ── Typography Scale ──────────────────────────────── */
   --font-display: var(--font-outfit), var(--font-noto-devanagari), system-ui, sans-serif;
-  --font-ui:      var(--font-inter), var(--font-noto-devanagari), system-ui, sans-serif;
+  --font-ui: var(--font-inter), var(--font-noto-devanagari), system-ui, sans-serif;
 
   --text-display-xl: clamp(2.75rem, 5vw, 4.5rem);
   --text-display-lg: clamp(2rem, 3.5vw, 3.5rem);
-  --text-heading-1:  clamp(1.5rem, 2.5vw, 2.25rem);
-  --text-heading-2:  clamp(1.25rem, 1.8vw, 1.75rem);
-  --text-heading-3:  clamp(1.125rem, 1.2vw, 1.35rem);
-  --text-body-lg:    1.125rem;
-  --text-body:       clamp(1rem, 1.2vw, 1.0625rem);  /* >= 16px floor on mobile */
-  --text-body-sm:    0.875rem;                       /* 14px */
-  --text-caption:    0.75rem;                        /* 12px minimum floor */
+  --text-heading-1: clamp(1.5rem, 2.5vw, 2.25rem);
+  --text-heading-2: clamp(1.25rem, 1.8vw, 1.75rem);
+  --text-heading-3: clamp(1.125rem, 1.2vw, 1.35rem);
+  --text-body-lg: 1.125rem;
+  --text-body: clamp(1rem, 1.2vw, 1.0625rem); /* >= 16px floor on mobile */
+  --text-body-sm: 0.875rem; /* 14px */
+  --text-caption: 0.75rem; /* 12px minimum floor */
 
-  --font-weight-regular:  400;
-  --font-weight-medium:   500;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --font-weight-bold:     700;
+  --font-weight-bold: 700;
 
-  --leading-tight:   1.15;
-  --leading-snug:    1.3;
-  --leading-normal:  1.5;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
   --leading-relaxed: 1.65;
 
-  --tracking-tight:  -0.02em;
-  --tracking-normal:  0em;
-  --tracking-wide:    0.04em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
 
   /* ── Spacing Utilities ─────────────────────────────── */
-  --spacing-px:  1px;
-  --spacing-1:   0.25rem;
-  --spacing-2:   0.5rem;
-  --spacing-3:   0.75rem;
-  --spacing-4:   1rem;
-  --spacing-5:   1.25rem;
-  --spacing-6:   1.5rem;
-  --spacing-8:   2rem;
-  --spacing-10:  2.5rem;
-  --spacing-12:  3rem;
-  --spacing-16:  4rem;
-  --spacing-20:  5rem;
-  --spacing-24:  6rem;
-  --spacing-32:  8rem;
+  --spacing-px: 1px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
 
   /* ── Aspect Ratios (Width / Height) ────────────────── */
-  --aspect-video:    16 / 9;   /* Standard landscape / trailer / thumbnail */
-  --aspect-poster:   2 / 3;    /* Portrait movie card */
-  --aspect-backdrop: 16 / 9;   /* Hero billboard backdrop */
-  --aspect-square:   1 / 1;    /* Avatar */
+  --aspect-video: 16 / 9; /* Standard landscape / trailer / thumbnail */
+  --aspect-poster: 2 / 3; /* Portrait movie card */
+  --aspect-backdrop: 16 / 9; /* Hero billboard backdrop */
+  --aspect-square: 1 / 1; /* Avatar */
 
   /* ── Border Radius ─────────────────────────────────── */
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   20px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* ── Shadows ───────────────────────────────────────── */
-  --shadow-card:        0 4px 24px oklch(0% 0 0 / 50%);
-  --shadow-card-hover:  0 8px 36px oklch(0% 0 0 / 70%);
-  --shadow-modal:       0 24px 64px oklch(0% 0 0 / 80%);
+  --shadow-card: 0 4px 24px oklch(0% 0 0 / 50%);
+  --shadow-card-hover: 0 8px 36px oklch(0% 0 0 / 70%);
+  --shadow-modal: 0 24px 64px oklch(0% 0 0 / 80%);
   --shadow-accent-glow: 0 0 24px var(--color-accent-glow);
 
   /* ── Motion Tokens (Canonical Definition) ─────────── */
-  --duration-instant:    75ms;
-  --duration-fast:       150ms;
-  --duration-base:       220ms;
-  --duration-slow:       350ms;
+  --duration-instant: 75ms;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 350ms;
   --duration-deliberate: 450ms;
-  --duration-cinematic:  700ms;
+  --duration-cinematic: 700ms;
 
-  --ease-standard:  cubic-bezier(0.2, 0, 0, 1);
-  --ease-entrance:  cubic-bezier(0.05, 0.7, 0.1, 1);
-  --ease-exit:      cubic-bezier(0.3, 0, 0.8, 0.15);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Non-Utility Design Tokens in :root ─────────────── */
 :root {
   /* Layout Dimensions */
-  --page-gutter:       clamp(1rem, 4vw, 3.5rem);
-  --rail-gap:          var(--spacing-3);
-  --section-gap:       var(--spacing-12);
-  --navbar-height:     4rem;
+  --page-gutter: clamp(1rem, 4vw, 3.5rem);
+  --rail-gap: var(--spacing-3);
+  --section-gap: var(--spacing-12);
+  --navbar-height: 4rem;
   --bottom-nav-height: 3.5rem;
 
   /* Motion Distances */
@@ -144,16 +144,16 @@
   --stagger-grid-item: 40ms;
 
   /* Layering Z-Indices */
-  --z-base:             0;
-  --z-card-hover:      10;
-  --z-sticky:         100;
-  --z-navbar:         200;
-  --z-dropdown:       300;
+  --z-base: 0;
+  --z-card-hover: 10;
+  --z-sticky: 100;
+  --z-navbar: 200;
+  --z-dropdown: 300;
   --z-modal-backdrop: 400;
-  --z-modal:          401;
-  --z-player:         450;
-  --z-toast:          500;
-  --z-command:        600;
+  --z-modal: 401;
+  --z-player: 450;
+  --z-toast: 500;
+  --z-command: 600;
 }
 
 /* ── Base Styles ────────────────────────────────────── */
@@ -168,19 +168,21 @@ body {
 /* ── Reduced Motion Overrides in :root ──────────────── */
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --duration-instant:    0ms;
-    --duration-fast:       0ms;
-    --duration-base:       0ms;
-    --duration-slow:       0ms;
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
     --duration-deliberate: 0ms;
-    --duration-cinematic:  0ms;
+    --duration-cinematic: 0ms;
 
-    --motion-distance-sm:  0px;
-    --motion-distance-md:  0px;
-    --motion-distance-lg:  0px;
+    --motion-distance-sm: 0px;
+    --motion-distance-md: 0px;
+    --motion-distance-lg: 0px;
   }
 
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -245,7 +247,9 @@ body {
 /* ── Typography Utilities ───────────────────────────── */
 .top10-numeral {
   font-family: var(--font-display);
-  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-feature-settings:
+    'tnum' 1,
+    'lnum' 1;
   -webkit-text-stroke: 4px var(--color-border);
   color: var(--color-bg-base);
 }
@@ -271,7 +275,9 @@ body {
 }
 
 .content-card {
-  transition: transform var(--duration-base) var(--ease-entrance), opacity var(--duration-base) var(--ease-standard);
+  transition:
+    transform var(--duration-base) var(--ease-entrance),
+    opacity var(--duration-base) var(--ease-standard);
   will-change: transform, opacity;
 }
 

@@ -46,8 +46,7 @@ export default function WatchPlayerPage() {
   const params = useParams()
   const slug = params?.slug as string
 
-  const title: MockTitle =
-    MOCK_TITLES.find((t) => t.slug === slug) || MOCK_TITLES[0]
+  const title: MockTitle = MOCK_TITLES.find((t) => t.slug === slug) || MOCK_TITLES[0]
 
   const videoRef = React.useRef<HTMLVideoElement | null>(null)
   const containerRef = React.useRef<HTMLDivElement | null>(null)
@@ -133,7 +132,7 @@ export default function WatchPlayerPage() {
         }).catch(() => {})
       }
     },
-    [title.id, slug, duration, selectedQuality]
+    [title.id, slug, duration, selectedQuality],
   )
 
   // ── 10s Debounced Beacon Loop ────────────────────────────────
@@ -224,8 +223,20 @@ export default function WatchPlayerPage() {
             if (qualities.length <= 1) {
               qualities.push(
                 { label: '480p SD', height: 480, levelIndex: 0, locked: false },
-                { label: '720p HD', height: 720, levelIndex: 1, locked: maxP < 720, plan: 'STANDARD' },
-                { label: '1080p FHD', height: 1080, levelIndex: 2, locked: maxP < 1080, plan: 'PREMIUM' }
+                {
+                  label: '720p HD',
+                  height: 720,
+                  levelIndex: 1,
+                  locked: maxP < 720,
+                  plan: 'STANDARD',
+                },
+                {
+                  label: '1080p FHD',
+                  height: 1080,
+                  levelIndex: 2,
+                  locked: maxP < 1080,
+                  plan: 'PREMIUM',
+                },
               )
             }
 
@@ -305,7 +316,7 @@ export default function WatchPlayerPage() {
     if (!videoRef.current) return
     videoRef.current.currentTime = Math.max(
       0,
-      Math.min(videoRef.current.currentTime + seconds, duration)
+      Math.min(videoRef.current.currentTime + seconds, duration),
     )
     sendBeacon('seek')
   }
@@ -569,7 +580,13 @@ export default function WatchPlayerPage() {
                         { label: 'Auto (1080p)', height: 0, levelIndex: -1, locked: false },
                         { label: '1080p Full HD', height: 1080, levelIndex: 2, locked: false },
                         { label: '720p HD', height: 720, levelIndex: 1, locked: false },
-                        { label: '4K Ultra HD', height: 2160, levelIndex: 3, locked: true, plan: 'PREMIUM' },
+                        {
+                          label: '4K Ultra HD',
+                          height: 2160,
+                          levelIndex: 3,
+                          locked: true,
+                          plan: 'PREMIUM',
+                        },
                       ]
                   ).map((q) => (
                     <DropdownMenu.Item

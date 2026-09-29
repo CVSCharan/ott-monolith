@@ -20,8 +20,8 @@ export const DialogOverlay = React.forwardRef<
     className={twMerge(
       clsx(
         'fixed inset-0 z-modal-backdrop bg-bg-scrim backdrop-blur-sm transition-opacity duration-fast',
-        className
-      )
+        className,
+      ),
     )}
     {...props}
   />
@@ -39,8 +39,8 @@ export const DialogContent = React.forwardRef<
       className={twMerge(
         clsx(
           'fixed left-1/2 top-1/2 z-modal -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-bg-elevated border border-border rounded-lg shadow-modal outline-none transition-all duration-base ease-entrance',
-          className
-        )
+          className,
+        ),
       )}
       {...props}
     >
@@ -60,9 +60,7 @@ export const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={twMerge(
-      clsx('font-display text-heading-1 font-bold text-text-primary', className)
-    )}
+    className={twMerge(clsx('font-display text-heading-1 font-bold text-text-primary', className))}
     {...props}
   />
 ))

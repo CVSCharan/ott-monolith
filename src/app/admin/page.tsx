@@ -27,7 +27,8 @@ export default function AdminOverviewPage() {
             Platform Operations & Management
           </h1>
           <p className="text-body-sm text-text-secondary mt-1">
-            Enterprise administration console for StreamForge media catalog, delivery, and system health.
+            Enterprise administration console for StreamForge media catalog, delivery, and system
+            health.
           </p>
         </div>
 
@@ -53,7 +54,9 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Catalog Titles</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Catalog Titles
+            </span>
             <Film className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -64,7 +67,9 @@ export default function AdminOverviewPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Subscription Plans</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Subscription Plans
+            </span>
             <Layers className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -75,7 +80,9 @@ export default function AdminOverviewPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Transcode Worker</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Transcode Worker
+            </span>
             <Cpu className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -89,7 +96,9 @@ export default function AdminOverviewPage() {
 
         <div className="p-5 rounded-xl bg-bg-surface/80 border border-border flex flex-col justify-between">
           <div className="flex items-center justify-between text-text-secondary mb-3">
-            <span className="text-caption font-semibold uppercase tracking-wider">Security State</span>
+            <span className="text-caption font-semibold uppercase tracking-wider">
+              Security State
+            </span>
             <ShieldCheck className="w-4 h-4 text-accent-400" />
           </div>
           <div>
@@ -119,20 +128,27 @@ export default function AdminOverviewPage() {
             </Link>
           </div>
           <p className="text-body-sm text-text-secondary mb-4">
-            Manage metadata, age ratings (U, U/A, A), plan tier minimums, trailer assets, and publishing schedules.
+            Manage metadata, age ratings (U, U/A, A), plan tier minimums, trailer assets, and
+            publishing schedules.
           </p>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-bg-card border border-border/50 text-body-sm">
               <span className="font-medium text-text-primary">Tears of Steel</span>
-              <span className="text-caption text-success font-semibold">Published · Standard Tier</span>
+              <span className="text-caption text-success font-semibold">
+                Published · Standard Tier
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-bg-card border border-border/50 text-body-sm">
               <span className="font-medium text-text-primary">Big Buck Bunny</span>
-              <span className="text-caption text-accent-400 font-semibold">Published · Free Tier</span>
+              <span className="text-caption text-accent-400 font-semibold">
+                Published · Free Tier
+              </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-bg-card border border-border/50 text-body-sm">
               <span className="font-medium text-text-primary">Sintel</span>
-              <span className="text-caption text-success font-semibold">Published · Standard Tier</span>
+              <span className="text-caption text-success font-semibold">
+                Published · Standard Tier
+              </span>
             </div>
           </div>
         </div>
@@ -155,7 +171,8 @@ export default function AdminOverviewPage() {
             </Link>
           </div>
           <p className="text-body-sm text-text-secondary mb-4">
-            Docker worker pipeline status, multi-bitrate HLS ladders (360p to 1080p), and timing-safe HMAC URL signing.
+            Docker worker pipeline status, multi-bitrate HLS ladders (360p to 1080p), and
+            timing-safe HMAC URL signing.
           </p>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-bg-card border border-border/50 text-body-sm">

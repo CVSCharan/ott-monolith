@@ -5,8 +5,7 @@ import { subscribeAccountToPlan, type PlanDisplay } from './service'
 import { revalidatePath } from 'next/cache'
 
 export type ActionResult<T = void> =
-  | { success: true; data: T }
-  | { success: false; code: string; message: string; details?: unknown }
+  { success: true; data: T } | { success: false; code: string; message: string; details?: unknown }
 
 /**
  * Server Action: Subscribes the authenticated account to a plan.
@@ -41,10 +40,7 @@ export async function subscribeToPlanAction(
     return {
       success: false,
       code: 'SUBSCRIPTION_ERROR',
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Failed to update subscription.',
+      message: error instanceof Error ? error.message : 'Failed to update subscription.',
     }
   }
 }

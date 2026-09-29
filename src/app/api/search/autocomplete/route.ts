@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
         headers: {
           'Cache-Control': user ? 'no-store' : 'public, s-maxage=30',
         },
-      }
+      },
     )
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'FAILED_TO_AUTOCOMPLETE'

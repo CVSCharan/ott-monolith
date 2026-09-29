@@ -18,17 +18,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Stack
 
-| Layer | Technology | Key constraint |
-|-------|-----------|---------------|
-| Framework | Next.js 16, App Router, TypeScript | Read `node_modules/next/dist/docs/` before any RSC/routing decision |
-| Styling | Tailwind CSS v4 | `@theme` block only — no raw values in `.tsx`; reference tokens |
-| Database | PostgreSQL 16 + Prisma 7 (@prisma/adapter-pg) | Config in `prisma.config.ts`; never `migrate deploy` in Vercel build step |
-| Auth | Custom JWT, httpOnly cookies | No `Authorization` header for browser clients; no `NEXT_PUBLIC_*` secrets |
-| Storage | MinIO (local) / Cloudflare R2 (prod) | Bucket NOT publicly accessible in demo; all HLS via proxy Route Handler |
-| Video | FFmpeg Docker worker + hls.js player | Worker is always-on VPS; never Vercel Functions (60 s limit) |
-| Queue | pg-boss (Postgres-backed) | Worker uses `DATABASE_DIRECT_URL`; Neon pooler cannot run migrations |
-| Search | Postgres FTS + pg_trgm | Extensions in first migration; GIN/BRIN indexes hand-edited in SQL |
-| Rate limiting | Redis token bucket in `src/proxy.ts` | No in-memory / Edge rate limiting |
+| Layer         | Technology                                    | Key constraint                                                            |
+| ------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
+| Framework     | Next.js 16, App Router, TypeScript            | Read `node_modules/next/dist/docs/` before any RSC/routing decision       |
+| Styling       | Tailwind CSS v4                               | `@theme` block only — no raw values in `.tsx`; reference tokens           |
+| Database      | PostgreSQL 16 + Prisma 7 (@prisma/adapter-pg) | Config in `prisma.config.ts`; never `migrate deploy` in Vercel build step |
+| Auth          | Custom JWT, httpOnly cookies                  | No `Authorization` header for browser clients; no `NEXT_PUBLIC_*` secrets |
+| Storage       | MinIO (local) / Cloudflare R2 (prod)          | Bucket NOT publicly accessible in demo; all HLS via proxy Route Handler   |
+| Video         | FFmpeg Docker worker + hls.js player          | Worker is always-on VPS; never Vercel Functions (60 s limit)              |
+| Queue         | pg-boss (Postgres-backed)                     | Worker uses `DATABASE_DIRECT_URL`; Neon pooler cannot run migrations      |
+| Search        | Postgres FTS + pg_trgm                        | Extensions in first migration; GIN/BRIN indexes hand-edited in SQL        |
+| Rate limiting | Redis token bucket in `src/proxy.ts`          | No in-memory / Edge rate limiting                                         |
 
 ---
 
@@ -100,36 +100,36 @@ src/modules/<name>/actions.ts  ← Server Actions (thin adapters, call service o
 
 ## DON'Ts
 
-| Rule | Why |
-|------|-----|
-| ❌ No raw colors / sizes / spacing in `.tsx` | Reference `--color-*` / `--space-*` / `--radius-*` tokens |
-| ❌ No deep cross-module imports | Use the module's public `index.ts` |
-| ❌ No unguarded Server Actions | First line must be `await requireSession()` or `await requireAdmin()` |
-| ❌ No secrets in client code | Never `NEXT_PUBLIC_*` for signing keys, DB URLs, API secrets |
-| ❌ No `prisma migrate deploy` in Vercel build | CI/CD pipeline only (see doc 14) |
-| ❌ No offset pagination on large tables | Cursor-based only (see doc 06) |
-| ❌ No direct DB writes without a migration | Every schema change needs `migrate dev --create-only` + hand-edit SQL |
-| ❌ No P2 features in MVP milestones | Tag it, document in decision register, ship in correct milestone |
-| ❌ No `console.log` in production code | Use `src/lib/logger.ts` (Pino) |
-| ❌ No hardcoded admin credentials | Admin password from `SEED_ADMIN_PASSWORD` env var only |
-| ❌ No inline styles except `style={{ '--token': value }}` | Only permitted pattern for dynamic CSS custom property overrides |
-| ❌ No FFmpeg invoked from Next.js server | FFmpeg runs only in the Docker worker (security + resource isolation) |
+| Rule                                                      | Why                                                                   |
+| --------------------------------------------------------- | --------------------------------------------------------------------- |
+| ❌ No raw colors / sizes / spacing in `.tsx`              | Reference `--color-*` / `--space-*` / `--radius-*` tokens             |
+| ❌ No deep cross-module imports                           | Use the module's public `index.ts`                                    |
+| ❌ No unguarded Server Actions                            | First line must be `await requireSession()` or `await requireAdmin()` |
+| ❌ No secrets in client code                              | Never `NEXT_PUBLIC_*` for signing keys, DB URLs, API secrets          |
+| ❌ No `prisma migrate deploy` in Vercel build             | CI/CD pipeline only (see doc 14)                                      |
+| ❌ No offset pagination on large tables                   | Cursor-based only (see doc 06)                                        |
+| ❌ No direct DB writes without a migration                | Every schema change needs `migrate dev --create-only` + hand-edit SQL |
+| ❌ No P2 features in MVP milestones                       | Tag it, document in decision register, ship in correct milestone      |
+| ❌ No `console.log` in production code                    | Use `src/lib/logger.ts` (Pino)                                        |
+| ❌ No hardcoded admin credentials                         | Admin password from `SEED_ADMIN_PASSWORD` env var only                |
+| ❌ No inline styles except `style={{ '--token': value }}` | Only permitted pattern for dynamic CSS custom property overrides      |
+| ❌ No FFmpeg invoked from Next.js server                  | FFmpeg runs only in the Docker worker (security + resource isolation) |
 
 ---
 
 ## Quick Reference: Which Layer Does What
 
-| Need | Use |
-|------|-----|
-| Fetch public cached content | RSC + `fetch()` with `next: { revalidate: N }` |
-| Fetch per-profile content | RSC `async` with `requireSession()` → service call |
-| Mutate from a form | Server Action in `src/modules/*/actions.ts` |
-| Mutate from a client event (player, beacon) | `POST /api/…` Route Handler |
-| Check session in middleware | `proxy.ts` JWT decode (no DB hit) |
-| Check session in a Server Component | `requireSession()` from `src/modules/auth` |
-| Rate limit | Redis token bucket in `proxy.ts` |
-| Enqueue background job | `pgBoss.send(jobName, data)` from a Route Handler or Server Action |
-| Log an error | `logger.error({ err }, 'description')` (Pino) |
+| Need                                        | Use                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| Fetch public cached content                 | RSC + `fetch()` with `next: { revalidate: N }`                     |
+| Fetch per-profile content                   | RSC `async` with `requireSession()` → service call                 |
+| Mutate from a form                          | Server Action in `src/modules/*/actions.ts`                        |
+| Mutate from a client event (player, beacon) | `POST /api/…` Route Handler                                        |
+| Check session in middleware                 | `proxy.ts` JWT decode (no DB hit)                                  |
+| Check session in a Server Component         | `requireSession()` from `src/modules/auth`                         |
+| Rate limit                                  | Redis token bucket in `proxy.ts`                                   |
+| Enqueue background job                      | `pgBoss.send(jobName, data)` from a Route Handler or Server Action |
+| Log an error                                | `logger.error({ err }, 'description')` (Pino)                      |
 
 ---
 
@@ -142,15 +142,15 @@ Adding a new var requires: `.env.example` entry + CI secret + doc 14 update, all
 
 ## Key Decisions (ADR Index)
 
-| ADR | Decision |
-|-----|---------|
-| 0001 | Next.js 16 App Router monolith |
-| 0002 | Prisma 6 as ORM |
-| 0003 | HLS + manifest-rewrite HMAC signing |
-| 0004 | Custom JWT auth (no third-party) |
-| 0005 | MinIO (local) / R2 (prod) |
-| 0006 | Postgres FTS + pg_trgm |
-| 0007 | Tailwind CSS v4 |
-| 0008 | Monolith-first with microservices exit |
-| 0009 | Frontend library selections (Radix · Motion · hls.js · TanStack) |
+| ADR  | Decision                                                                                   |
+| ---- | ------------------------------------------------------------------------------------------ |
+| 0001 | Next.js 16 App Router monolith                                                             |
+| 0002 | Prisma 6 as ORM                                                                            |
+| 0003 | HLS + manifest-rewrite HMAC signing                                                        |
+| 0004 | Custom JWT auth (no third-party)                                                           |
+| 0005 | MinIO (local) / R2 (prod)                                                                  |
+| 0006 | Postgres FTS + pg_trgm                                                                     |
+| 0007 | Tailwind CSS v4                                                                            |
+| 0008 | Monolith-first with microservices exit                                                     |
+| 0009 | Frontend library selections (Radix · Motion · hls.js · TanStack)                           |
 | 0010 | Standardized `src/` directory layout (`src/app`, `src/modules`, `src/lib`, `src/proxy.ts`) |

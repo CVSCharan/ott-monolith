@@ -1,12 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { loginAction, signUpAction } from '@/modules/auth/actions'
 
@@ -17,12 +12,7 @@ export interface AuthModalProps {
   initialMode?: 'login' | 'signup'
 }
 
-export function AuthModal({
-  isOpen,
-  onClose,
-  onSuccess,
-  initialMode = 'login',
-}: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onSuccess, initialMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = React.useState<'login' | 'signup'>(initialMode)
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -163,11 +153,7 @@ export function AuthModal({
               disabled={isPending}
               className="w-full"
             >
-              {isPending
-                ? 'Please wait...'
-                : mode === 'login'
-                ? 'Sign In'
-                : 'Create Account'}
+              {isPending ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </Button>
           </div>
         </form>

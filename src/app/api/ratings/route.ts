@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     if (!titleId || !['like', 'dislike'].includes(value)) {
       return NextResponse.json(
         { error: 'Valid titleId and value ("like" | "dislike") required' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 

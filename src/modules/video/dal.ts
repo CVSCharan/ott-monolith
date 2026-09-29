@@ -92,7 +92,7 @@ export async function updateVideoAssetStatus(
     hlsBasePath?: string
     durationSeconds?: number
     renditions?: Prisma.InputJsonValue
-  }
+  },
 ) {
   return db.videoAsset.update({
     where: { id },
@@ -128,7 +128,7 @@ export async function updateTranscodeJobProgress(
     status?: string
     errorMessage?: string
     ffprobeMeta?: Prisma.InputJsonValue
-  }
+  },
 ) {
   return db.transcodeJob.update({
     where: { id },
@@ -191,7 +191,7 @@ export async function insertPlayEvents(
     deviceType?: string
     userAgent?: string
     occurredAt: Date
-  }>
+  }>,
 ) {
   if (events.length === 0) return { count: 0 }
 

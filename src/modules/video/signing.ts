@@ -40,9 +40,7 @@ export function segmentTtl(durationSeconds: number): number {
 export function hmacSign(payload: string, ttlSeconds: number): { token: string; exp: number } {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds
   const secret = env.HMAC_MANIFEST_SECRET
-  const token = createHmac('sha256', secret)
-    .update(`${payload}:${exp}`)
-    .digest('hex')
+  const token = createHmac('sha256', secret).update(`${payload}:${exp}`).digest('hex')
 
   return { token, exp }
 }
@@ -57,9 +55,7 @@ export function hmacVerify(payload: string, token: string, exp: string | number)
   }
 
   const secret = env.HMAC_MANIFEST_SECRET
-  const expected = createHmac('sha256', secret)
-    .update(`${payload}:${expNum}`)
-    .digest('hex')
+  const expected = createHmac('sha256', secret).update(`${payload}:${expNum}`).digest('hex')
 
   if (token.length !== expected.length) {
     return false
@@ -84,7 +80,7 @@ export function rewriteMasterPlaylist(
     maxQualityP: number
     tokenExp: number | string
     ttlSeconds?: number
-  }
+  },
 ): string {
   const { maxQualityP, tokenExp, ttlSeconds = 3600 } = options
   const lines = rawPlaylist.split(/\r?\n/)
@@ -142,7 +138,7 @@ export function rewriteVariantPlaylist(
   rawPlaylist: string,
   tokenExp: number | string,
   maxQualityP: number,
-  ttlSeconds = 7200
+  ttlSeconds = 7200,
 ): string {
   const lines = rawPlaylist.split(/\r?\n/)
   const rewrittenLines: string[] = []

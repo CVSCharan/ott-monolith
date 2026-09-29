@@ -22,7 +22,10 @@ export default function RootError({
           url: window.location.pathname,
         })
         if (navigator.sendBeacon) {
-          navigator.sendBeacon('/api/telemetry/rum', new Blob([payload], { type: 'application/json' }))
+          navigator.sendBeacon(
+            '/api/telemetry/rum',
+            new Blob([payload], { type: 'application/json' }),
+          )
         }
       } catch {
         // Non-blocking telemetry
@@ -50,7 +53,8 @@ export default function RootError({
             Something went off script
           </h1>
           <p className="text-body-md text-[var(--color-text-secondary)] leading-relaxed">
-            An unexpected error occurred during rendering. Our automated telemetry has logged this incident.
+            An unexpected error occurred during rendering. Our automated telemetry has logged this
+            incident.
           </p>
 
           {error.digest && (
@@ -84,7 +88,11 @@ export default function RootError({
         <div className="pt-6 border-t border-white/10 flex items-center justify-center gap-2 text-caption text-[var(--color-text-muted)]">
           <LifeBuoy className="w-4 h-4 text-[var(--color-accent-400)]" />
           <span>Need assistance? Check system status via</span>
-          <Link href="/api/health/ready" target="_blank" className="text-white underline underline-offset-4 hover:text-[var(--color-accent-300)]">
+          <Link
+            href="/api/health/ready"
+            target="_blank"
+            className="text-white underline underline-offset-4 hover:text-[var(--color-accent-300)]"
+          >
             Readiness Probe
           </Link>
         </div>

@@ -64,8 +64,7 @@ export function transformTitle(title: TitleInput, userTierRank = 0) {
   const mins = durationMin % 60
   const durationStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
 
-  const genres =
-    title.genres?.map((g) => g.genre?.name || g.name || 'Drama') || ['Drama']
+  const genres = title.genres?.map((g) => g.genre?.name || g.name || 'Drama') || ['Drama']
 
   return {
     id: title.id,
@@ -94,7 +93,10 @@ export function transformTitle(title: TitleInput, userTierRank = 0) {
   }
 }
 
-function resolveUserContext(user?: SessionUser | null): { ctx: VisibilityContext; tierRank: number } {
+function resolveUserContext(user?: SessionUser | null): {
+  ctx: VisibilityContext
+  tierRank: number
+} {
   let tierRank = 0
   if (user?.planSlug === 'standard') tierRank = 1
   else if (user?.planSlug === 'premium') tierRank = 2
@@ -160,7 +162,7 @@ export async function getHomeCatalog(user?: SessionUser | null) {
     })
 
     const actionSciFi = transformed.filter((t) =>
-      t.genres.some((g: string) => ['Action', 'Sci-Fi', 'Fantasy'].includes(g))
+      t.genres.some((g: string) => ['Action', 'Sci-Fi', 'Fantasy'].includes(g)),
     )
     if (actionSciFi.length > 0) {
       formattedRails.push({
@@ -171,7 +173,7 @@ export async function getHomeCatalog(user?: SessionUser | null) {
     }
 
     const animationFamily = transformed.filter((t) =>
-      t.genres.some((g: string) => ['Animation', 'Family', 'Comedy'].includes(g))
+      t.genres.some((g: string) => ['Animation', 'Family', 'Comedy'].includes(g)),
     )
     if (animationFamily.length > 0) {
       formattedRails.push({
@@ -231,7 +233,7 @@ export async function getTitleDetail(slug: string, user?: SessionUser | null) {
 export async function searchCatalog(
   query: string,
   filters?: { genre?: string; type?: string; minAge?: number },
-  user?: SessionUser | null
+  user?: SessionUser | null,
 ) {
   const { ctx, tierRank } = resolveUserContext(user)
   const results = await searchTitlesInDb(query, filters, ctx)
@@ -292,9 +294,6 @@ export async function getAdminTitlesList() {
   }))
 }
 
-export async function setAdminTitleStatus(
-  id: string,
-  status: 'draft' | 'published' | 'archived',
-) {
+export async function setAdminTitleStatus(id: string, status: 'draft' | 'published' | 'archived') {
   return updateTitleStatusInDb(id, status)
 }

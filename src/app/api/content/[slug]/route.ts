@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSessionUser } from '@/modules/auth'
 import { getTitleDetail } from '@/modules/content'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params
     const user = await getSessionUser()

@@ -41,7 +41,9 @@ test.describe('StreamForge Core Smoke Suite', () => {
     expect(res.status()).toBe(422)
   })
 
-  test('Subscription Plans page displays pricing tiers and feature comparison', async ({ page }) => {
+  test('Subscription Plans page displays pricing tiers and feature comparison', async ({
+    page,
+  }) => {
     await page.goto('/plans')
     await expect(page).toHaveTitle(/Plans/i)
     await expect(page.getByText('Standard')).toBeVisible()
@@ -50,7 +52,9 @@ test.describe('StreamForge Core Smoke Suite', () => {
     await expect(page.getByText(/₹249/)).toBeVisible()
   })
 
-  test('Admin dashboard requires authentication and redirects unauthenticated user', async ({ page }) => {
+  test('Admin dashboard requires authentication and redirects unauthenticated user', async ({
+    page,
+  }) => {
     await page.goto('/admin')
     // Should be redirected away from admin console or show access denied
     await expect(page).not.toHaveURL(/\/admin$/)

@@ -37,7 +37,7 @@ export interface PlaybackResponse {
  */
 export async function getVideoPlayback(
   assetIdOrSlug: string,
-  user?: SessionUser | null
+  user?: SessionUser | null,
 ): Promise<PlaybackResponse> {
   // Try finding by asset ID first, then fallback to title slug
   let asset = await findVideoAssetById(assetIdOrSlug)
@@ -87,7 +87,10 @@ export async function getVideoPlayback(
   // Map subtitles with signed URLs
   const subtitles = asset.subtitles.map((sub) => {
     const subTtl = 14400 // 4 hours
-    const subToken = hmacSign(`${asset!.id}:subtitles/${sub.languageCode}.vtt:${maxQualityP}`, subTtl)
+    const subToken = hmacSign(
+      `${asset!.id}:subtitles/${sub.languageCode}.vtt:${maxQualityP}`,
+      subTtl,
+    )
     return {
       languageCode: sub.languageCode,
       label: sub.label,
@@ -158,7 +161,7 @@ export async function getPartUploadUrl(params: {
     params.s3Key,
     params.uploadId,
     params.partNumber,
-    1800 // 30-minute expiry
+    1800, // 30-minute expiry
   )
 
   const expiresAt = new Date(Date.now() + 1800 * 1000).toISOString()
@@ -195,7 +198,10 @@ export async function completeVideoUpload(params: {
       status: 'pending',
     })
 
-    logger.info({ assetId: params.assetId, jobId: job.id }, 'Video upload completed and transcode job queued')
+    logger.info(
+      { assetId: params.assetId, jobId: job.id },
+      'Video upload completed and transcode job queued',
+    )
 
     return {
       assetId: params.assetId,
@@ -271,7 +277,7 @@ export async function recordPlayerBeacon(
     }>
   },
   user?: SessionUser | null,
-  userAgent?: string
+  userAgent?: string,
 ) {
   let progressSaved = false
   let eventsIngested = 0
@@ -324,9 +330,4 @@ export async function recordPlayerBeacon(
   }
 }
 
-export {
-  rewriteMasterPlaylist,
-  rewriteVariantPlaylist,
-  getVariantHeightByIndex,
-  hmacSign,
-}
+export { rewriteMasterPlaylist, rewriteVariantPlaylist, getVariantHeightByIndex, hmacSign }

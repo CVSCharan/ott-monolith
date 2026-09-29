@@ -9,12 +9,7 @@ import { TitleDetailModal } from '@/components/modal/TitleDetailModal'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { ProfileModal, type ProfileItem } from '@/components/auth/ProfileModal'
 import { Footer } from '@/components/footer/Footer'
-import {
-  MOCK_TITLES,
-  MOCK_RAILS,
-  FEATURED_BILLBOARD,
-  type MockTitle,
-} from '@/lib/mock-data'
+import { MOCK_TITLES, MOCK_RAILS, FEATURED_BILLBOARD, type MockTitle } from '@/lib/mock-data'
 
 export default function HomePage() {
   const router = useRouter()
@@ -34,7 +29,9 @@ export default function HomePage() {
   })
 
   const [liveBillboard, setLiveBillboard] = React.useState<MockTitle | null>(null)
-  const [liveRails, setLiveRails] = React.useState<Array<{ id: string; title: string; isTop10?: boolean; items: MockTitle[] }>>([])
+  const [liveRails, setLiveRails] = React.useState<
+    Array<{ id: string; title: string; isTop10?: boolean; items: MockTitle[] }>
+  >([])
 
   // Fetch real database rails from /api/rails
   React.useEffect(() => {

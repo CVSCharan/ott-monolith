@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -22,18 +22,18 @@ const securityHeaders = [
       "form-action 'self'",
     ].join('; '),
   },
-];
+]
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
       {
-        protocol: "https",
-        hostname: "commondatastorage.googleapis.com",
+        protocol: 'https',
+        hostname: 'commondatastorage.googleapis.com',
       },
     ],
   },
@@ -43,8 +43,8 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: securityHeaders,
       },
-    ];
+    ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

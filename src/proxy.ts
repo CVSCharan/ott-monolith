@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), browsing-topics=()'
+    'camera=(), microphone=(), geolocation=(), browsing-topics=()',
   )
 
   // ── 2. Rate Limiting via Redis Token Bucket ──────────────
@@ -50,7 +50,7 @@ export async function proxy(request: NextRequest) {
             'Content-Type': 'application/json',
             'Retry-After': ipLimit.resetSeconds.toString(),
           },
-        }
+        },
       )
     }
   } else if (pathname.startsWith('/api/')) {
@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest) {
             'Content-Type': 'application/json',
             'Retry-After': generalLimit.resetSeconds.toString(),
           },
-        }
+        },
       )
     }
   }
@@ -105,10 +105,12 @@ export async function proxy(request: NextRequest) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse(
           JSON.stringify({ error: 'FORBIDDEN', message: 'Admin privilege required.' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403, headers: { 'Content-Type': 'application/json' } },
         )
       }
-      return NextResponse.redirect(new URL('/login?from=' + encodeURIComponent(pathname), request.url))
+      return NextResponse.redirect(
+        new URL('/login?from=' + encodeURIComponent(pathname), request.url),
+      )
     }
   }
 

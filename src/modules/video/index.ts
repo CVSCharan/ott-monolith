@@ -22,10 +22,6 @@ export {
   recordPlayerBeaconAction,
 } from './actions'
 
-export {
-  hmacVerify,
-  segmentTtl,
-  BITRATE_LADDER,
-} from './signing'
+export { hmacVerify, segmentTtl, BITRATE_LADDER } from './signing'
 
 export type { PlaybackResponse } from './service'

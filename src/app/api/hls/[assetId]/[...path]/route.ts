@@ -48,7 +48,7 @@ function getDemoPlaylist(pathStr: string): string {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ assetId: string; path: string[] }> }
+  { params }: { params: Promise<{ assetId: string; path: string[] }> },
 ) {
   const { assetId, path } = await params
   const { searchParams } = new URL(req.url)
@@ -100,7 +100,8 @@ export async function GET(
 
   // 4. If master playlist: filter variants above qMax and rewrite URIs
   if (pathStr === 'master.m3u8') {
-    const playlistText = typeof rawContent === 'string' ? rawContent : new TextDecoder().decode(rawContent)
+    const playlistText =
+      typeof rawContent === 'string' ? rawContent : new TextDecoder().decode(rawContent)
     const filteredAndRewritten = rewriteMasterPlaylist(assetId, playlistText, {
       maxQualityP: qMax,
       tokenExp: exp,
@@ -118,7 +119,8 @@ export async function GET(
 
   // 5. If variant playlist: rewrite segment URIs
   if (pathStr.endsWith('.m3u8')) {
-    const playlistText = typeof rawContent === 'string' ? rawContent : new TextDecoder().decode(rawContent)
+    const playlistText =
+      typeof rawContent === 'string' ? rawContent : new TextDecoder().decode(rawContent)
     const rewritten = rewriteVariantPlaylist(assetId, path[0], playlistText, exp, qMax)
 
     return new Response(rewritten, {

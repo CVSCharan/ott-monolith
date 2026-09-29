@@ -8,7 +8,9 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('q') || ''
     const genre = searchParams.get('genre') || undefined
     const type = searchParams.get('type') || undefined
-    const minAge = searchParams.get('minAge') ? parseInt(searchParams.get('minAge')!, 10) : undefined
+    const minAge = searchParams.get('minAge')
+      ? parseInt(searchParams.get('minAge')!, 10)
+      : undefined
 
     const user = await getSessionUser()
     const results = await searchCatalog(query, { genre, type, minAge }, user)

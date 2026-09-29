@@ -93,7 +93,16 @@ async function main() {
 
   // ── 3. Seed Genres ─────────────────────────────────────────
   console.log('🏷️ Seeding genres...')
-  const genreNames = ['Animation', 'Action', 'Sci-Fi', 'Fantasy', 'Comedy', 'Family', 'Horror', 'Drama']
+  const genreNames = [
+    'Animation',
+    'Action',
+    'Sci-Fi',
+    'Fantasy',
+    'Comedy',
+    'Family',
+    'Horror',
+    'Drama',
+  ]
   const genresMap: Record<string, string> = {}
 
   for (const name of genreNames) {
@@ -113,18 +122,24 @@ async function main() {
       slug: 'big-buck-bunny',
       title: 'Big Buck Bunny',
       type: 'movie',
-      synopsis: 'A large, lovable rabbit seeks poetic justice when bullied by forest troublemakers.',
-      description: 'Big Buck Bunny tells the story of a giant, gentle rabbit with a heart bigger than his ears. When woodland bullies torment the forest creatures, Bunny engineers an ingenious retribution.',
+      synopsis:
+        'A large, lovable rabbit seeks poetic justice when bullied by forest troublemakers.',
+      description:
+        'Big Buck Bunny tells the story of a giant, gentle rabbit with a heart bigger than his ears. When woodland bullies torment the forest creatures, Bunny engineers an ingenious retribution.',
       releaseYear: 2024,
       durationSeconds: 5520,
       minAge: 0,
       minTierRank: 0,
       status: 'published',
       dominantColor: '#1d3527',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
-      posterUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
-      backdropUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80',
-      trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      thumbnailUrl:
+        'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
+      posterUrl:
+        'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80',
+      backdropUrl:
+        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80',
+      trailerUrl:
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
       likeCount: 2450,
       playCount: 15400,
     },
@@ -132,18 +147,24 @@ async function main() {
       slug: 'tears-of-steel',
       title: 'Tears of Steel',
       type: 'movie',
-      synopsis: 'In a dystopian neo-Amsterdam, scientists reenact a fateful memory to avert a robotic apocalypse.',
-      description: 'Set in a dystopian future where Amsterdam has become the epicenter of a robot uprising, scientists and cybernetic soldiers gather at the Oude Kerk to project past memories.',
+      synopsis:
+        'In a dystopian neo-Amsterdam, scientists reenact a fateful memory to avert a robotic apocalypse.',
+      description:
+        'Set in a dystopian future where Amsterdam has become the epicenter of a robot uprising, scientists and cybernetic soldiers gather at the Oude Kerk to project past memories.',
       releaseYear: 2025,
       durationSeconds: 6300,
       minAge: 13,
       minTierRank: 1,
       status: 'published',
       dominantColor: '#1a2238',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
-      posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
-      backdropUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80',
-      trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      thumbnailUrl:
+        'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+      posterUrl:
+        'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+      backdropUrl:
+        'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80',
+      trailerUrl:
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
       likeCount: 1980,
       playCount: 9800,
     },
@@ -151,17 +172,22 @@ async function main() {
       slug: 'sintel',
       title: 'Sintel: The Dragon’s Quest',
       type: 'movie',
-      synopsis: 'A fierce lone warrior braves freezing tundras to rescue her baby dragon companion.',
-      description: 'Driven by devotion, a solitary wanderer named Sintel traverses harsh desert ruins and snowy peaks in search of Scales, an orphaned baby dragon.',
+      synopsis:
+        'A fierce lone warrior braves freezing tundras to rescue her baby dragon companion.',
+      description:
+        'Driven by devotion, a solitary wanderer named Sintel traverses harsh desert ruins and snowy peaks in search of Scales, an orphaned baby dragon.',
       releaseYear: 2024,
       durationSeconds: 4920,
       minAge: 13,
       minTierRank: 2,
       status: 'published',
       dominantColor: '#341d1a',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-      posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-      backdropUrl: 'https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=1920&q=80',
+      thumbnailUrl:
+        'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+      posterUrl:
+        'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+      backdropUrl:
+        'https://images.unsplash.com/photo-1514539079130-25950c84af65?auto=format&fit=crop&w=1920&q=80',
       trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
       likeCount: 3120,
       playCount: 18200,

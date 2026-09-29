@@ -1,11 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { hashPassword, verifyPassword } from '../service'
-import {
-  signAccessToken,
-  verifyAccessToken,
-  signRefreshToken,
-  verifyRefreshToken,
-} from '@/lib/jwt'
+import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } from '@/lib/jwt'
 
 describe('Auth Service - Password Hashing & Verification', () => {
   it('correctly hashes a password and verifies it', async () => {

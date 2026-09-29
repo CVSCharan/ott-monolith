@@ -79,7 +79,7 @@ export async function updateAccountPin(accountId: string, pinHash: string) {
 export async function updatePinAttempts(
   accountId: string,
   attempts: number,
-  lockedUntil: Date | null
+  lockedUntil: Date | null,
 ) {
   return db.account.update({
     where: { id: accountId },
@@ -136,7 +136,7 @@ export async function rotateRefreshToken(
     tokenHash: string
     familyId: string
     expiresAt: Date
-  }
+  },
 ) {
   return db.$transaction([
     db.refreshToken.update({

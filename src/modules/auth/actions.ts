@@ -73,7 +73,7 @@ export async function loginAction(formData: FormData) {
   try {
     const { accessToken, refreshToken, activeProfile } = await authService.authenticate(
       email,
-      password
+      password,
     )
 
     const cookieStore = await cookies()
@@ -121,7 +121,7 @@ export async function selectProfileAction(targetProfileId: string, pin?: string)
       session.sub,
       targetProfileId,
       session.isKids,
-      pin
+      pin,
     )
 
     const cookieStore = await cookies()

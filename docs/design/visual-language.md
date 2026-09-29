@@ -16,20 +16,21 @@ Key mood words: _dark · immersive · sharp · generous whitespace · confidence
 
 ### Principles Translated to Visual Rules
 
-| Principle | Visual expression |
-|-----------|------------------|
-| Content-forward | Maximum content art coverage; no decorative borders or box-shadows on cards at rest |
-| Cinematic | Near-black backgrounds (`--color-bg-base`); high-quality blur, not pixel-level crisp edges on backgrounds |
-| Instant | No skeletons with hard edges — use `--ease-cinematic` fade-in; shapes match loaded content |
-| Progressive disclosure | Card rest state: just art + minimal title. Hover: full metadata revealed |
-| Dark-first | Light mode is a future layer. Every design decision assumes dark context |
+| Principle              | Visual expression                                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| Content-forward        | Maximum content art coverage; no decorative borders or box-shadows on cards at rest                       |
+| Cinematic              | Near-black backgrounds (`--color-bg-base`); high-quality blur, not pixel-level crisp edges on backgrounds |
+| Instant                | No skeletons with hard edges — use `--ease-cinematic` fade-in; shapes match loaded content                |
+| Progressive disclosure | Card rest state: just art + minimal title. Hover: full metadata revealed                                  |
+| Dark-first             | Light mode is a future layer. Every design decision assumes dark context                                  |
 
 ### Mood Board Description (asset placeholders)
 
-> ⚠️ No proprietary assets. Required production assets (document before launch):  
-> 1. `brand/logo-wordmark-dark.svg` — white/light wordmark on transparent background  
-> 2. `brand/logo-mark.svg` — icon-only (for favicon, app icon)  
-> 3. `brand/logo-wordmark-light.svg` — dark wordmark for light surfaces (Phase 2)  
+> ⚠️ No proprietary assets. Required production assets (document before launch):
+>
+> 1. `brand/logo-wordmark-dark.svg` — white/light wordmark on transparent background
+> 2. `brand/logo-mark.svg` — icon-only (for favicon, app icon)
+> 3. `brand/logo-wordmark-light.svg` — dark wordmark for light surfaces (Phase 2)
 > 4. Placeholder art: `public/placeholder-16-9.webp`, `public/placeholder-2-3.webp` (provide as 8px blurred color blocks per content-and-imagery-guidelines.md)
 
 ---
@@ -47,6 +48,7 @@ ALTER TABLE titles ADD COLUMN blur_data_url TEXT;         -- base64 WebP blur pl
 ```
 
 Add to Prisma schema (`prisma/schema.prisma`):
+
 ```prisma
 model Title {
   // ...
@@ -58,6 +60,7 @@ model Title {
 ### Ingest-Time Extraction (Artwork Upload Time)
 
 > **Architectural Decision:** Dominant color and blur data URLs are extracted during **image artwork upload** (`src/modules/content/services/artwork.service.ts`), NOT during video transcoding. This ensures:
+>
 > 1. **Series Support:** Series titles possess poster and backdrop artwork but have no direct video assets (episodes carry video). Artwork-time extraction guarantees series pages receive ambient theming.
 > 2. **Instant Availability:** Artwork is processed immediately when uploaded in the admin dashboard, long before video transcode jobs run.
 > 3. **Zero Client JS for Placeholders:** Generating an ingest-time blur data URL directly feeds `next/image`'s `placeholder="blur"` and `blurDataURL`, eliminating the runtime overhead of client-side ThumbHash decoding (~1.2 kB bundle + canvas decoding).
@@ -68,7 +71,7 @@ import sharp from 'sharp'
 
 interface ArtworkIngestResult {
   dominantColor: string // Clamped hex format (#rrggbb)
-  blurDataUrl: string   // Base64 WebP data URL
+  blurDataUrl: string // Base64 WebP data URL
 }
 
 /**
@@ -85,9 +88,7 @@ export async function processArtworkIngest(imageBuffer: Buffer): Promise<Artwork
   const blurDataUrl = `data:image/webp;base64,${blurBuffer.toString('base64')}`
 
   // 2. Extract dominant color via sharp downsampled stats
-  const { dominant } = await sharp(imageBuffer)
-    .resize(64, 64, { fit: 'cover' })
-    .stats()
+  const { dominant } = await sharp(imageBuffer).resize(64, 64, { fit: 'cover' }).stats()
 
   // 3. Clamp Lightness and Chroma in OKLCH to preserve contrast and prevent neon saturation:
   //    - Target Lightness (L): clamp to 0.15 - 0.35 (keeps ambient glow subtle and dark-theme compliant)
@@ -101,7 +102,12 @@ export async function processArtworkIngest(imageBuffer: Buffer): Promise<Artwork
   return { dominantColor, blurDataUrl }
 }
 
-function clampOklchHex(r: number, g: number, b: number, bounds: { minL: number; maxL: number; maxC: number }): string {
+function clampOklchHex(
+  r: number,
+  g: number,
+  b: number,
+  bounds: { minL: number; maxL: number; maxC: number },
+): string {
   // Converts sRGB -> Linear RGB -> OKLCH, clamps L and C, then converts back to sRGB Hex
   // Guarantees consistent dark-mode luminance across all artwork genres
   // Implementation in src/lib/color.ts
@@ -135,25 +141,24 @@ export default async function TitleDetailPage({ params }: TitlePageProps) {
 /* src/styles/ambient.css */
 .ambient-gradient {
   /* Blends the clamped ambient color with transparency using standard CSS color-mix */
-  background-image:
-    radial-gradient(
-      ellipse 80% 60% at 50% -10%,
-      color-mix(in oklch, var(--ambient-color, #1a102a), transparent 85%),
-      transparent
-    );
+  background-image: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    color-mix(in oklch, var(--ambient-color, #1a102a), transparent 85%),
+    transparent
+  );
 }
 ```
 
 ### Allowed Locations
 
-| Location | Allowed | Notes |
-|----------|---------|-------|
-| Title detail page — hero background | ✓ | Low opacity radial gradient (15% max via `color-mix`) |
-| Billboard — background tint | ✓ | 10% opacity, behind background art |
-| Player page background (pre-play) | ✓ | 12% opacity ambient |
-| Home page rail area | ✗ | Too busy; violates content-forward principle |
-| Cards | ✗ | Performance overhead and visual clutter |
-| Admin UI | ✗ | Standard dark neutral UI only |
+| Location                            | Allowed | Notes                                                 |
+| ----------------------------------- | ------- | ----------------------------------------------------- |
+| Title detail page — hero background | ✓       | Low opacity radial gradient (15% max via `color-mix`) |
+| Billboard — background tint         | ✓       | 10% opacity, behind background art                    |
+| Player page background (pre-play)   | ✓       | 12% opacity ambient                                   |
+| Home page rail area                 | ✗       | Too busy; violates content-forward principle          |
+| Cards                               | ✗       | Performance overhead and visual clutter               |
+| Admin UI                            | ✗       | Standard dark neutral UI only                         |
 
 ---
 
@@ -167,7 +172,8 @@ export default async function TitleDetailPage({ params }: TitlePageProps) {
 /* Phase 2: noise texture overlay */
 .with-grain::before {
   content: '';
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   background-image: url('/textures/noise-256.png');
   opacity: 0.03;
   pointer-events: none;
@@ -175,42 +181,42 @@ export default async function TitleDetailPage({ params }: TitlePageProps) {
 }
 ```
 
-| Allowed | Forbidden |
-|---------|-----------|
-| Landing hero (Phase 2) | Cards |
-| Billboard background | Player controls |
-| Title detail hero | Forms, inputs |
-| Behind modal scrim | Admin UI |
+| Allowed                | Forbidden       |
+| ---------------------- | --------------- |
+| Landing hero (Phase 2) | Cards           |
+| Billboard background   | Player controls |
+| Title detail hero      | Forms, inputs   |
+| Behind modal scrim     | Admin UI        |
 
 ### Gradient
 
 Gradients are used only as **content scrims** (see `content-and-imagery-guidelines.md`) and **ambient backgrounds** (dominant color). Never decorative on UI elements.
 
-| Gradient | Where | Forbidden |
-|----------|-------|-----------|
-| `billboard-vignette` | Over billboard image | On plain backgrounds |
-| `card-scrim` | Card hover overlay | On all cards (rest state = none) |
-| `nav-transparent-to-solid` | Navbar over billboard | Standard pages |
-| `player-controls` | Bottom of player | Top of player |
-| Dominant color radial | Title detail/player bg | Rails, cards |
+| Gradient                   | Where                  | Forbidden                        |
+| -------------------------- | ---------------------- | -------------------------------- |
+| `billboard-vignette`       | Over billboard image   | On plain backgrounds             |
+| `card-scrim`               | Card hover overlay     | On all cards (rest state = none) |
+| `nav-transparent-to-solid` | Navbar over billboard  | Standard pages                   |
+| `player-controls`          | Bottom of player       | Top of player                    |
+| Dominant color radial      | Title detail/player bg | Rails, cards                     |
 
 ### Glass / Backdrop Blur
 
 **One level only**: `backdrop-filter: blur(12px) saturate(150%)` on `--color-bg-elevated` at 85% opacity. Used for:
 
-| Component | Allowed |
-|-----------|---------|
-| Floating player controls overlay | ✓ |
-| Navbar when transparent (over billboard) | ✓ |
-| Command palette overlay | ✓ |
-| Modal backdrop behind scrim | ✗ (use solid scrim) |
-| Cards | ✗ |
-| Forms | ✗ |
+| Component                                | Allowed             |
+| ---------------------------------------- | ------------------- |
+| Floating player controls overlay         | ✓                   |
+| Navbar when transparent (over billboard) | ✓                   |
+| Command palette overlay                  | ✓                   |
+| Modal backdrop behind scrim              | ✗ (use solid scrim) |
+| Cards                                    | ✗                   |
+| Forms                                    | ✗                   |
 
 ```css
 /* Token pattern */
 .glass {
-  background-color: var(--color-bg-elevated);  /* 85% alpha built into token */
+  background-color: var(--color-bg-elevated); /* 85% alpha built into token */
   backdrop-filter: blur(12px) saturate(1.5);
   -webkit-backdrop-filter: blur(12px) saturate(1.5);
 }
@@ -229,13 +235,13 @@ Gradients are used only as **content scrims** (see `content-and-imagery-guidelin
 
 ### Justification
 
-| Choice | Outfit (Display) | Inter (UI) | Alternatives considered |
-|--------|-----------------|-----------|------------------------|
-| Why chosen | Geometric grotesque; clean at billboard sizes (56–72px); tabular numerals (`tnum`, `lnum`) for Top-10; full variable axis; free | Industry-standard screen legibility; excellent hinting; full variable weight axis; widest browser caching | Onest (less distinctive numerals), Plus Jakarta Sans (less geometric), Satoshi (proprietary), Manrope (narrower) |
-| Indic support | Partial (Latin only) | Latin + Latin Ext | Noto Sans Devanagari, Tamil, Telugu variable subsets |
-| License | OFL 1.1 (free for commercial) | OFL 1.1 | — |
-| Maintenance | Active (Google Fonts) | Active (rsms.me + Google Fonts) | — |
-| Bundle impact | Single variable WOFF2 subset (~24 kB) | Single variable WOFF2 subset (~32 kB) | — |
+| Choice        | Outfit (Display)                                                                                                                | Inter (UI)                                                                                                | Alternatives considered                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Why chosen    | Geometric grotesque; clean at billboard sizes (56–72px); tabular numerals (`tnum`, `lnum`) for Top-10; full variable axis; free | Industry-standard screen legibility; excellent hinting; full variable weight axis; widest browser caching | Onest (less distinctive numerals), Plus Jakarta Sans (less geometric), Satoshi (proprietary), Manrope (narrower) |
+| Indic support | Partial (Latin only)                                                                                                            | Latin + Latin Ext                                                                                         | Noto Sans Devanagari, Tamil, Telugu variable subsets                                                             |
+| License       | OFL 1.1 (free for commercial)                                                                                                   | OFL 1.1                                                                                                   | —                                                                                                                |
+| Maintenance   | Active (Google Fonts)                                                                                                           | Active (rsms.me + Google Fonts)                                                                           | —                                                                                                                |
+| Bundle impact | Single variable WOFF2 subset (~24 kB)                                                                                           | Single variable WOFF2 subset (~32 kB)                                                                     | —                                                                                                                |
 
 ### next/font Variable Font Configuration
 
@@ -292,6 +298,7 @@ export const notoTelugu = Noto_Sans_Telugu({
 ```
 
 In `src/app/layout.tsx`:
+
 ```tsx
 <html
   lang="en"
@@ -300,16 +307,22 @@ In `src/app/layout.tsx`:
 ```
 
 In CSS font-family stack (`src/styles/fonts.css`):
+
 ```css
 :root {
-  --font-display-stack: var(--font-display), var(--font-indic-devanagari), var(--font-indic-tamil), var(--font-indic-telugu), system-ui, sans-serif;
-  --font-ui-stack: var(--font-ui), var(--font-indic-devanagari), var(--font-indic-tamil), var(--font-indic-telugu), system-ui, sans-serif;
+  --font-display-stack:
+    var(--font-display), var(--font-indic-devanagari), var(--font-indic-tamil),
+    var(--font-indic-telugu), system-ui, sans-serif;
+  --font-ui-stack:
+    var(--font-ui), var(--font-indic-devanagari), var(--font-indic-tamil), var(--font-indic-telugu),
+    system-ui, sans-serif;
 }
 ```
 
 ### Type Scale with `clamp()` — Explanation
 
 `clamp(MIN, PREFERRED, MAX)` means:
+
 - At narrow viewports: size is locked to MIN
 - At target width: size is the PREFERRED (viewport-relative)
 - At wide viewports: size is locked to MAX
@@ -318,7 +331,7 @@ In CSS font-family stack (`src/styles/fonts.css`):
 /* Example: Billboard title */
 .billboard-title {
   font-family: var(--font-display);
-  font-size: var(--text-display-xl);     /* clamp(2.75rem, 5vw, 4.5rem) */
+  font-size: var(--text-display-xl); /* clamp(2.75rem, 5vw, 4.5rem) */
   font-weight: var(--font-weight-bold);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
@@ -333,11 +346,11 @@ In CSS font-family stack (`src/styles/fonts.css`):
 ```css
 .top10-numeral {
   font-family: var(--font-display);
-  font-size: clamp(5rem, 14vw, 11rem);   /* Large enough to bleed outside card */
+  font-size: clamp(5rem, 14vw, 11rem); /* Large enough to bleed outside card */
   font-weight: var(--font-weight-extrabold);
   font-variant-numeric: tabular-nums lining-nums;
   font-feature-settings: 'tnum', 'lnum';
-  line-height: 0.85;                      /* Optically adjust to art */
+  line-height: 0.85; /* Optically adjust to art */
   color: var(--color-text-primary);
   /* Stroke for depth — CSS paint worklet approach (Phase 2) or SVG filter */
   -webkit-text-stroke: 2px var(--color-bg-base);
@@ -351,19 +364,19 @@ In CSS font-family stack (`src/styles/fonts.css`):
 
 ## Open Questions
 
-| # | Status | Question |
-|---|--------|---------|
-| OQ1 | Closed | Dominant-color extraction: `sharp` downsampling + stats sampling at image-upload time. Clamped L/C in OKLCH. Generates blur data URL at ingest for zero-client JS. |
-| OQ2 | Open | Outfit has glyphs for extended Latin (diacritics) but not for Devanagari. Is UI copy ever in Hindi on the admin side? If yes, Noto Sans must also be in `--font-ui`. |
-| OQ3 | Open | Phase 2 grain texture: generate with CSS Houdini Paint Worklet (no file request) or serve `noise-256.png` (simpler)? |
+| #   | Status | Question                                                                                                                                                             |
+| --- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OQ1 | Closed | Dominant-color extraction: `sharp` downsampling + stats sampling at image-upload time. Clamped L/C in OKLCH. Generates blur data URL at ingest for zero-client JS.   |
+| OQ2 | Open   | Outfit has glyphs for extended Latin (diacritics) but not for Devanagari. Is UI copy ever in Hindi on the admin side? If yes, Noto Sans must also be in `--font-ui`. |
+| OQ3 | Open   | Phase 2 grain texture: generate with CSS Houdini Paint Worklet (no file request) or serve `noise-256.png` (simpler)?                                                 |
 
 ---
 
 ## Risks
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Outfit unavailable (Google Fonts outage) | Low | `system-ui, sans-serif` fallback in token; FOUT is acceptable for display text |
-| `unicode-range` @font-face + next/font conflict | Low | Noto Sans loaded via static @font-face; not in next/font. No CSS conflict. |
-| `backdrop-filter` GPU pressure on mobile | Medium | Limit glass elements per viewport; remove on low-power via `@media (prefers-reduced-transparency: reduce)` if supported |
-| OKLCH colors not rendering in Safari 15.3 and below | Low | < 2% of users; Tailwind v4 outputs `@supports` fallback |
+| Risk                                                | Impact | Mitigation                                                                                                              |
+| --------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Outfit unavailable (Google Fonts outage)            | Low    | `system-ui, sans-serif` fallback in token; FOUT is acceptable for display text                                          |
+| `unicode-range` @font-face + next/font conflict     | Low    | Noto Sans loaded via static @font-face; not in next/font. No CSS conflict.                                              |
+| `backdrop-filter` GPU pressure on mobile            | Medium | Limit glass elements per viewport; remove on low-power via `@media (prefers-reduced-transparency: reduce)` if supported |
+| OKLCH colors not rendering in Safari 15.3 and below | Low    | < 2% of users; Tailwind v4 outputs `@supports` fallback                                                                 |

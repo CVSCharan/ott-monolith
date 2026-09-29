@@ -1,12 +1,15 @@
 # ADR 0009: Frontend Library Selections & Client Architecture
 
 ## Status
+
 Accepted
 
 ## Context
+
 A Netflix/Prime-class OTT web application requires high visual fidelity, seamless micro-interactions, low input latency (INP < 200 ms), high-quality adaptive video streaming (HLS), and an accessible, keyboard-navigable interface. However, unrestricted client dependencies can cause severe bundle bloat, hydration delays, and layout shifts that violate Core Web Vitals targets.
 
 ## Decision
+
 We standardize the client-side technology stack with the following choices:
 
 1. **Styling & Design Tokens:** Tailwind CSS v4 (`@tailwindcss/postcss`). Compiled ahead of time via lightningcss, emitting pure CSS with zero runtime footprint. Design tokens defined via `@theme`.
@@ -20,10 +23,12 @@ We standardize the client-side technology stack with the following choices:
 9. **Quality & Testing Gates:** Playwright with `@axe-core/playwright` as mandatory automated gates in CI.
 
 ### Core Rules
+
 - **Server Components by Default:** Pages remain RSC. Client libraries are isolated to leaf islands (`'use client'`).
 - **Strict Bundle Budgets:** Maximum initial client JavaScript is capped at 80 kB Gzip for the Home page, 90 kB for Title Detail, 135 kB for the Video Player route, and 195 kB for the Admin console.
 - **Dynamic Imports:** Heavy modules (`hls.js`, Recharts, dnd-kit, Uppy) must be dynamically imported via `next/dynamic`.
 
 ## Consequences
+
 - **Positive:** Guarantees 60 FPS compositor animations, eliminates unnecessary client re-renders, and ensures WCAG 2.2 AA accessibility compliance from day one.
 - **Negative:** Requires team discipline to avoid installing ad-hoc NPM packages and requires custom UI chrome implementation over bare `hls.js`.

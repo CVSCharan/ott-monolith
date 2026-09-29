@@ -67,7 +67,8 @@ export default function AdminTranscodePage() {
             Transcoding Worker & Delivery Pipeline
           </h1>
           <p className="text-body-sm text-text-secondary mt-1">
-            Real-time status of multi-bitrate HLS encoding jobs, Docker worker health, and S3 delivery storage.
+            Real-time status of multi-bitrate HLS encoding jobs, Docker worker health, and S3
+            delivery storage.
           </p>
         </div>
 
@@ -131,9 +132,7 @@ export default function AdminTranscodePage() {
       {/* Jobs Table */}
       <div className="bg-bg-surface/80 border border-border rounded-xl overflow-hidden shadow-sm">
         <div className="px-6 py-4 border-b border-border bg-bg-card/40 flex items-center justify-between">
-          <h2 className="font-semibold text-text-primary text-body-md">
-            Recent Transcode Tasks
-          </h2>
+          <h2 className="font-semibold text-text-primary text-body-md">Recent Transcode Tasks</h2>
           <span className="text-caption text-text-muted">
             All variants encoded with aligned keyframes
           </span>

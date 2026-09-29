@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       {
         data: result,
       },
-      { status: 202 }
+      { status: 202 },
     )
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'FAILED_TO_PROCESS_BEACON'

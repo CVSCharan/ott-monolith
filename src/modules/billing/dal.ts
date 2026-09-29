@@ -38,11 +38,7 @@ export async function getAccountWithPlan(accountId: string) {
   })
 }
 
-export async function updateAccountPlan(
-  accountId: string,
-  planId: string,
-  expiresAt: Date | null,
-) {
+export async function updateAccountPlan(accountId: string, planId: string, expiresAt: Date | null) {
   return db.account.update({
     where: { id: accountId },
     data: {

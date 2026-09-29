@@ -162,7 +162,7 @@ export async function rotateSession(refreshTokenJwt: string) {
 export async function verifyParentalPin(
   accountId: string,
   pin: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<boolean> {
   const account = await dal.findAccountById(accountId)
   if (!account) throw new Error('Account not found.')
@@ -170,10 +170,10 @@ export async function verifyParentalPin(
   // Check lockout
   if (account.pinLockedUntil && account.pinLockedUntil > new Date()) {
     const remainingMinutes = Math.ceil(
-      (account.pinLockedUntil.getTime() - Date.now()) / (60 * 1000)
+      (account.pinLockedUntil.getTime() - Date.now()) / (60 * 1000),
     )
     throw new Error(
-      `Parental PIN entry is temporarily locked due to too many failed attempts. Try again in ${remainingMinutes} minutes.`
+      `Parental PIN entry is temporarily locked due to too many failed attempts. Try again in ${remainingMinutes} minutes.`,
     )
   }
 
@@ -220,7 +220,7 @@ export async function selectActiveProfile(
   accountId: string,
   targetProfileId: string,
   currentIsKids: boolean = false,
-  pin?: string
+  pin?: string,
 ) {
   const account = await dal.findAccountById(accountId)
   if (!account) throw new Error('Account not found.')

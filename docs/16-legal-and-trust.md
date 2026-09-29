@@ -8,15 +8,15 @@
 
 ## Summary Table
 
-| Document | Required for Demo? | Required for Production? | Owner |
-|----------|--------------------|-------------------------|-------|
-| Terms of Service | Stub page, clearly labelled "draft" | ✅ Yes, legal review | Legal |
-| Privacy Policy | Stub page, clearly labelled "draft" | ✅ Yes, legal review | Legal |
-| Cookie Consent Banner | No banner for demo | ✅ Yes (GDPR/DPDPA) | Eng + Legal |
-| Takedown Contact (DMCA) | Email address only | ✅ Yes | Legal |
-| Refund/Cancellation Policy | "Demo mode, no real charges" notice | ✅ Yes, legal review | Legal |
-| CC BY Attribution Page | ✅ Required (seed content is CC-licensed) | ✅ Yes | Eng |
-| Data Export/Deletion | 501 stub | ✅ Phase 2 | Eng |
+| Document                   | Required for Demo?                        | Required for Production? | Owner       |
+| -------------------------- | ----------------------------------------- | ------------------------ | ----------- |
+| Terms of Service           | Stub page, clearly labelled "draft"       | ✅ Yes, legal review     | Legal       |
+| Privacy Policy             | Stub page, clearly labelled "draft"       | ✅ Yes, legal review     | Legal       |
+| Cookie Consent Banner      | No banner for demo                        | ✅ Yes (GDPR/DPDPA)      | Eng + Legal |
+| Takedown Contact (DMCA)    | Email address only                        | ✅ Yes                   | Legal       |
+| Refund/Cancellation Policy | "Demo mode, no real charges" notice       | ✅ Yes, legal review     | Legal       |
+| CC BY Attribution Page     | ✅ Required (seed content is CC-licensed) | ✅ Yes                   | Eng         |
+| Data Export/Deletion       | 501 stub                                  | ✅ Phase 2               | Eng         |
 
 ---
 
@@ -28,6 +28,7 @@
 > StreamForge is a demonstration platform for a fictional video streaming service. No content is commercially licensed for real-world distribution. By using this platform you acknowledge it is a technology demonstration only, with no guarantees of service availability, data retention, or content accuracy.
 
 **Production requirements (not yet drafted):**
+
 - Acceptable use
 - Account termination conditions
 - Intellectual property ownership
@@ -45,6 +46,7 @@
 > This is a demonstration platform. The following data is collected during the demo: email address, hashed password, watch progress, ratings. Data is not shared with third parties. All data may be reset at any time.
 
 **Production requirements:**
+
 - Data controller identification
 - Categories of data collected (see doc 11: play_events, watch_progress, ratings, account)
 - Legal basis for processing (consent, legitimate interest)
@@ -59,15 +61,16 @@
 ## Cookie Consent & Storage Compliance `[MVP]`
 
 **Implementation:** Banner / Vaul drawer component shown on first visit. Preferences stored in a first-party `sf_consent` cookie.
-*(Note: ePrivacy Directive applies equally to `localStorage` and `cookies` under terminal storage access rules; storing essential settings does not require prior consent, but user notice is provided).*
+_(Note: ePrivacy Directive applies equally to `localStorage` and `cookies` under terminal storage access rules; storing essential settings does not require prior consent, but user notice is provided)._
 
 Cookie categories:
-| Category | Cookies / Storage | MVP Default | Purpose |
-|----------|-------------------|------------|---------|
-| Strictly Necessary | `sf_access_token`, `sf_refresh_token`, `sf_consent` | Always on | Session authentication and security |
-| Functional | `sf_quality_pref`, `sf_subtitle_lang` | Always on | Playback volume, quality, and subtitle language preferences |
-| Analytics | (Phase 2: QoS event batching) | Off until consent | Playback buffering and crash telemetry |
-| Marketing | None planned | N/A | No third-party ad pixels or tracking scripts |
+
+| Category           | Cookies / Storage                                   | MVP Default       | Purpose                                                     |
+| ------------------ | --------------------------------------------------- | ----------------- | ----------------------------------------------------------- |
+| Strictly Necessary | `sf_access_token`, `sf_refresh_token`, `sf_consent` | Always on         | Session authentication and security                         |
+| Functional         | `sf_quality_pref`, `sf_subtitle_lang`               | Always on         | Playback volume, quality, and subtitle language preferences |
+| Analytics          | (Phase 2: QoS event batching)                       | Off until consent | Playback buffering and crash telemetry                      |
+| Marketing          | None planned                                        | N/A               | No third-party ad pixels or tracking scripts                |
 
 ---
 
@@ -92,6 +95,7 @@ Cookie categories:
 > ⚠️ **Demo Mode** — StreamForge is a technology demonstration. No real payments are processed. No card numbers are collected. Any "subscription" is fictional and carries no financial obligation.
 
 **Production policy stub (not yet drafted — needs legal review):**
+
 - Cancellation: effective at end of current billing period
 - Refund eligibility: within N days of charge, if content was unavailable
 - Prorated refunds: not offered
@@ -107,12 +111,12 @@ Cookie categories:
 
 **Seed content attributions (populated at demo seed time):**
 
-| Title | License | License URL | Attribution | Modifications & Transcode Notes |
-|-------|---------|-------------|------------|---------------------------------|
-| **Big Buck Bunny** | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2008, Blender Foundation / www.bigbuckbunny.org | Transcoded into multi-bitrate HLS (360p, 480p, 720p, 1080p); audio normalized to AAC stereo; poster frame extracted at 10% duration. |
-| **Elephants Dream** | CC BY 2.5 | [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) | © 2006, Blender Foundation / Netherlands Media Art Institute / orange.blender.org | Transcoded into multi-bitrate HLS ladder; audio downmixed to stereo; seek poster extracted. |
-| **Sintel** | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2010, Blender Foundation / www.sintel.org | Transcoded into HLS ladder; keyframes aligned at 2s intervals; poster frame generated. |
-| **Tears of Steel** | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2012, Blender Foundation / mango.blender.org | Transcoded to HLS; visual assets extracted for UI billboard testing. |
+| Title               | License   | License URL                                               | Attribution                                                                       | Modifications & Transcode Notes                                                                                                      |
+| ------------------- | --------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Big Buck Bunny**  | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2008, Blender Foundation / www.bigbuckbunny.org                                 | Transcoded into multi-bitrate HLS (360p, 480p, 720p, 1080p); audio normalized to AAC stereo; poster frame extracted at 10% duration. |
+| **Elephants Dream** | CC BY 2.5 | [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) | © 2006, Blender Foundation / Netherlands Media Art Institute / orange.blender.org | Transcoded into multi-bitrate HLS ladder; audio downmixed to stereo; seek poster extracted.                                          |
+| **Sintel**          | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2010, Blender Foundation / www.sintel.org                                       | Transcoded into HLS ladder; keyframes aligned at 2s intervals; poster frame generated.                                               |
+| **Tears of Steel**  | CC BY 3.0 | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | © 2012, Blender Foundation / mango.blender.org                                    | Transcoded to HLS; visual assets extracted for UI billboard testing.                                                                 |
 
 > **Self-Hosted Seed Artwork:** To prevent third-party hotlinking failures, CSP leaks, and referrer blocking, all seed posters, backdrops, and avatars are **strictly self-hosted** in MinIO/R2 and seeded locally via `npm run seed:media`. No external Google/Cloudflare image CDNs are hotlinked in production runtime.
 
@@ -126,6 +130,7 @@ Cookie categories:
 **Auth:** Requires active session (`requireSession()`)  
 **MVP:** Returns `501 Not Implemented`  
 **Phase 2:** Returns a JSON file (downloadable) containing:
+
 - Account info (name, email, created_at, plan)
 - All profiles (name, avatar, is_kids)
 - Watchlist items (title slugs)
@@ -141,13 +146,13 @@ Cookie categories:
 
 ### Retention Schedule
 
-| Data | Retention | Deletion method |
-|------|-----------|----------------|
-| `play_events` | 90 days | pg-boss retention job (nightly) |
-| `parental_pin_events` | 30 days | pg-boss retention job (nightly) |
-| `refresh_tokens` | 30 days from creation | pg-boss cleanup job |
-| `accounts` (deleted) | 30 days soft → then hard delete | pg-boss job |
-| `admin_audit_log` | 2 years | pg-boss retention job (monthly) |
+| Data                  | Retention                       | Deletion method                 |
+| --------------------- | ------------------------------- | ------------------------------- |
+| `play_events`         | 90 days                         | pg-boss retention job (nightly) |
+| `parental_pin_events` | 30 days                         | pg-boss retention job (nightly) |
+| `refresh_tokens`      | 30 days from creation           | pg-boss cleanup job             |
+| `accounts` (deleted)  | 30 days soft → then hard delete | pg-boss job                     |
+| `admin_audit_log`     | 2 years                         | pg-boss retention job (monthly) |
 
 ---
 
@@ -165,9 +170,9 @@ Per doc 03 US-702 and the decision register (OQ-06-03):
 
 ## Open Questions
 
-| # | Status | Question |
-|---|--------|---------|
-| OQ1 | 🔵 Open (Legal) | All docs need attorney review before production launch |
-| OQ2 | 🔵 Open (Legal) | Governing law jurisdiction? (India: DPDPA · EU: GDPR · Both?) |
-| OQ3 | 🔵 Open (Legal/Eng) | Cookie consent banner: implement in MVP or P2? Currently P2. |
-| OQ4 | 🔵 Open (Eng) | Attribution table in DB vs static page? Currently static. |
+| #   | Status              | Question                                                      |
+| --- | ------------------- | ------------------------------------------------------------- |
+| OQ1 | 🔵 Open (Legal)     | All docs need attorney review before production launch        |
+| OQ2 | 🔵 Open (Legal)     | Governing law jurisdiction? (India: DPDPA · EU: GDPR · Both?) |
+| OQ3 | 🔵 Open (Legal/Eng) | Cookie consent banner: implement in MVP or P2? Currently P2.  |
+| OQ4 | 🔵 Open (Eng)       | Attribution table in DB vs static page? Currently static.     |

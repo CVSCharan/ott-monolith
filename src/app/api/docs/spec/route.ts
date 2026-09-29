@@ -67,7 +67,9 @@ export async function GET() {
             },
           },
           responses: {
-            '200': { description: 'Successfully authenticated, sets httpOnly access and refresh cookies' },
+            '200': {
+              description: 'Successfully authenticated, sets httpOnly access and refresh cookies',
+            },
             '401': { description: 'Invalid email or password' },
             '429': { description: 'Too many login attempts' },
           },
@@ -78,7 +80,10 @@ export async function GET() {
           summary: 'Get curated homepage rails and billboard',
           tags: ['Catalog & Discovery'],
           responses: {
-            '200': { description: 'Returns active billboard title and discovery rails filtered by maturity' },
+            '200': {
+              description:
+                'Returns active billboard title and discovery rails filtered by maturity',
+            },
           },
         },
       },
@@ -131,11 +136,12 @@ export async function GET() {
         get: {
           summary: 'Obtain signed HLS master URL and subtitles',
           tags: ['Video & Streaming'],
-          parameters: [
-            { name: 'assetId', in: 'path', required: true, schema: { type: 'string' } },
-          ],
+          parameters: [{ name: 'assetId', in: 'path', required: true, schema: { type: 'string' } }],
           responses: {
-            '200': { description: 'Returns signed master.m3u8 URL, signed subtitles, and plan max resolution' },
+            '200': {
+              description:
+                'Returns signed master.m3u8 URL, signed subtitles, and plan max resolution',
+            },
             '403': { description: 'Subscription entitlement required or kids age restriction' },
             '404': { description: 'Video asset not found' },
           },
