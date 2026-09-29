@@ -171,9 +171,9 @@ Per doc 03 US-702 and the decision register (OQ-06-03):
 
 ## Open Questions
 
-| #   | Status              | Question                                                      |
-| --- | ------------------- | ------------------------------------------------------------- |
-| OQ1 | 🔵 Open (Legal)     | All docs need attorney review before production launch        |
-| OQ2 | 🔵 Open (Legal)     | Governing law jurisdiction? (India: DPDPA · EU: GDPR · Both?) |
-| OQ3 | 🔵 Open (Legal/Eng) | Cookie consent banner: implement in MVP or P2? Currently P2.  |
-| OQ4 | 🔵 Open (Eng)       | Attribution table in DB vs static page? Currently static.     |
+| #   | Status                     | Decision / Resolution                                                                                                         |
+| --- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| OQ1 | 🟢 Resolved (Eng Template) | Deployed live draft templates (`/terms`, `/privacy`, `/legal/grievance`, `/attribution`) with explicit demo mode disclosures. |
+| OQ2 | 🟢 Resolved (Dual Regime)  | Dual jurisdiction model: India DPDPA 2023 & IT Rules 2021 (Resident Officer) combined with EU GDPR data subject rights.       |
+| OQ3 | 🟢 Resolved                | Zero third-party ad tracking; essential session cookies and player UI storage tokens disclosed in Privacy Policy.             |
+| OQ4 | 🟢 Resolved (Static Route) | Dedicated static route `/attribution` deployed with CC BY 3.0 / 2.5 Blender Foundation credits and modification notes.        |

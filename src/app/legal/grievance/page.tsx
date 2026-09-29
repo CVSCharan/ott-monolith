@@ -2,15 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar/Navbar'
 import { Footer } from '@/components/footer/Footer'
-import {
-  Scale,
-  Mail,
-  Clock,
-  MapPin,
-  ArrowLeft,
-  ShieldCheck,
-  FileCheck2,
-} from 'lucide-react'
+import { Scale, Mail, Clock, MapPin, ArrowLeft, ShieldCheck, FileCheck2 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Grievance Redressal Mechanism | StreamForge',
