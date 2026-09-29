@@ -33,6 +33,36 @@ export default function HomePage() {
     avatarColor: 'bg-accent-600',
   })
 
+  const [liveBillboard, setLiveBillboard] = React.useState<MockTitle | null>(null)
+  const [liveRails, setLiveRails] = React.useState<Array<{ id: string; title: string; isTop10?: boolean; items: MockTitle[] }>>([])
+
+  // Fetch real database rails from /api/rails
+  React.useEffect(() => {
+    let isCancelled = false
+    async function fetchRails() {
+      try {
+        const res = await fetch('/api/rails')
+        if (res.ok) {
+          const json = await res.json()
+          if (!isCancelled && json.data) {
+            if (json.data.billboard) {
+              setLiveBillboard(json.data.billboard)
+            }
+            if (json.data.rails && json.data.rails.length > 0) {
+              setLiveRails(json.data.rails)
+            }
+          }
+        }
+      } catch {
+        // Fallback silently to mock data on error
+      }
+    }
+    fetchRails()
+    return () => {
+      isCancelled = true
+    }
+  }, [activeProfile.id, isKidsMode])
+
   // Filter content when Kids Mode is enabled (U and U/A 7+ only)
   const visibleTitles = React.useMemo(() => {
     if (!isKidsMode) return MOCK_TITLES
@@ -40,11 +70,32 @@ export default function HomePage() {
   }, [isKidsMode])
 
   const featuredBillboard = React.useMemo(() => {
+    if (liveBillboard) {
+      const minAge = (liveBillboard as unknown as { minAge?: number }).minAge
+      const isRestricted = minAge !== undefined ? minAge > 7 : !liveBillboard.isKids
+      if (isKidsMode && isRestricted) {
+        return visibleTitles[0] || FEATURED_BILLBOARD
+      }
+      return liveBillboard
+    }
     if (!isKidsMode) return FEATURED_BILLBOARD
     return visibleTitles[0] || FEATURED_BILLBOARD
-  }, [isKidsMode, visibleTitles])
+  }, [isKidsMode, liveBillboard, visibleTitles])
 
   const filteredRails = React.useMemo(() => {
+    if (liveRails.length > 0) {
+      if (!isKidsMode) return liveRails
+      return liveRails
+        .map((r) => ({
+          ...r,
+          items: r.items.filter((t) => {
+            const minAge = (t as unknown as { minAge?: number }).minAge
+            return minAge !== undefined ? minAge <= 7 : t.isKids
+          }),
+        }))
+        .filter((r) => r.items.length > 0)
+    }
+
     if (!isKidsMode) return MOCK_RAILS
 
     return [
@@ -61,7 +112,7 @@ export default function HomePage() {
         items: [...visibleTitles].reverse(),
       },
     ]
-  }, [isKidsMode, visibleTitles])
+  }, [isKidsMode, liveRails, visibleTitles])
 
   const handleOpenMoreInfo = (title: MockTitle) => {
     setSelectedTitle(title)

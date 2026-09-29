@@ -9,12 +9,12 @@
 ## 1. Executive Status Dashboard
 
 ```
-Overall Progress: [████████████░░░░░░░░] 58%
+Overall Progress: [███████████████░░░░░] 75%
 ├── Phase 0: Architecture, Design & Contracts:  [██████████] 100% (Completed)
 ├── Milestone 0: Design System & Prototype:      [██████████] 100% (Completed: Tokens, Billboard, Rails, Modal, Player)
-├── Milestone 1: Platform Foundation & Auth:     [████████░░]  85% (Neon DB synced, Seeded, Proxy & Auth module live)
-├── Milestone 2: Video Pipeline & Player:        [░░░░░░░░░░]   0% (Specifications complete, ready to build)
-├── Milestone 3: Discovery & Parental Controls:  [░░░░░░░░░░]   0% (Specifications complete)
+├── Milestone 1: Platform Foundation & Auth:     [██████████] 100% (Completed: Neon DB, Seed, Proxy & Auth module live)
+├── Milestone 2: Video Pipeline & Player:        [██████████] 100% (Completed: Storage client, HMAC Proxy, HLS engine, Beacon)
+├── Milestone 3: Discovery & Rails Experience:   [████░░░░░░]  40% (In Progress: Catalog DAL, Search & Browsing)
 ├── Milestone 4: Billing & Admin Console:        [░░░░░░░░░░]   0% (Specifications complete)
 └── Milestone 5: Hardening & Observability:      [░░░░░░░░░░]   0% (CI gates defined)
 ```
@@ -25,9 +25,9 @@ Overall Progress: [████████████░░░░░░░░]
 |-----------|------------|---------------------|----------------|---------------|
 | **Phase 0** | **System Architecture & Design** | Docs 00–16, `design/*`, ADRs 0001–0010, `traceability.md`, `decision-register.md`. | ✅ **Completed** | Full review, no unrecorded conflicts. |
 | **Milestone 0** | **Design System & Static Prototype** | Tailwind v4 `@theme static`, fonts, Radix primitives, mock Home shell, Billboard trailer, Quick-view modal, Watch Player. | ✅ **Completed** | `npm run lint`, `tsc --noEmit`, `npm run build` passing cleanly. |
-| **Milestone 1** | **Walking Skeleton & Auth** | Neon DB migration, Prisma 6, Redis token bucket in `proxy.ts`, JWT family rotation, Auth module & DAL. | 🟡 **In Progress (85%)** | Schema synced, seed passed, lint & build clean. |
-| **Milestone 2** | **Video Pipeline & Streaming** | Uppy S3 upload, Docker worker (FFmpeg, 50 GB disk), pg-boss transcode queue, HMAC manifest proxy, `hls.js` player HUD with plan locks. | ⚪ **Ready to Start** | Worker fixture test (`sample-5s.mp4`), playback E2E test. |
-| **Milestone 3** | **Discovery & Parental Controls** | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), 4-digit PIN verification modal, lockout timer. | ⚪ **Pending M1/M2** | 9-cell Audience Matrix Playwright suite. |
+| **Milestone 1** | **Walking Skeleton & Auth** | Neon DB migration, Prisma 6, Redis token bucket in `proxy.ts`, JWT family rotation, Auth module & DAL, Profile switching & Parental PIN. | ✅ **Completed** | Schema synced, seed passed, unit tests passing. |
+| **Milestone 2** | **Video Pipeline & Streaming** | S3 SDK storage client (MinIO/R2), multipart upload API, HMAC manifest proxy with plan tier gating, Hls.js player engine with 10s QoS beacon. | ✅ **Completed** | Unit tests passing, manifest rewrite verified. |
+| **Milestone 3** | **Discovery, Rails & Browsing** | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), Title detail modal with recommendations, Watchlist & Ratings. | 🟡 **In Progress** | 9-cell Audience Matrix Playwright suite. |
 | **Milestone 4** | **Subscriptions & Admin CMS** | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics. | ⚪ **Pending M3** | Admin RBAC test, Subscription lifecycle test. |
 | **Milestone 5** | **Hardening & Production Launch** | LHCI performance audit (TBT < 150 ms), `/api/health/live` vs `/ready`, Pino log redaction, RUM beaconing, CI/CD deployment. | ⚪ **Pending M4** | LHCI score $\ge 90$, 100% axe-core clean. |
 
