@@ -579,6 +579,38 @@ Single consolidated beacon handling:
 
 ---
 
+## Real User Monitoring (RUM) Telemetry
+
+### `POST /api/telemetry/rum`
+
+Lightweight ingestion endpoint for browser Core Web Vitals (CLS, FCP, FID, INP, LCP, TTFB) dispatched via `navigator.sendBeacon` or background fetch keepalive.
+
+```typescript
+// Transport: navigator.sendBeacon('/api/telemetry/rum', Blob) or fetch() with keepalive: true
+// Rate limit: 100 per minute per IP
+// Headers: Content-Type: application/json
+
+// Request Body:
+{
+  "id"?: string,
+  "name": "CLS" | "FCP" | "FID" | "INP" | "LCP" | "TTFB",
+  "value": number,
+  "rating"?: "good" | "needs-improvement" | "poor",
+  "delta"?: number,
+  "navigationType"?: string,
+  "url"?: string
+}
+
+// Processing in Route Handler:
+// 1. Validates metric name against ALLOWED_METRICS set.
+// 2. Formats structured Pino log with metric, value, rating, and referrer.
+//
+// Success: 204 No Content
+// Validation Error: 400 Bad Request or 422 Unprocessable Entity
+```
+
+---
+
 ## Video Endpoints
 
 ### `GET /api/video/playback/:assetId`

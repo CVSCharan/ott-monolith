@@ -1,8 +1,8 @@
 # 05 – Database Design
 
-> ORM: **Prisma 6** · DB: **PostgreSQL 16** (Neon production, Docker locally)  
+> ORM: **Prisma 7** (`@prisma/adapter-pg`, `prisma.config.ts`) · DB: **PostgreSQL 16** (Neon production, Docker locally)  
 > Naming: `snake_case` columns · `PascalCase` Prisma models  
-> **Key decisions:** `tier_rank` replaces `content_tiers[]`; `min_age` for maturity; account-level parental PIN; refresh-token families; `play_events` is unpartitioned BIGINT; `watch_progress` uses two partial unique indexes.
+> **Key decisions:** `tier_rank` replaces `content_tiers[]`; `min_age` for maturity; account-level parental PIN; refresh-token families; `play_events` is unpartitioned BIGINT; `watch_progress` uses two partial unique indexes; connection URLs managed in `prisma.config.ts`.
 
 ---
 
@@ -628,12 +628,27 @@ Prisma generates correct migrations for most columns, but several PostgreSQL fea
 
 ### Example Prisma schema excerpt
 
+```typescript
+// prisma.config.ts
+import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: env("DATABASE_URL"),
+  },
+  migrations: {
+    path: "prisma/migrations",
+    seed: "node --import tsx prisma/seed.ts",
+  },
+});
+```
+
 ```prisma
 // prisma/schema.prisma
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_DIRECT_URL")  // required for prisma migrate + pg-boss worker
+  provider = "postgresql"
 }
 
 model Title {

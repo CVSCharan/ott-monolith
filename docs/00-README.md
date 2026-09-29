@@ -1,8 +1,8 @@
 # OTT Monolith – Documentation Index
 
-> **Status:** Milestones 0–4 Completed (Foundation, Auth, Video Engine, Catalog, Discovery, Subscriptions & Admin CMS) · Production Standards Live · Milestone 5 (Production Hardening & Launch) In Progress  
+> **Status:** Milestones 0–4 Completed (Foundation, Auth, Video Engine, Catalog, Discovery, Subscriptions & Admin CMS) · Production Standards Live · Milestone 5 (Production Hardening & Launch) Core Complete  
 > **Last updated:** 2026-09-30  
-> **Stack:** Next.js 16 (App Router, TypeScript) · Prisma 6 · PostgreSQL (Neon Cloud) · MinIO/R2 · hls.js · Redis · Pino
+> **Stack:** Next.js 16 (App Router, TypeScript) · Prisma 7 (@prisma/adapter-pg) · PostgreSQL (Neon Cloud) · MinIO/R2 · hls.js · Redis · Pino
 
 ---
 
@@ -64,7 +64,7 @@
 Frontend        Next.js 16 App Router · React 19 · Tailwind CSS v4
 Backend         Next.js Route Handlers + Server Actions
 Database        PostgreSQL 16 (Neon in prod, Docker in dev)
-ORM             Prisma 6
+ORM             Prisma 7 (@prisma/adapter-pg) · prisma.config.ts
 Video           FFmpeg · HLS (hls.js) · MinIO/R2
 Auth            Custom JWT (access + refresh) stored in httpOnly cookies
 Billing         In-app dummy transactions → Razorpay (Phase 2)
@@ -72,9 +72,9 @@ Cache           Next.js built-in caching + Redis (Phase 2)
 Queue           Postgres-backed job queue (pg-boss) for transcoding + stats aggregation
 Search          Postgres FTS + pg_trgm; pgvector (Phase 2)
 Rate Limiting   Redis token bucket (Phase 1: docker compose + Upstash; replaces Edge in-memory)
-Observability   Pino logging · OpenTelemetry · Vercel Analytics
-Testing         Vitest · Playwright · Testing Library
-CI/CD           GitHub Actions → Vercel
+Observability   Pino logging · OpenTelemetry · Core Web Vitals RUM
+Testing         Vitest (Unit) · Playwright (E2E & axe-core a11y)
+CI/CD           GitHub Actions (lint, type-check, vitest, build) · Husky + lint-staged
 Local Dev       docker compose (Postgres + MinIO + Redis + pg-boss worker)
 ```
 
