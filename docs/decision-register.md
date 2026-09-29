@@ -194,7 +194,7 @@ See doc 14 for runtime flag implementation. Listed here for decision-register co
 | `feat.sprite_seek_preview`     | Timeline sprite thumbnails    | P2               | 🔵 Not started           |
 | `feat.razorpay_checkout`       | Real payment via Razorpay     | P2               | 🔵 Not started           |
 | `feat.recommendations`         | ML-based personalised rails   | P2               | 🔵 Not started           |
-| `feat.concurrent_stream_limit` | Enforce max_streams           | P2               | 🔵 Not started           |
+| `feat.concurrent_stream_limit` | Enforce max_streams           | MVP / P2         | ✅ Implemented (US-304, Redis 60s + `playback_sessions`) |
 | `feat.skip_intro`              | Intro/recap skip markers      | P2               | 🔵 Not started           |
 | `feat.light_mode`              | Light colour scheme           | P2               | 🔵 Not started           |
 | `feat.analytics_dashboard`     | Admin analytics charts        | P2               | 🔵 Not started           |

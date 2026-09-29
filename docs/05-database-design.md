@@ -289,11 +289,9 @@ erDiagram
 
 ### Phase 2 Tables (reserved in ERD, not built in MVP)
 
-| Table               | Purpose                                                              |
-| ------------------- | -------------------------------------------------------------------- |
-| `subscriptions`     | Subscription lifecycle (start, renewal, cancel, grace period)        |
-| `payments`          | Payment records, Razorpay order/payment IDs, amounts                 |
-| `playback_sessions` | Concurrent stream enforcement; one row per active stream per account |
+| Table      | Purpose                                              |
+| ---------- | ---------------------------------------------------- |
+| `payments` | Payment records, Razorpay order/payment IDs, amounts |
 
 ---
 
@@ -606,6 +604,28 @@ CREATE INDEX idx_play_events_title   ON play_events(title_id, occurred_at DESC);
 ```
 
 > **OQ1 Answered — Partitioning decision:** Do **not** partition in Phase 1. Partitioning adds complexity (partition creation, partition-aware queries, Prisma raw-SQL only), and the benefits only materialise at > 50M rows. Start with the BRIN index and a monthly `DELETE WHERE occurred_at < now() - INTERVAL '90 days'` retention job. Add `PARTITION BY RANGE (occurred_at)` as an expand → backfill → contract migration when you hit sustained 500k+ events/day.
+
+### `playback_sessions`
+
+Active and historical concurrent stream tracking per account. Enforces plan max streams (Free: 1, Standard: 2, Premium: 4) paired with Redis key `stream:{accountId}:{sessionId}` (TTL 60s).
+
+```sql
+CREATE TABLE playback_sessions (
+  id                UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  account_id        UUID        NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  profile_id        UUID        NOT NULL,
+  title_id          UUID        NOT NULL,
+  device_type       TEXT,
+  ip_address        TEXT,
+  started_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_heartbeat_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ended_at          TIMESTAMPTZ
+);
+
+-- Index for concurrent stream lookup and active session pruning:
+CREATE INDEX idx_playback_sessions_account_heartbeat
+  ON playback_sessions (account_id, last_heartbeat_at DESC);
+```
 
 ---
 

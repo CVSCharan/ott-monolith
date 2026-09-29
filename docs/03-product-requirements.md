@@ -130,6 +130,21 @@
   - Premium plan → max 1080p
 - [ ] Attempting to manually select a higher quality than the plan allows: option shown as greyed-out with a lock icon + upgrade CTA tooltip
 
+### US-304 Concurrent Stream Limit
+
+> **As a** platform operator, **I want** to enforce simultaneous playback stream quotas per account according to their subscription plan tier **so that** account sharing is controlled and monetization is protected.
+
+**Acceptance Criteria:**
+
+- [x] Stream limits enforced server-side before playback initiation:
+  - Free: 1 concurrent stream
+  - Standard: 2 concurrent streams
+  - Premium: 4 concurrent streams
+- [x] Active playback tracked via PostgreSQL `playback_sessions` table and Redis key `stream:{accountId}:{sessionId}` (60s TTL).
+- [x] Lightweight player heartbeat ping (`POST /api/playback-sessions/:id/heartbeat`) every 15–30s refreshes TTL; auto-expires after 60s if browser window closes without unload beacon.
+- [x] If concurrent stream limit is exceeded, return HTTP `409 Conflict` (`CONCURRENT_STREAM_LIMIT_EXCEEDED`) containing list of active streaming devices and titles.
+- [x] Explicit session termination (`DELETE /api/playback-sessions/:id`) immediately releases the concurrency slot.
+
 ---
 
 ## Epic 4: Search

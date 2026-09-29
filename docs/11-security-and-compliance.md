@@ -229,8 +229,20 @@ CREATE INDEX idx_audit_log_priority ON admin_audit_log(priority, occurred_at DES
 
 ## Account Sharing / Concurrent Streams
 
-**Phase 1 (MVP):** Not enforced. `max_streams` column exists in `plans` table but no enforcement logic. Plans page does **not** display `max_streams` until Phase 2.  
-**Phase 2:** `playback_sessions` table tracks active streams per account. Manifest handler rejects new session if count ≥ `plan.max_streams`.
+Real-time concurrent stream limiter is implemented in `src/modules/video/service.ts` and `src/modules/video/dal.ts` (US-304):
+
+- **Plan Quotas:**
+  - **Free:** 1 concurrent stream
+  - **Standard:** 2 concurrent streams
+  - **Premium:** 4 concurrent streams
+- **Dual-Tier State Validation:**
+  - **Redis Cache:** High-speed atomic key `stream:{accountId}:{sessionId}` with 60-second TTL updated on every heartbeat.
+  - **PostgreSQL Persistence:** `playback_sessions` table (`account_id`, `profile_id`, `title_id`, `device_type`, `started_at`, `last_heartbeat_at`, `ended_at`). Active sessions have `ended_at IS NULL` and `last_heartbeat_at >= NOW() - 60s`.
+- **Enforcement & Rejection Contract:**
+  - `POST /api/playback-sessions`: Atomically validates quota before playback begins. If active streams $\ge$ plan allowance, responds with HTTP `409 Conflict` (`CONCURRENT_STREAM_LIMIT_EXCEEDED`) including metadata on active streaming devices so the client can prompt remote session termination.
+  - `POST /api/playback-sessions/:id/heartbeat`: Player heartbeat ping refreshed every 15–30s. If the session was remotely terminated or expired, returns HTTP `410 Gone`.
+  - `DELETE /api/playback-sessions/:id`: Explicit termination releases the concurrency slot immediately.
+  - Server Actions: `terminatePlaybackSessionAction` and `getActivePlaybackSessionsAction` guarded with `requireSession()`.
 
 ---
 
