@@ -228,7 +228,8 @@ flowchart LR
 - [x] Implement Admin content management dashboard (`/admin/content`) with title editor and publish/schedule controls.
 - [x] Implement Admin rail curation interface (`/admin/rails`) with reordering.
 - [x] Implement Admin transcode jobs monitoring page (`/admin/transcode`).
-- [x] Implement Admin watch analytics dashboard (`/admin/analytics`) with Recharts.
+- [x] Implement Admin watch analytics dashboard (`/admin/analytics`) with daily play sessions and completion stats.
+- [x] Implement Admin user and subscriber access control console (`/admin/users`) with plan assignment and ban controls.
 
 ### Milestone 5: Production Hardening, Observability & Launch `[In Progress - Core Complete]`
 - [x] Health check endpoints (`/api/health/live` and `/api/health/ready` verifying Neon DB, Redis, and transcode worker heartbeat).
@@ -237,7 +238,7 @@ flowchart LR
 - [x] Transcode worker daemon with Redis heartbeat key (`workers/transcode.worker.ts`, script `npm run worker`).
 - [x] Playwright E2E integration test suite (`tests/e2e/smoke.spec.ts`, script `npm run test:e2e`).
 - [x] axe-core accessibility test suite (`tests/e2e/a11y.spec.ts`, script `npm run test:a11y`).
+- [x] Deterministic pinned-image visual regression test fixtures and suite (`public/fixtures/`, `tests/e2e/visual.spec.ts`, script `npm run test:visual`).
 - [x] Prisma 7 driver adapter modernization (`prisma.config.ts`, `@prisma/adapter-pg`, `pg.Pool`, `src/lib/db.ts`).
-- [ ] Run deterministic pinned-image visual regression test suite in Docker CI.
 - [ ] Run Lighthouse CI audit (verify TBT < 150 ms, Perf $\ge 90$, A11y $\ge 95$).
 - [ ] Complete legal review of Terms, Privacy, 18+ account age, and India IT Rules.

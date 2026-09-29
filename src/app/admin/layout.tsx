@@ -10,6 +10,8 @@ import {
   Home,
   FileCode,
   HeartPulse,
+  Users as UsersIcon,
+  Activity,
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -71,6 +73,22 @@ export default function AdminLayout({
             >
               <Cpu className="w-4 h-4 text-accent-400" />
               <span>Transcode Queue</span>
+            </Link>
+
+            <Link
+              href="/admin/analytics"
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-body-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors"
+            >
+              <Activity className="w-4 h-4 text-accent-400" />
+              <span>Streaming Analytics</span>
+            </Link>
+
+            <Link
+              href="/admin/users"
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-body-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors"
+            >
+              <UsersIcon className="w-4 h-4 text-accent-400" />
+              <span>Subscribers</span>
             </Link>
           </nav>
 

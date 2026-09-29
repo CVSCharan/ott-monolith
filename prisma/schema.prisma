@@ -33,6 +33,8 @@ model Account {
   profiles          Profile[]
   refreshTokens     RefreshToken[]
   parentalPinEvents ParentalPinEvent[]
+  adminAuditLogs    AdminAuditLog[]
+  playbackSessions  PlaybackSession[]
 
   @@map("accounts")
 }
@@ -431,3 +433,48 @@ model TitleStatsDaily {
   @@index([statDate(sort: Desc), playCountDay(sort: Desc)])
   @@map("title_stats_daily")
 }
+
+enum AuditPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model AdminAuditLog {
+  id         BigInt        @id @default(autoincrement()) @db.BigInt
+  accountId  String        @map("account_id") @db.Uuid
+  action     String        // "publish_title" | "delete_title" | "update_rail" | "ban_account" | "change_plan"
+  resource   String        // "title:uuid", "account:uuid", "rail:uuid"
+  priority   AuditPriority @default(MEDIUM)
+  beforeState Json?        @map("before_state")
+  afterState  Json?        @map("after_state")
+  ipAddress   String?      @map("ip_address")
+  userAgent   String?      @map("user_agent")
+  occurredAt  DateTime     @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, occurredAt(sort: Desc)])
+  @@index([resource, occurredAt(sort: Desc)])
+  @@index([priority, occurredAt(sort: Desc)])
+  @@map("admin_audit_log")
+}
+
+model PlaybackSession {
+  id             String    @id @default(uuid()) @db.Uuid
+  accountId      String    @map("account_id") @db.Uuid
+  profileId      String    @map("profile_id") @db.Uuid
+  titleId        String    @map("title_id") @db.Uuid
+  deviceType     String?   @map("device_type")
+  ipAddress      String?   @map("ip_address")
+  startedAt      DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  lastHeartbeatAt DateTime @default(now()) @map("last_heartbeat_at") @db.Timestamptz(3)
+  endedAt        DateTime? @map("ended_at") @db.Timestamptz(3)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, lastHeartbeatAt(sort: Desc)])
+  @@map("playback_sessions")
+}
+
