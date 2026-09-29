@@ -1,6 +1,6 @@
 # OTT Monolith – Documentation Index
 
-> **Status:** Milestones 0–3 Completed (Foundation, Auth, Video Engine, Catalog & Discovery) · Production Standards (Security Headers, Pino Logging, Health Probes, Swagger OpenAPI) Live · Milestone 4 In Progress  
+> **Status:** Milestones 0–4 Completed (Foundation, Auth, Video Engine, Catalog, Discovery, Subscriptions & Admin CMS) · Production Standards Live · Milestone 5 (Production Hardening & Launch) In Progress  
 > **Last updated:** 2026-09-30  
 > **Stack:** Next.js 16 (App Router, TypeScript) · Prisma 6 · PostgreSQL (Neon Cloud) · MinIO/R2 · hls.js · Redis · Pino
 

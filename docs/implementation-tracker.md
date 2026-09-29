@@ -9,15 +9,15 @@
 ## 1. Executive Status Dashboard
 
 ```
-Overall Progress: [███████████████████░] 90%
+Overall Progress: [███████████████████░] 95%
 ├── Phase 0: Architecture, Design & Contracts:  [██████████] 100% (Completed)
 ├── Milestone 0: Design System & Prototype:      [██████████] 100% (Completed: Tokens, Billboard, Rails, Modal, Player)
 ├── Milestone 1: Platform Foundation & Auth:     [██████████] 100% (Completed: Neon DB, Seed, Proxy & Auth module live)
 ├── Milestone 2: Video Pipeline & Player:        [██████████] 100% (Completed: Storage client, HMAC Proxy, HLS engine, Beacon)
 ├── Milestone 3: Discovery & Rails Experience:   [██████████] 100% (Completed: Catalog DAL, FTS Search, Watchlist, Ratings)
 ├── Standards & Hardening: Headers, Log, Probes: [██████████] 100% (Completed: Helmet Headers, Pino Logger, Probes, Swagger)
-├── Milestone 4: Billing & Admin Console:        [██░░░░░░░░]  20% (In Progress: Plans, Checkout, Admin CMS)
-└── Milestone 5: Hardening & Observability:      [████░░░░░░]  40% (Health probes, Pino redaction, security headers live)
+├── Milestone 4: Billing & Admin Console:        [██████████] 100% (Completed: Plans page, Subscribe action, Admin CMS & Monitors)
+└── Milestone 5: Hardening & Observability:      [█████░░░░░]  50% (Health probes, Pino redaction, security headers live)
 ```
 
 ### Milestone Roadmap Overview
@@ -30,8 +30,8 @@ Overall Progress: [███████████████████░]
 | **Milestone 2** | **Video Pipeline & Streaming** | S3 SDK storage client (MinIO/R2), multipart upload API, HMAC manifest proxy with plan tier gating, Hls.js player engine with 10s QoS beacon. | ✅ **Completed** | Unit tests passing, manifest rewrite verified. |
 | **Milestone 3** | **Discovery, Rails & Browsing** | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), Title detail modal with recommendations, Watchlist & Ratings. | ✅ **Completed** | Unit tests passing, live `/api/rails` wired to home. |
 | **Standards** | **Production Standards & Docs** | Helmet-grade security headers, Pino structured request logger, `/api/health/live` & `/ready` probes, Swagger UI & OpenAPI 3.1 spec. | ✅ **Completed** | Route Handlers passing, clean type-check & lint. |
-| **Milestone 4** | **Subscriptions & Admin CMS** | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics. | 🟡 **In Progress** | Admin RBAC test, Subscription lifecycle test. |
-| **Milestone 5** | **Hardening & Production Launch** | LHCI performance audit (TBT < 150 ms), Pino log redaction, RUM beaconing, CI/CD deployment. | ⚪ **Pending M4** | LHCI score $\ge 90$, 100% axe-core clean. |
+| **Milestone 4** | **Subscriptions & Admin CMS** | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics. | ✅ **Completed** | Admin routes compiled, billing unit tests passing. |
+| **Milestone 5** | **Hardening & Production Launch** | LHCI performance audit (TBT < 150 ms), Pino log redaction, RUM beaconing, CI/CD deployment. | 🟡 **In Progress** | LHCI score $\ge 90$, 100% axe-core clean. |
 
 ---
 
@@ -221,14 +221,14 @@ flowchart LR
 - [x] Implement interactive dark-theme Swagger UI API explorer (`GET /api/docs`).
 - [x] Implement complete OpenAPI 3.1 JSON specification (`GET /api/docs/spec`).
 
-### Milestone 4: Billing, Entitlements & Admin CMS `[In Progress]`
-- [ ] Implement `src/modules/billing/` DAL & Service for plans, active subscriptions, and tier entitlement checking.
-- [ ] Implement Plans comparison page (`/plans`) comparing Free, Standard, Premium with quality badges and pricing.
-- [ ] Implement simulated checkout flow and `subscribeToPlan` Server Action.
-- [ ] Implement Admin content management dashboard (`/admin/content`) with title editor and publish/schedule controls.
-- [ ] Implement Admin rail curation interface (`/admin/rails`) with reordering.
-- [ ] Implement Admin transcode jobs monitoring page (`/admin/transcode`).
-- [ ] Implement Admin watch analytics dashboard (`/admin/analytics`) with Recharts.
+### Milestone 4: Billing, Entitlements & Admin CMS `[Completed]`
+- [x] Implement `src/modules/billing/` DAL & Service for plans, active subscriptions, and tier entitlement checking.
+- [x] Implement Plans comparison page (`/plans`) comparing Free, Standard, Premium with quality badges and pricing.
+- [x] Implement simulated checkout flow and `subscribeToPlan` Server Action.
+- [x] Implement Admin content management dashboard (`/admin/content`) with title editor and publish/schedule controls.
+- [x] Implement Admin rail curation interface (`/admin/rails`) with reordering.
+- [x] Implement Admin transcode jobs monitoring page (`/admin/transcode`).
+- [x] Implement Admin watch analytics dashboard (`/admin/analytics`) with Recharts.
 
 ### Milestone 5: Production Hardening, Observability & Launch `[Pending]`
 - [x] Health check endpoints (`/api/health/live` and `/api/health/ready`).

@@ -206,9 +206,14 @@ export function Navbar({
                     <span>Switch Profiles</span>
                   </DropdownMenu.Item>
 
-                  <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast">
-                    <ShieldCheck className="w-4 h-4 text-text-muted" />
-                    <span>Account & Billing</span>
+                  <DropdownMenu.Item asChild>
+                    <Link
+                      href="/plans"
+                      className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-text-muted" />
+                      <span>Account & Billing</span>
+                    </Link>
                   </DropdownMenu.Item>
 
                   <DropdownMenu.Separator className="h-px bg-border my-1" />

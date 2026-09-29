@@ -12,6 +12,8 @@ import {
   rateTitleInDb,
   findWatchHistoryByProfile,
   getAllPublishedGenres,
+  listTitlesForAdmin,
+  updateTitleStatusInDb,
   type VisibilityContext,
 } from './dal'
 import type { SessionUser } from '@/modules/auth'
@@ -279,4 +281,20 @@ export async function getWatchHistory(profileId: string, user?: SessionUser | nu
 
 export async function getGenres() {
   return getAllPublishedGenres()
+}
+
+export async function getAdminTitlesList() {
+  const titles = await listTitlesForAdmin()
+  return titles.map((t) => ({
+    ...t,
+    maturityRating: formatMaturityRating(t.minAge),
+    genresList: t.genres.map((g) => g.genre.name),
+  }))
+}
+
+export async function setAdminTitleStatus(
+  id: string,
+  status: 'draft' | 'published' | 'archived',
+) {
+  return updateTitleStatusInDb(id, status)
 }

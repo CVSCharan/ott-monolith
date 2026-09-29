@@ -11,6 +11,8 @@ export {
   getGenres,
   formatMaturityRating,
   transformTitle,
+  getAdminTitlesList,
+  setAdminTitleStatus,
 } from './service'
 
 export {

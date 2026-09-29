@@ -353,3 +353,26 @@ export async function getAllPublishedGenres() {
     },
   })
 }
+
+export async function listTitlesForAdmin() {
+  return db.title.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      genres: { include: { genre: true } },
+      videoAssets: { select: { id: true, status: true, durationSeconds: true } },
+    },
+  })
+}
+
+export async function updateTitleStatusInDb(
+  id: string,
+  status: 'draft' | 'published' | 'archived',
+) {
+  return db.title.update({
+    where: { id },
+    data: {
+      status,
+      publishAt: status === 'published' ? new Date() : undefined,
+    },
+  })
+}
