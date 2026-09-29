@@ -7,7 +7,14 @@ import {
   findLatestTranscodeJob,
   upsertWatchProgress,
   insertPlayEvents,
+  createPlaybackSession,
+  findPlaybackSessionById,
+  findActivePlaybackSessions,
+  updatePlaybackSessionHeartbeat,
+  endPlaybackSession,
+  endAllPlaybackSessionsForAccount,
 } from './dal'
+import { getAccountSubscription } from '@/modules/billing'
 import {
   hmacSign,
   segmentTtl,
@@ -315,12 +322,13 @@ export async function recordPlayerBeacon(
     eventsIngested = result.count
   }
 
-  // 3. Heartbeat for playback session tracking (TTL 30 seconds)
+  // 3. Heartbeat for playback session tracking (TTL 60 seconds)
   if (beacon.playbackSessionId && user?.sub) {
     try {
-      await redis.setex(`stream:${user.sub}:${beacon.playbackSessionId}`, 30, 'active')
+      await updatePlaybackSessionHeartbeat(beacon.playbackSessionId)
+      await redis.setex(`stream:${user.sub}:${beacon.playbackSessionId}`, 60, 'active')
     } catch {
-      // Redis error shouldn't fail beacon
+      // Redis or DB error shouldn't fail beacon
     }
   }
 
@@ -330,4 +338,183 @@ export async function recordPlayerBeacon(
   }
 }
 
+// ==============================================================================
+// Playback Session & Concurrency Limiting
+// ==============================================================================
+
+export interface ActiveSessionItem {
+  id: string
+  titleId: string
+  titleName: string | null
+  deviceType: string | null
+  startedAt: Date
+  lastHeartbeatAt: Date
+}
+
+export class ConcurrentStreamLimitError extends Error {
+  public readonly code = 'CONCURRENT_STREAM_LIMIT_EXCEEDED'
+  public readonly maxStreams: number
+  public readonly activeStreams: number
+  public readonly activeSessions: ActiveSessionItem[]
+
+  constructor(maxStreams: number, activeStreams: number, activeSessions: ActiveSessionItem[]) {
+    super(
+      `Concurrent stream limit reached (${activeStreams}/${maxStreams}). Stop playback on another device to continue.`,
+    )
+    this.name = 'ConcurrentStreamLimitError'
+    this.maxStreams = maxStreams
+    this.activeStreams = activeStreams
+    this.activeSessions = activeSessions
+  }
+}
+
+export interface RegisterPlaybackSessionParams {
+  accountId: string
+  profileId: string
+  titleId: string
+  deviceType?: string
+  ipAddress?: string
+}
+
+/**
+ * Registers a new playback session after verifying account concurrent stream quota.
+ * Throws ConcurrentStreamLimitError if active stream count >= allowed plan maxStreams.
+ */
+export async function registerPlaybackSession(params: RegisterPlaybackSessionParams) {
+  const { accountId, profileId, titleId, deviceType, ipAddress } = params
+
+  // 1. Fetch active subscription & allowed max streams
+  const subscription = await getAccountSubscription(accountId)
+  const maxStreams = subscription?.plan?.maxStreams ?? 1
+
+  // 2. Active stream threshold: heartbeat within last 60 seconds and endedAt is null
+  const activeSince = new Date(Date.now() - 60 * 1000)
+  const activeSessions = await findActivePlaybackSessions(accountId, activeSince)
+
+  // 3. Check concurrency cap
+  if (activeSessions.length >= maxStreams) {
+    const formattedSessions: ActiveSessionItem[] = activeSessions.map((s) => ({
+      id: s.id,
+      titleId: s.titleId,
+      titleName: s.title?.title ?? null,
+      deviceType: s.deviceType,
+      startedAt: s.startedAt,
+      lastHeartbeatAt: s.lastHeartbeatAt,
+    }))
+
+    throw new ConcurrentStreamLimitError(maxStreams, activeSessions.length, formattedSessions)
+  }
+
+  // 4. Create session row
+  const session = await createPlaybackSession({
+    accountId,
+    profileId,
+    titleId,
+    deviceType,
+    ipAddress,
+  })
+
+  // 5. High-speed Redis stream cache marker (60s TTL)
+  try {
+    await redis.setex(`stream:${accountId}:${session.id}`, 60, 'active')
+  } catch (err) {
+    logger.warn({ err }, 'Failed to set redis stream key during playback session registration')
+  }
+
+  return {
+    sessionId: session.id,
+    accountId: session.accountId,
+    profileId: session.profileId,
+    titleId: session.titleId,
+    deviceType: session.deviceType,
+    maxStreams,
+    activeStreams: activeSessions.length + 1,
+    startedAt: session.startedAt,
+  }
+}
+
+/**
+ * Sends a heartbeat for an active playback session, extending its TTL in DB and Redis.
+ */
+export async function sendPlaybackHeartbeat(sessionId: string, accountId: string) {
+  const session = await findPlaybackSessionById(sessionId)
+  if (!session || session.accountId !== accountId || session.endedAt) {
+    return { success: false, reason: 'SESSION_NOT_FOUND_OR_ENDED' }
+  }
+
+  await updatePlaybackSessionHeartbeat(sessionId)
+
+  try {
+    await redis.setex(`stream:${accountId}:${sessionId}`, 60, 'active')
+  } catch (err) {
+    logger.warn({ err }, 'Failed to refresh redis stream key on heartbeat')
+  }
+
+  return { success: true, lastHeartbeatAt: new Date() }
+}
+
+/**
+ * Explicitly terminates an active playback session, releasing the concurrency slot immediately.
+ */
+export async function terminatePlaybackSession(
+  sessionId: string,
+  accountId: string,
+  isAdmin: boolean = false,
+) {
+  const session = await findPlaybackSessionById(sessionId)
+  if (!session) {
+    return { success: false, reason: 'SESSION_NOT_FOUND' }
+  }
+
+  if (!isAdmin && session.accountId !== accountId) {
+    throw new Error('FORBIDDEN')
+  }
+
+  await endPlaybackSession(sessionId)
+
+  try {
+    await redis.del(`stream:${session.accountId}:${sessionId}`)
+  } catch (err) {
+    logger.warn({ err }, 'Failed to delete redis stream key on session termination')
+  }
+
+  return { success: true, terminatedSessionId: sessionId }
+}
+
+/**
+ * Retrieves all currently active playback sessions for an account along with plan limits.
+ */
+export async function getActivePlaybackSessionsForAccount(accountId: string) {
+  const activeSince = new Date(Date.now() - 60 * 1000)
+  const [activeSessions, subscription] = await Promise.all([
+    findActivePlaybackSessions(accountId, activeSince),
+    getAccountSubscription(accountId),
+  ])
+
+  const maxStreams = subscription?.plan?.maxStreams ?? 1
+
+  return {
+    activeStreams: activeSessions.length,
+    maxStreams,
+    sessions: activeSessions.map((s) => ({
+      id: s.id,
+      titleId: s.titleId,
+      title: s.title,
+      deviceType: s.deviceType,
+      ipAddress: s.ipAddress,
+      startedAt: s.startedAt,
+      lastHeartbeatAt: s.lastHeartbeatAt,
+    })),
+  }
+}
+
+/**
+ * Terminates all active playback sessions for an account (e.g. security reset or password change).
+ */
+export async function terminateAllPlaybackSessions(accountId: string) {
+  await endAllPlaybackSessionsForAccount(accountId)
+  return { success: true }
+}
+
 export { rewriteMasterPlaylist, rewriteVariantPlaylist, getVariantHeightByIndex, hmacSign }
+

@@ -1,6 +1,6 @@
 'use server'
 
-import { requireAdmin, getSessionUser } from '@/modules/auth'
+import { requireAdmin, requireSession, getSessionUser } from '@/modules/auth'
 import {
   getVideoPlayback,
   initiateVideoUpload,
@@ -9,6 +9,8 @@ import {
   abortVideoUpload,
   recordPlayerBeacon,
   getVideoAssetStatus,
+  terminatePlaybackSession,
+  getActivePlaybackSessionsForAccount,
 } from './service'
 
 export async function getVideoPlaybackAction(assetIdOrSlug: string) {
@@ -81,3 +83,14 @@ export async function recordPlayerBeaconAction(beaconData: {
   const user = await getSessionUser()
   return recordPlayerBeacon(beaconData, user)
 }
+
+export async function terminatePlaybackSessionAction(sessionId: string) {
+  const session = await requireSession()
+  return terminatePlaybackSession(sessionId, session.sub)
+}
+
+export async function getActivePlaybackSessionsAction() {
+  const session = await requireSession()
+  return getActivePlaybackSessionsForAccount(session.sub)
+}
+

@@ -579,6 +579,120 @@ Single consolidated beacon handling:
 
 ---
 
+## Playback Sessions & Concurrent Stream Management
+
+Enforces real-time concurrent stream allocations per account tier (Free: 1, Standard: 2, Premium: 4). Active sessions have `endedAt IS NULL` and `lastHeartbeatAt >= NOW() - 60s`, mirrored in Redis (`stream:{accountId}:{sessionId}`) with a 60-second TTL.
+
+### `GET /api/playback-sessions`
+
+Retrieves all currently active playback streams for the authenticated account and checks remaining stream quota.
+
+```typescript
+// Requires: valid access_token cookie
+// Success 200 OK
+{
+  "data": {
+    "activeStreams": 1,
+    "maxStreams": 2,
+    "sessions": [
+      {
+        "id": "c1f7b764-e1b9-4dc3-8208-a83120155b92",
+        "titleId": "48b6d8ec-b1cb-4b20-b48d-697f9e8020aa",
+        "title": {
+          "id": "48b6d8ec-b1cb-4b20-b48d-697f9e8020aa",
+          "title": "Big Buck Bunny",
+          "slug": "big-buck-bunny",
+          "backdropUrl": "/images/bbb-backdrop.jpg"
+        },
+        "deviceType": "desktop",
+        "ipAddress": "192.168.1.5",
+        "startedAt": "2026-09-30T01:15:00.000Z",
+        "lastHeartbeatAt": "2026-09-30T01:15:30.000Z"
+      }
+    ]
+  }
+}
+```
+
+### `POST /api/playback-sessions`
+
+Registers a new playback session when the video player mounts or begins playback. Validates account concurrency quota atomically before issuing session token.
+
+```typescript
+// Requires: valid access_token cookie
+// Request Body:
+{
+  "titleId": string,          // UUID of title being played
+  "deviceType"?: string       // "desktop" | "mobile" | "tablet" | "tv"
+}
+
+// Success 201 Created:
+{
+  "data": {
+    "sessionId": "c1f7b764-e1b9-4dc3-8208-a83120155b92",
+    "accountId": "20a8db08-161b-4fe2-9ee6-4e554162e841",
+    "profileId": "78a94627-ef60-47ec-b1b7-a36928e1c6aa",
+    "titleId": "48b6d8ec-b1cb-4b20-b48d-697f9e8020aa",
+    "deviceType": "desktop",
+    "maxStreams": 2,
+    "activeStreams": 2,
+    "startedAt": "2026-09-30T01:15:00.000Z"
+  }
+}
+
+// Error 409 Conflict (Stream Quota Exceeded):
+{
+  "error": "CONCURRENT_STREAM_LIMIT_EXCEEDED",
+  "message": "Concurrent stream limit reached (2/2). Stop playback on another device to continue.",
+  "maxStreams": 2,
+  "activeStreams": 2,
+  "activeSessions": [
+    {
+      "id": "99ea7412-f01a-4c91-a1b7-9912187319aa",
+      "titleId": "48b6d8ec-b1cb-4b20-b48d-697f9e8020aa",
+      "titleName": "Big Buck Bunny",
+      "deviceType": "mobile",
+      "startedAt": "2026-09-30T01:10:00.000Z",
+      "lastHeartbeatAt": "2026-09-30T01:14:45.000Z"
+    }
+  ]
+}
+```
+
+### `POST /api/playback-sessions/:id/heartbeat`
+
+Dedicated lightweight keepalive heartbeat issued by the active player every 15–30 seconds.
+
+```typescript
+// Requires: valid access_token cookie
+// Success 200 OK:
+{
+  "success": true,
+  "lastHeartbeatAt": "2026-09-30T01:16:00.000Z"
+}
+
+// Error 410 Gone (Session terminated remotely or expired):
+{
+  "error": "SESSION_TERMINATED",
+  "reason": "SESSION_NOT_FOUND_OR_ENDED"
+}
+```
+
+### `DELETE /api/playback-sessions/:id`
+
+Terminates an active session immediately, releasing the account concurrency slot. Can be invoked on player exit, or remotely by the user from an "Active Devices" management prompt.
+
+```typescript
+// Requires: valid access_token cookie
+// Success 200 OK:
+{
+  "success": true,
+  "terminatedSessionId": "c1f7b764-e1b9-4dc3-8208-a83120155b92"
+}
+```
+
+---
+
 ## Real User Monitoring (RUM) Telemetry
 
 ### `POST /api/telemetry/rum`

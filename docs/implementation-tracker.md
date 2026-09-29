@@ -201,7 +201,12 @@ flowchart LR
   - [x] `POST /api/admin/video/multipart/initiate`, `part-url`, `complete`, `abort`
   - [x] `GET /api/admin/video/assets/[assetId]/status`
 - [x] Connect `hls.js` player HUD in `src/app/watch/[slug]/page.tsx` with dynamic level picker, plan locks, and subtitles.
-- [x] Implement unit tests in `src/modules/video/__tests__/video.test.ts`.
+- [x] Implement real-time concurrent stream limiter (`PlaybackSession`) in `src/modules/video/service.ts` enforcing account tier quotas (Free: 1, Standard: 2, Premium: 4) backed by Redis TTL (60s) and Postgres `playback_sessions`.
+  - [x] `POST /api/playback-sessions` (atomic concurrency check; 409 Conflict if exceeded)
+  - [x] `GET /api/playback-sessions` (list active streaming devices and plan allowances)
+  - [x] `POST /api/playback-sessions/[id]/heartbeat` (15-30s keepalive; 410 Gone if session terminated)
+  - [x] `DELETE /api/playback-sessions/[id]` (immediate slot release and remote device termination)
+- [x] Implement unit tests in `src/modules/video/__tests__/video.test.ts` and `src/modules/video/__tests__/playback-sessions.test.ts`.
 
 ### Milestone 3: Discovery, Personalization & Catalog `[Completed]`
 

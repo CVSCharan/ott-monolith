@@ -211,3 +211,122 @@ export async function findTitleBySlug(slug: string) {
     },
   })
 }
+
+// ------------------------------------------------------------------------------
+// Playback Session & Concurrency DAL Functions
+// ------------------------------------------------------------------------------
+
+export async function createPlaybackSession(data: {
+  accountId: string
+  profileId: string
+  titleId: string
+  deviceType?: string
+  ipAddress?: string
+}) {
+  return db.playbackSession.create({
+    data: {
+      accountId: data.accountId,
+      profileId: data.profileId,
+      titleId: data.titleId,
+      deviceType: data.deviceType,
+      ipAddress: data.ipAddress,
+      startedAt: new Date(),
+      lastHeartbeatAt: new Date(),
+    },
+    include: {
+      account: {
+        include: { plan: true },
+      },
+    },
+  })
+}
+
+export async function findPlaybackSessionById(id: string) {
+  return db.playbackSession.findUnique({
+    where: { id },
+    include: {
+      account: {
+        include: { plan: true },
+      },
+    },
+  })
+}
+
+export async function findActivePlaybackSessions(accountId: string, activeSince: Date) {
+  const sessions = await db.playbackSession.findMany({
+    where: {
+      accountId,
+      endedAt: null,
+      lastHeartbeatAt: {
+        gte: activeSince,
+      },
+    },
+    orderBy: {
+      lastHeartbeatAt: 'desc',
+    },
+  })
+
+  if (sessions.length === 0) return []
+
+  // Join titles for rich display
+  const titleIds = Array.from(new Set(sessions.map((s) => s.titleId)))
+  const titles = await db.title.findMany({
+    where: { id: { in: titleIds } },
+    select: { id: true, title: true, slug: true, backdropUrl: true },
+  })
+  const titleMap = new Map(titles.map((t) => [t.id, t]))
+
+  return sessions.map((s) => ({
+    ...s,
+    title: titleMap.get(s.titleId) || null,
+  }))
+}
+
+export async function countActivePlaybackSessions(accountId: string, activeSince: Date) {
+  return db.playbackSession.count({
+    where: {
+      accountId,
+      endedAt: null,
+      lastHeartbeatAt: {
+        gte: activeSince,
+      },
+    },
+  })
+}
+
+export async function updatePlaybackSessionHeartbeat(id: string) {
+  return db.playbackSession.updateMany({
+    where: {
+      id,
+      endedAt: null,
+    },
+    data: {
+      lastHeartbeatAt: new Date(),
+    },
+  })
+}
+
+export async function endPlaybackSession(id: string) {
+  return db.playbackSession.updateMany({
+    where: {
+      id,
+      endedAt: null,
+    },
+    data: {
+      endedAt: new Date(),
+    },
+  })
+}
+
+export async function endAllPlaybackSessionsForAccount(accountId: string) {
+  return db.playbackSession.updateMany({
+    where: {
+      accountId,
+      endedAt: null,
+    },
+    data: {
+      endedAt: new Date(),
+    },
+  })
+}
+

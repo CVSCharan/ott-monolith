@@ -95,6 +95,10 @@ WHERE status = 'published'
 | **US-302** | Consolidated Player Beacon (Progress, QoE, Session) | Route Handler (`POST /api/player/beacon`)          | Client beacon / fetch (10s debounce) | Active profile or anonymous (with anonId)                   | `watch_progress`, `play_events`                                              | `src/app/api/player/beacon/route.ts`            | `usePlayerProgress` hook               | Completed | `[MVP]`   |
 | **US-302** | Continue Watching History Rail                      | Route Handler (`GET /api/history`)                 | Client fetch / RSC                   | Active profile, completed < 95%                             | `watch_progress`, `titles`, `episodes`                                       | `src/app/(public)/page.tsx` & `/history`        | `ContinueWatchingRail`, `ProgressCard` | Active    | `[MVP]`   |
 | **US-303** | Adaptive Quality Selector                           | Route Handler (`GET /api/video/playback/:assetId`) | Client fetch (`maxQualityP`)         | Plan tier cap (Free: 480p, Standard: 720p, Premium: 1080p)  | `plans`, `accounts`                                                          | `src/app/watch/[slug]/page.tsx`                 | `PlayerSettingsMenu`, `QualitySubmenu` | Completed | `[MVP]`   |
+| **US-304** | Concurrent Stream Limiter (Register & Check)        | Route Handler (`POST /api/playback-sessions`)      | Client fetch                         | Plan concurrent streams cap (Free: 1, Std: 2, Prem: 4)     | `playback_sessions`, `accounts`, `plans`, Redis              | `src/app/api/playback-sessions/route.ts`        | `VideoPlayer`, `ConcurrencyModal`      | Completed | `[MVP]`   |
+| **US-304** | Active Playback Sessions List                       | Route Handler (`GET /api/playback-sessions`)       | Client fetch / Server Action         | Authenticated account                                      | `playback_sessions`, `titles`                                | `src/app/api/playback-sessions/route.ts`        | `ActiveStreamsList`, `AccountSecurity` | Completed | `[MVP]`   |
+| **US-304** | Playback Session Keepalive Heartbeat                | Route Handler (`POST /api/playback-sessions/:id/heartbeat`) | Client keepalive fetch             | Active session owner                                       | `playback_sessions`, Redis                                   | `src/app/api/playback-sessions/[id]/heartbeat/route.ts` | Player heartbeat interval              | Completed | `[MVP]`   |
+| **US-304** | Terminate Remote Playback Session                   | Route Handler (`DELETE /api/playback-sessions/:id`)| Client fetch / Server Action         | Session owner or admin                                     | `playback_sessions`, Redis                                   | `src/app/api/playback-sessions/[id]/route.ts`   | `ActiveStreamsList`, `AdminUserDetail` | Completed | `[MVP]`   |
 
 ---
 
@@ -251,5 +255,4 @@ WHERE status = 'published'
 | `GET /api/billing/invoices`             | —         | PDF invoices and payment receipt download                  |
 | `GET /api/recommend/:profileId`         | —         | Vector / collaborative filtering personalised rail         |
 | `POST /api/admin/content/:id/subtitles` | —         | Subtitle track upload + automated SRT to WebVTT conversion |
-| `GET /api/playback-sessions`            | —         | Real-time concurrent stream validation                     |
-| `DELETE /api/playback-sessions/:id`     | —         | Force terminate remote playback session                    |
+

@@ -6,6 +6,12 @@ export {
   abortVideoUpload,
   getVideoAssetStatus,
   recordPlayerBeacon,
+  registerPlaybackSession,
+  sendPlaybackHeartbeat,
+  terminatePlaybackSession,
+  getActivePlaybackSessionsForAccount,
+  terminateAllPlaybackSessions,
+  ConcurrentStreamLimitError,
   rewriteMasterPlaylist,
   rewriteVariantPlaylist,
   getVariantHeightByIndex,
@@ -20,8 +26,14 @@ export {
   abortVideoUploadAction,
   getVideoAssetStatusAction,
   recordPlayerBeaconAction,
+  terminatePlaybackSessionAction,
+  getActivePlaybackSessionsAction,
 } from './actions'
 
 export { hmacVerify, segmentTtl, BITRATE_LADDER } from './signing'
 
-export type { PlaybackResponse } from './service'
+export type {
+  PlaybackResponse,
+  ActiveSessionItem,
+  RegisterPlaybackSessionParams,
+} from './service'
