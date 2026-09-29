@@ -740,6 +740,56 @@ export async function subscribeToPlan(
 
 ---
 
+## System, Health & Documentation Endpoints
+
+### `GET /api/health/live`
+
+Process-level liveness probe. Verifies that the Node.js/Next.js HTTP server process is running and accepting requests.
+- **Access:** Public
+- **Checks:** Zero external subsystem dependency checks (avoids false-positive restarts if DB is momentarily unavailable).
+- **Response 200 OK:**
+  ```json
+  { "status": "ok", "uptime": 124.5, "timestamp": "2026-09-30T00:00:00.000Z" }
+  ```
+
+### `GET /api/health/ready`
+
+Subsystem readiness probe for ingress routers and deployment controllers.
+- **Access:** Public
+- **Checks:**
+  - Neon PostgreSQL: executes `SELECT 1` via `health.dal.ts`
+  - Redis: executes `PING` expecting `PONG`
+- **Response 200 OK (Healthy):**
+  ```json
+  {
+    "status": "ready",
+    "checks": { "database": "up", "redis": "up" },
+    "timestamp": "2026-09-30T00:00:00.000Z"
+  }
+  ```
+- **Response 503 Service Unavailable (Degraded):**
+  ```json
+  {
+    "status": "degraded",
+    "checks": { "database": "down", "redis": "up" },
+    "timestamp": "2026-09-30T00:00:00.000Z"
+  }
+  ```
+
+### `GET /api/docs`
+
+Interactive Swagger UI documentation explorer. Renders dark-theme Swagger UI with authorization modal for JWT testing.
+- **Access:** Public
+- **Content-Type:** `text/html; charset=utf-8`
+
+### `GET /api/docs/spec`
+
+Machine-readable OpenAPI 3.1 JSON specification.
+- **Access:** Public
+- **Content-Type:** `application/json`
+
+---
+
 ## Missing Endpoints Added
 
 | Endpoint                             | Purpose                                         |
@@ -756,6 +806,10 @@ export async function subscribeToPlan(
 | `GET /api/plans`                     | All plan definitions (for /plans page)          |
 | `POST /api/admin/content/:id/images` | Thumbnail / poster upload                       |
 | `GET /api/hls/:assetId/[...path]`    | HLS manifest proxy + segment proxy              |
+| `GET /api/health/live`               | Process liveness probe                          |
+| `GET /api/health/ready`              | Subsystem readiness probe (Postgres + Redis)    |
+| `GET /api/docs`                      | Swagger UI interactive API explorer             |
+| `GET /api/docs/spec`                 | OpenAPI 3.1 JSON specification                  |
 
 ---
 

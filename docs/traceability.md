@@ -172,7 +172,10 @@ WHERE status = 'published'
 |-------|----------------------|---------|-------------|------------------|--------|--------------|--------------|--------|-----------|
 | **US-901** | Player Analytics & QoE Event Ingest | Route Handler (`POST /api/player/beacon`) | Consolidated client beacon | Authenticated or anonymous (with anonId) | `play_events` | `src/app/api/player/beacon/route.ts` | Player telemetry sender | Completed | `[MVP]` |
 | **US-901** | Basic Analytics Overview `[P2]` | Route Handler (`GET /api/admin/analytics/overview`) | RSC Service Call (`getAnalyticsOverview`) | Admin only | `title_stats_daily`, `play_events` | `src/app/(admin)/admin/analytics/page.tsx` | `PlaysChart`, `TopTitlesMetricCard` | Deferred | `[P2]` |
-| System | Platform Health & Readiness Check | Route Handler (`GET /api/health`) | Route Handler call | Public (probes DB, Redis, MinIO connectivity) | None (probes ping) | `src/app/api/health/route.ts` | Uptime monitor / Docker healthcheck | Active | `[MVP]` |
+| System | Platform Liveness Probe | Route Handler (`GET /api/health/live`) | Route Handler call | Public (probes HTTP process) | None | `src/app/api/health/live/route.ts` | Uptime monitor / Docker liveness probe | Completed | `[MVP]` |
+| System | Platform Readiness Probe | Route Handler (`GET /api/health/ready`) | Route Handler call | Public (probes DB, Redis connectivity) | None (SELECT 1 + PING) | `src/app/api/health/ready/route.ts` | Uptime monitor / Ingress router | Completed | `[MVP]` |
+| System | Interactive OpenAPI / Swagger UI | Route Handler (`GET /api/docs`) | Route Handler call | Public | None | `src/app/api/docs/route.ts` | Swagger UI Explorer | Completed | `[MVP]` |
+| System | OpenAPI 3.1 JSON Specification | Route Handler (`GET /api/docs/spec`) | Route Handler call | Public | None | `src/app/api/docs/spec/route.ts` | OpenAPI Spec | Completed | `[MVP]` |
 | System | Dynamic Sitemap XML | Route Handler (`GET /sitemap.xml`) | Static / ISR revalidated | Published titles, genres | `titles`, `genres` | `src/app/sitemap.ts` | Next.js Metadata Route | Active | `[MVP]` |
 | System | Robots Exclusion Protocol | Route Handler (`GET /robots.txt`) | Static Route | Public | None | `src/app/robots.ts` | Next.js Metadata Route | Active | `[MVP]` |
 

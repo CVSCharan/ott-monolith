@@ -1,8 +1,8 @@
 # OTT Monolith – Documentation Index
 
-> **Status:** Phase 0 – Architecture & Design Docs (no application code yet)  
-> **Last updated:** 2026-09-29  
-> **Stack:** Next.js 16 (App Router, TypeScript) · Prisma · PostgreSQL (Neon) · MinIO/R2 · hls.js
+> **Status:** Milestones 0–3 Completed (Foundation, Auth, Video Engine, Catalog & Discovery) · Production Standards (Security Headers, Pino Logging, Health Probes, Swagger OpenAPI) Live · Milestone 4 In Progress  
+> **Last updated:** 2026-09-30  
+> **Stack:** Next.js 16 (App Router, TypeScript) · Prisma 6 · PostgreSQL (Neon Cloud) · MinIO/R2 · hls.js · Redis · Pino
 
 ---
 

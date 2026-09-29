@@ -93,6 +93,7 @@ graph LR
         Admin["admin\n─────\ntranscode_jobs\nreads all owned tables"]
         Analytics["analytics\n─────\nplay_events · title_stats_daily"]
         Recommend["recommend\n─────\nreads title_stats_daily\nwatchlist · ratings\nno own tables"]
+        Health["health\n─────\nliveness · readiness\nprobes DB & Redis\nno own tables"]
     end
 
     Auth --> Profile
