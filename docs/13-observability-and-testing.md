@@ -21,32 +21,39 @@
 
 ---
 
-## 2. Automated CI Testing Gates & Visual Verification
+## 2. Automated Git Hooks & CI Testing Gates
+
+### Local Git Hooks (Husky + lint-staged)
+Enforced on developer workstations via Husky (`core.hooksPath = .husky`):
+1. **`pre-commit` ([`.husky/pre-commit`](../.husky/pre-commit)):**
+   - Automatically runs `npx lint-staged` (`eslint --fix` on modified files).
+   - Automatically runs `npm run type-check` (`tsc --noEmit`) to verify zero TypeScript errors.
+2. **`pre-push` ([`.husky/pre-push`](../.husky/pre-push)):**
+   - Automatically runs full Vitest suite (`npm test`) across all 4 modules.
+   - Pushes are rejected if any test fails.
+
+### GitHub Actions CI Pipeline ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml))
+Triggered on every push to `main` and on all Pull Requests:
 
 ```yaml
 # .github/workflows/ci.yml
-jobs:
-  verify:
-    steps:
-      - name: Module Boundary & Lint Check
-        run: npm run lint
-      - name: Type Check
-        run: npm run type-check
-      - name: Traceability Orphan Check
-        run: npm run db:orphan-check
-      - name: Unit Tests (Vitest)
-        run: npm test
-      - name: Postgres Integration Tests
-        run: npm run test:integration
-      - name: Worker Fixture Transcode Test
-        run: npm run test:worker
-      - name: End-to-End Playwright Matrix Tests
-        run: npm run test:e2e
-      - name: Accessibility Audit (Axe-Core)
-        run: npm run test:a11y
-      - name: Lighthouse CI Audit (TBT/LCP/CLS)
-        run: npx lhci autorun
+steps:
+  - name: Install Dependencies
+    run: npm ci
+  - name: Generate Prisma Client
+    run: npm run db:generate
+  - name: Module Boundary & Lint Check
+    run: npm run lint
+  - name: TypeScript Strict Type Check
+    run: npm run type-check
+  - name: Unit Tests (Vitest)
+    run: npm test
+  - name: Next.js Production Build
+    run: npm run build
 ```
+
+### Automated Security & Dependency Scanning
+- **Dependabot ([`.github/dependabot.yml`](../.github/dependabot.yml)):** Automated weekly dependency updates and vulnerability patches for npm packages and GitHub Actions.
 
 ### 1. Manual Contrast Audit Protocol for Gradient Scrims
 Automated a11y scanners (`axe-core`) only evaluate DOM CSS color tokens against solid background elements; they cannot reliably calculate contrast over complex image backgrounds, video frames, or multi-stop CSS gradient scrims (`billboard-vignette`, `card-scrim`).
