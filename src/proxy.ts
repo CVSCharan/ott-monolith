@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyAccessToken } from '@/lib/jwt'
 import { checkRateLimit } from '@/lib/redis'
+import { logger } from '@/lib/logger'
 
 /**
  * StreamForge Proxy Middleware.
@@ -10,6 +11,11 @@ import { checkRateLimit } from '@/lib/redis'
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1'
+
+  // Log incoming API request (Morgan equivalent)
+  if (pathname.startsWith('/api/')) {
+    logger.info({ method: request.method, path: pathname, ip }, 'Incoming API Request')
+  }
 
   // ── 1. Security Headers ──────────────────────────────────
   const response = NextResponse.next()
