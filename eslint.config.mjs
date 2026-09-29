@@ -38,7 +38,7 @@ const eslintConfig = defineConfig([
   },
   // Allow Prisma and db imports strictly inside DAL files and Prisma scripts
   {
-    files: ["src/modules/**/*.dal.ts", "src/lib/db.ts", "prisma/**"],
+    files: ["**/dal.ts", "**/*.dal.ts", "src/modules/**/dal.ts", "src/lib/db.ts", "prisma/**"],
     rules: {
       "no-restricted-imports": [
         "error",

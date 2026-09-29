@@ -1,0 +1,435 @@
+// ==============================================================================
+// StreamForge – Prisma Schema
+// Database: PostgreSQL 16
+// Source of truth: docs/05-database-design.md
+// ==============================================================================
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ------------------------------------------------------------------------------
+// 1. Auth, Accounts & Subscription Plans
+// ------------------------------------------------------------------------------
+
+model Account {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  role             String    @default("user") // "user" | "admin"
+  planId           String?   @map("plan_id") @db.Uuid
+  planExpiresAt    DateTime? @map("plan_expires_at") @db.Timestamptz(3)
+  parentalPinHash  String?   @map("parental_pin_hash") // 4-digit PIN hash
+  pinAttempts      Int       @default(0) @map("pin_attempts") @db.SmallInt
+  pinLockedUntil   DateTime? @map("pin_locked_until") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  plan              Plan?              @relation(fields: [planId], references: [id], onDelete: SetNull)
+  profiles          Profile[]
+  refreshTokens     RefreshToken[]
+  parentalPinEvents ParentalPinEvent[]
+
+  @@map("accounts")
+}
+
+model Plan {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String @unique // "free" | "standard" | "premium"
+  pricePaise  Int    @default(0) @map("price_paise")
+  maxProfiles Int    @default(1) @map("max_profiles") @db.SmallInt
+  maxStreams  Int    @default(1) @map("max_streams") @db.SmallInt
+  maxQualityP Int    @default(480) @map("max_quality_p") @db.SmallInt // 480 | 720 | 1080
+  maxTierRank Int    @default(0) @map("max_tier_rank") @db.SmallInt // 0=free, 1=standard, 2=premium
+
+  accounts Account[]
+
+  @@map("plans")
+}
+
+model Profile {
+  id           String   @id @default(uuid()) @db.Uuid
+  accountId    String   @map("account_id") @db.Uuid
+  name         String
+  avatarUrl    String?  @map("avatar_url")
+  isKids       Boolean  @default(false) @map("is_kids")
+  languagePref String   @default("en") @map("language_pref")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  account        Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  watchlistItems WatchlistItem[]
+  watchProgress  WatchProgress[]
+  ratings        Rating[]
+
+  @@index([accountId])
+  @@map("profiles")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  accountId  String    @map("account_id") @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  familyId   String    @map("family_id") @db.Uuid
+  replacedBy String?   @map("replaced_by") @db.Uuid
+  replacedAt DateTime? @map("replaced_at") @db.Timestamptz(3)
+  isRevoked  Boolean   @default(false) @map("is_revoked")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
+model ParentalPinEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  action    String // "verify" | "lockout" | "reset"
+  success   Boolean
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt(sort: Desc)])
+  @@map("parental_pin_events")
+}
+
+// ------------------------------------------------------------------------------
+// 2. Titles, Catalog, Cast & Seasons
+// ------------------------------------------------------------------------------
+
+model Title {
+  id              String    @id @default(uuid()) @db.Uuid
+  slug            String    @unique
+  type            String // "movie" | "series"
+  title           String
+  synopsis        String?
+  description     String?
+  releaseYear     Int?      @map("release_year") @db.SmallInt
+  durationSeconds Int?      @map("duration_seconds")
+  minAge          Int       @default(0) @map("min_age") @db.SmallInt // 0=U, 7=U/A 7+, 13=U/A 13+, 16=U/A 16+, 18=A
+  minTierRank     Int       @default(0) @map("min_tier_rank") @db.SmallInt // 0=free, 1=standard, 2=premium
+  status          String    @default("draft") // "draft" | "published" | "archived"
+  publishAt       DateTime? @map("publish_at") @db.Timestamptz(3)
+  dominantColor   String?   @map("dominant_color")
+  thumbnailUrl    String?   @map("thumbnail_url")
+  posterUrl       String?   @map("poster_url")
+  backdropUrl     String?   @map("backdrop_url")
+  trailerUrl      String?   @map("trailer_url")
+  likeCount       Int       @default(0) @map("like_count")
+  dislikeCount    Int       @default(0) @map("dislike_count")
+  playCount       Int       @default(0) @map("play_count")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  genres         TitleGenre[]
+  cast           TitleCast[]
+  seasons        Season[]
+  episodes       Episode[]
+  videoAssets    VideoAsset[]
+  watchlistItems WatchlistItem[]
+  watchProgress  WatchProgress[]
+  ratings        Rating[]
+  railItems      RailItem[]
+  billboards     Billboard[]
+  statsDaily     TitleStatsDaily[]
+
+  @@index([publishAt(sort: Desc)])
+  @@index([minAge])
+  @@index([minTierRank])
+  @@map("titles")
+}
+
+model Genre {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  titles TitleGenre[]
+  rails  Rail[]
+
+  @@map("genres")
+}
+
+model TitleGenre {
+  id      String @id @default(uuid()) @db.Uuid
+  titleId String @map("title_id") @db.Uuid
+  genreId String @map("genre_id") @db.Uuid
+
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  genre Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@unique([titleId, genreId])
+  @@map("title_genres")
+}
+
+model Person {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  castCredits TitleCast[]
+
+  @@map("persons")
+}
+
+model TitleCast {
+  id            String  @id @default(uuid()) @db.Uuid
+  titleId       String  @map("title_id") @db.Uuid
+  personId      String  @map("person_id") @db.Uuid
+  characterName String? @map("character_name")
+  role          String  @default("actor") // "actor" | "director" | "writer"
+  displayOrder  Int     @default(0) @map("display_order")
+
+  title  Title  @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([titleId, displayOrder])
+  @@map("title_cast")
+}
+
+model Season {
+  id           String   @id @default(uuid()) @db.Uuid
+  titleId      String   @map("title_id") @db.Uuid
+  seasonNumber Int      @map("season_number") @db.SmallInt
+  title        String
+  releaseYear  Int?     @map("release_year") @db.SmallInt
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  titleRelation Title     @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  episodes      Episode[]
+
+  @@unique([titleId, seasonNumber])
+  @@map("seasons")
+}
+
+model Episode {
+  id              String    @id @default(uuid()) @db.Uuid
+  seasonId        String?   @map("season_id") @db.Uuid
+  titleId         String    @map("title_id") @db.Uuid
+  episodeNumber   Int       @map("episode_number") @db.SmallInt
+  title           String
+  description     String?
+  durationSeconds Int       @default(0) @map("duration_seconds")
+  thumbnailUrl    String?   @map("thumbnail_url")
+  airDate         DateTime? @map("air_date") @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  titleRelation Title           @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  season        Season?         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  videoAssets   VideoAsset[]
+  watchProgress WatchProgress[]
+
+  @@index([titleId, episodeNumber])
+  @@map("episodes")
+}
+
+// ------------------------------------------------------------------------------
+// 3. Media Assets, Transcoding & Subtitles
+// ------------------------------------------------------------------------------
+
+model VideoAsset {
+  id                    String    @id @default(uuid()) @db.Uuid
+  titleId               String?   @map("title_id") @db.Uuid
+  episodeId             String?   @map("episode_id") @db.Uuid
+  isActive              Boolean   @default(false) @map("is_active")
+  rawS3Key              String?   @map("raw_s3_key")
+  hlsBasePath           String?   @map("hls_base_path")
+  status                String    @default("pending") // "pending" | "processing" | "ready" | "error"
+  errorMessage          String?   @map("error_message")
+  sourceWidth           Int?      @map("source_width") @db.SmallInt
+  sourceHeight          Int?      @map("source_height") @db.SmallInt
+  sourceBitrateKbps     Int?      @map("source_bitrate_kbps")
+  durationSeconds       Int?      @map("duration_seconds")
+  rawSizeBytes          BigInt?   @map("raw_size_bytes")
+  hlsSizeBytes          BigInt?   @map("hls_size_bytes")
+  renditions            Json?     @map("renditions")
+  processingStartedAt   DateTime? @map("processing_started_at") @db.Timestamptz(3)
+  processingCompletedAt DateTime? @map("processing_completed_at") @db.Timestamptz(3)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  title         Title?          @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  episode       Episode?        @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  subtitles     SubtitleTrack[]
+  transcodeJobs TranscodeJob[]
+
+  @@map("video_assets")
+}
+
+model TranscodeJob {
+  id            String   @id @default(uuid()) @db.Uuid
+  videoAssetId  String   @map("video_asset_id") @db.Uuid
+  pgBossId      String?  @unique @map("pg_boss_id")
+  attemptNumber Int      @default(1) @map("attempt_number") @db.SmallInt
+  status        String   @default("pending") // "pending" | "processing" | "completed" | "failed"
+  errorMessage  String?  @map("error_message")
+  ffprobeMeta   Json?    @map("ffprobe_meta")
+  progressPct   Int      @default(0) @map("progress_pct")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  videoAsset VideoAsset @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+
+  @@map("transcode_jobs")
+}
+
+model SubtitleTrack {
+  id           String  @id @default(uuid()) @db.Uuid
+  videoAssetId String  @map("video_asset_id") @db.Uuid
+  languageCode String  @map("language_code") // "en" | "hi" | "ta" | "te"
+  label        String
+  vttS3Key     String  @map("vtt_s3_key")
+  isDefault    Boolean @default(false) @map("is_default")
+
+  videoAsset VideoAsset @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+
+  @@map("subtitle_tracks")
+}
+
+// ------------------------------------------------------------------------------
+// 4. User State: Watch Progress, Watchlist & Ratings
+// ------------------------------------------------------------------------------
+
+model WatchlistItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  titleId   String   @map("title_id") @db.Uuid
+  addedAt   DateTime @default(now()) @map("added_at") @db.Timestamptz(3)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title   Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, titleId])
+  @@index([profileId, addedAt(sort: Desc)])
+  @@map("watchlist_items")
+}
+
+model WatchProgress {
+  id              String   @id @default(uuid()) @db.Uuid
+  profileId       String   @map("profile_id") @db.Uuid
+  titleId         String   @map("title_id") @db.Uuid
+  episodeId       String?  @map("episode_id") @db.Uuid
+  positionSeconds Int      @map("position_seconds")
+  durationSeconds Int      @map("duration_seconds")
+  isCompleted     Boolean  @default(false) @map("is_completed")
+  watchedAt       DateTime @default(now()) @map("watched_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  profile Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title   Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  episode Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, updatedAt(sort: Desc)])
+  @@map("watch_progress")
+}
+
+model Rating {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  titleId   String   @map("title_id") @db.Uuid
+  value     String // "like" | "dislike"
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title   Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, titleId])
+  @@map("ratings")
+}
+
+// ------------------------------------------------------------------------------
+// 5. Curation, Layout & Analytics
+// ------------------------------------------------------------------------------
+
+model Rail {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  type      String // "manual" | "genre" | "trending" | "new_releases" | "continue_watching" | "my_list"
+  position  Int      @db.SmallInt
+  isActive  Boolean  @default(true) @map("is_active")
+  genreId   String?  @map("genre_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  genre Genre?     @relation(fields: [genreId], references: [id], onDelete: SetNull)
+  items RailItem[]
+
+  @@index([position])
+  @@map("rails")
+}
+
+model RailItem {
+  id        String    @id @default(uuid()) @db.Uuid
+  railId    String    @map("rail_id") @db.Uuid
+  titleId   String    @map("title_id") @db.Uuid
+  position  Int       @db.SmallInt
+  showFrom  DateTime? @map("show_from") @db.Timestamptz(3)
+  showUntil DateTime? @map("show_until") @db.Timestamptz(3)
+
+  rail  Rail  @relation(fields: [railId], references: [id], onDelete: Cascade)
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([railId, titleId])
+  @@index([railId, position])
+  @@map("rail_items")
+}
+
+model Billboard {
+  id        String    @id @default(uuid()) @db.Uuid
+  titleId   String    @map("title_id") @db.Uuid
+  position  Int       @db.SmallInt
+  isActive  Boolean   @default(true) @map("is_active")
+  showFrom  DateTime? @map("show_from") @db.Timestamptz(3)
+  showUntil DateTime? @map("show_until") @db.Timestamptz(3)
+
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@index([position])
+  @@map("billboards")
+}
+
+model PlayEvent {
+  id              BigInt   @id @default(autoincrement()) @db.BigInt
+  profileId       String?  @map("profile_id") @db.Uuid
+  anonymousId     String?  @map("anonymous_id") @db.Uuid
+  titleId         String   @map("title_id") @db.Uuid
+  episodeId       String?  @map("episode_id") @db.Uuid
+  videoAssetId    String?  @map("video_asset_id") @db.Uuid
+  eventType       String   @map("event_type") // "play" | "pause" | "seek" | "buffer" | "quality_change" | "complete" | "heartbeat" | "error"
+  positionSeconds Int      @map("position_seconds")
+  quality         String? // "360p" | "480p" | "720p" | "1080p" | "auto"
+  deviceType      String?  @map("device_type") // "desktop" | "mobile" | "tablet" | "tv"
+  userAgent       String?  @map("user_agent")
+  occurredAt      DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  @@index([titleId, occurredAt(sort: Desc)])
+  @@map("play_events")
+}
+
+model TitleStatsDaily {
+  id               String   @id @default(uuid()) @db.Uuid
+  titleId          String   @map("title_id") @db.Uuid
+  statDate         DateTime @map("stat_date") @db.Date
+  playCountDay     Int      @default(0) @map("play_count_day")
+  completeCountDay Int      @default(0) @map("complete_count_day")
+  watchSecondsDay  BigInt   @default(0) @map("watch_seconds_day")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([titleId, statDate])
+  @@index([statDate(sort: Desc), playCountDay(sort: Desc)])
+  @@map("title_stats_daily")
+}

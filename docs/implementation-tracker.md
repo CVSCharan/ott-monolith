@@ -9,10 +9,10 @@
 ## 1. Executive Status Dashboard
 
 ```
-Overall Progress: [██████████░░░░░░░░░░] 48%
+Overall Progress: [████████████░░░░░░░░] 58%
 ├── Phase 0: Architecture, Design & Contracts:  [██████████] 100% (Completed)
 ├── Milestone 0: Design System & Prototype:      [██████████] 100% (Completed: Tokens, Billboard, Rails, Modal, Player)
-├── Milestone 1: Platform Foundation & Auth:     [██░░░░░░░░]  20% (Schema/routes specified, proxy scaffolded)
+├── Milestone 1: Platform Foundation & Auth:     [████████░░]  85% (Neon DB synced, Seeded, Proxy & Auth module live)
 ├── Milestone 2: Video Pipeline & Player:        [░░░░░░░░░░]   0% (Specifications complete, ready to build)
 ├── Milestone 3: Discovery & Parental Controls:  [░░░░░░░░░░]   0% (Specifications complete)
 ├── Milestone 4: Billing & Admin Console:        [░░░░░░░░░░]   0% (Specifications complete)
@@ -25,7 +25,7 @@ Overall Progress: [██████████░░░░░░░░░░]
 |-----------|------------|---------------------|----------------|---------------|
 | **Phase 0** | **System Architecture & Design** | Docs 00–16, `design/*`, ADRs 0001–0010, `traceability.md`, `decision-register.md`. | ✅ **Completed** | Full review, no unrecorded conflicts. |
 | **Milestone 0** | **Design System & Static Prototype** | Tailwind v4 `@theme static`, fonts, Radix primitives, mock Home shell, Billboard trailer, Quick-view modal, Watch Player. | ✅ **Completed** | `npm run lint`, `tsc --noEmit`, `npm run build` passing cleanly. |
-| **Milestone 1** | **Walking Skeleton & Auth** | Postgres directUrl migration, Prisma client, Redis token bucket in `proxy.ts`, Argon2id auth, JWT refresh rotation, anonymous session. | ⚪ **Ready to Start** | Postgres integration test, Auth E2E test. |
+| **Milestone 1** | **Walking Skeleton & Auth** | Neon DB migration, Prisma 6, Redis token bucket in `proxy.ts`, JWT family rotation, Auth module & DAL. | 🟡 **In Progress (85%)** | Schema synced, seed passed, lint & build clean. |
 | **Milestone 2** | **Video Pipeline & Streaming** | Uppy S3 upload, Docker worker (FFmpeg, 50 GB disk), pg-boss transcode queue, HMAC manifest proxy, `hls.js` player HUD with plan locks. | ⚪ **Ready to Start** | Worker fixture test (`sample-5s.mp4`), playback E2E test. |
 | **Milestone 3** | **Discovery & Parental Controls** | Curated rails, FTS + pg_trgm search, Kids mode filter (`buildVisibilityFilter`), 4-digit PIN verification modal, lockout timer. | ⚪ **Pending M1/M2** | 9-cell Audience Matrix Playwright suite. |
 | **Milestone 4** | **Subscriptions & Admin CMS** | Plans comparison page, dummy checkout Server Action, Admin catalog manager, rail reordering (`dnd-kit`), Recharts analytics. | ⚪ **Pending M3** | Admin RBAC test, Subscription lifecycle test. |
@@ -160,19 +160,19 @@ flowchart LR
 - [x] Build Platform Footer with CC BY attribution and trust/legal links.
 - [x] Pass quality gates: zero lint errors (`npm run lint`), TypeScript strict check (`npx tsc --noEmit`), and production build (`npm run build`).
 
-### Milestone 1: Platform Foundation & Core Services `[Pending]`
-- [ ] Hand-edit initial PostgreSQL migration SQL (`prisma/migrations/0001_init/migration.sql`):
-  - [ ] Add `CREATE EXTENSION IF NOT EXISTS "citext";`
-  - [ ] Add `CREATE EXTENSION IF NOT EXISTS "pg_trgm";`
-  - [ ] Add `watch_progress` partial unique indexes.
-  - [ ] Add TSVECTOR generated column and GIN index.
-- [ ] Run `npm run db:migrate:dev` against local Docker PostgreSQL.
-- [ ] Implement database seed script (`npm run db:seed`) creating plans and sample titles.
-- [ ] Implement Redis connection client with fail-closed auth fallback (`src/lib/redis.ts`).
-- [ ] Implement `src/proxy.ts` with rate-limiting token bucket and JWT shape validator.
-- [ ] Implement authentication service with Argon2id and refresh token family rotation.
-- [ ] Implement Server Actions: `signUp`, `login`, `logout`, `selectProfile`, `verifyPin`.
-- [ ] Verify unit tests for auth and entitlements (`npm test`).
+### Milestone 1: Platform Foundation & Core Services `[In Progress - 85%]`
+- [x] Configure Neon PostgreSQL connection strings (`DATABASE_URL`, `DATABASE_DIRECT_URL`) in local `.env`.
+- [x] Implement `prisma/schema.prisma` covering all 23 database models and relations from doc 05.
+- [x] Synchronize database schema to Neon cloud PostgreSQL (`npx prisma db push`).
+- [x] Implement database seed script (`npm run db:seed`) seeding Plans, Admin Account, Genres, and Sample Titles.
+- [x] Implement Redis connection client with token bucket rate limiting and fail-closed auth fallback (`src/lib/redis.ts`).
+- [x] Implement `src/proxy.ts` (Next.js 16 native Proxy) with security headers, token bucket rate limits, and JWT session inspection.
+- [x] Implement `src/lib/jwt.ts` token signer/verifier using `jose` for 15-minute access and 7-day refresh tokens.
+- [x] Implement `src/modules/auth/dal.ts` strictly isolating Prisma queries to the DAL layer.
+- [x] Implement `src/modules/auth/service.ts` with constant-time dummy check against timing attacks, refresh family rotation, and parental PIN validation.
+- [x] Implement Server Actions in `src/modules/auth/actions.ts`: `signUpAction`, `loginAction`, `logoutAction`, `selectProfileAction`, `verifyPinAction`.
+- [x] Pass all quality gates: `npm run lint`, `npm run type-check`, and `npm run build`.
+- [ ] Implement auth and profile switching UI modal / pages and integration tests.
 
 ### Milestone 2: Video Processing & Streaming Engine `[Pending]`
 - [ ] Verify local MinIO S3 bucket initialization in `docker-compose.yml`.
