@@ -75,10 +75,13 @@ npm run db:seed            # Seed plans, admin account, and sample titles
 
 # Quality Gates (Mandatory CI checks)
 npm run lint               # ESLint with module boundary enforcement
+npm run lint:fix           # ESLint auto-format and fix
+npm run format             # Prettier code formatting
 npm run type-check         # TypeScript type check (tsc --noEmit)
 npm test                   # Vitest unit test suite
 npm run test:e2e           # Playwright end-to-end matrix tests
 npm run test:a11y          # axe-core accessibility audit
+npm run test:visual        # Playwright visual regression snapshots
 ```
 
 For the complete contributor contract, consult [AGENTS.md](./AGENTS.md).

@@ -185,22 +185,31 @@ const securityHeaders = [
 
 ```sql
 -- migration: 0xxx_admin_audit_log.sql
+CREATE TYPE audit_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
+
 CREATE TABLE admin_audit_log (
-  id           BIGINT      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  account_id   UUID        NOT NULL,  -- admin who performed the action
-  action       TEXT        NOT NULL,  -- e.g. 'publish_title', 'delete_title', 'update_rail'
-  resource     TEXT        NOT NULL,  -- e.g. 'title:uuid', 'rail:uuid'
-  before_state JSONB,                 -- snapshot before change (NULL for creates)
-  after_state  JSONB,                 -- snapshot after change (NULL for deletes)
-  ip_address   INET,
-  occurred_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  id           BIGINT         GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  account_id   UUID           NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  action       TEXT           NOT NULL,  -- e.g. 'publish_title', 'delete_title', 'ban_account', 'change_plan'
+  resource     TEXT           NOT NULL,  -- e.g. 'title:uuid', 'account:uuid', 'rail:uuid'
+  priority     audit_priority NOT NULL DEFAULT 'MEDIUM',
+  before_state JSONB,                    -- snapshot before change (NULL for creates)
+  after_state  JSONB,                    -- snapshot after change (NULL for deletes)
+  ip_address   TEXT,
+  user_agent   TEXT,
+  occurred_at  TIMESTAMPTZ    NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_audit_log_account ON admin_audit_log(account_id, occurred_at DESC);
 CREATE INDEX idx_audit_log_resource ON admin_audit_log(resource, occurred_at DESC);
+CREATE INDEX idx_audit_log_priority ON admin_audit_log(priority, occurred_at DESC);
 ```
 
-Populated by: all `publishTitle`, `scheduleTitle`, `deleteTitle`, `updateRail`, `addRailItem`, `removeRailItem`, and any user plan override actions.
+### Audit Priority Levels
+- **`CRITICAL`:** Account suspension/ban, privilege escalation, hard deletion of master assets or published titles.
+- **`HIGH`:** Publishing/unpublishing catalog titles, admin force-upgrading user plan tier, parental PIN administrative reset.
+- **`MEDIUM`:** Updating home rails, modifying title metadata/genres, manually re-enqueueing transcode jobs.
+- **`LOW`:** Generating analytics exports, viewing compliance reports.
 
 ---
 

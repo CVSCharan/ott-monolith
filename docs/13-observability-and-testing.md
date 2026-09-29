@@ -139,6 +139,14 @@ Split health checking into standard liveness and readiness endpoints with **mini
   - Playback error rate: `errors / totalSessions` (Alert threshold > 1%).
   - Startup latency: Time to first frame (Target < 1.2s).
 
+### Client Error Boundaries & Fault Isolation
+
+To prevent single component failures from taking down the whole page:
+1. **Global Error Boundary ([`src/app/global-error.tsx`](../src/app/global-error.tsx)):** Catches catastrophic root layout failures and presents a clean fallback HTML shell.
+2. **Route Segment Error Boundary ([`src/app/error.tsx`](../src/app/error.tsx)):** Recovers from page runtime errors with a `Try Again` (`reset()`) retry button and automatically reports error digests to `/api/telemetry/rum`.
+3. **Section Error Boundary ([`src/components/common/SectionErrorBoundary.tsx`](../src/components/common/SectionErrorBoundary.tsx)):** Reusable boundary wrapping individual carousels and rails; provides inline retry without crashing the billboard or adjacent rails.
+4. **Cinematic 404 ([`src/app/not-found.tsx`](../src/app/not-found.tsx)):** Custom dark-first page with immediate home return and plan exploration actions.
+
 ---
 
 ## 4. The Testing Pyramid

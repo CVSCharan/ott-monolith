@@ -738,6 +738,9 @@ model PlayEvent {
 | `watch_progress`    | `(profile_id, title_id) WHERE episode_id IS NULL`       | Partial Unique | Movie upsert                  |
 | `watch_progress`    | `(profile_id, episode_id) WHERE episode_id IS NOT NULL` | Partial Unique | Episode upsert                |
 | `watch_progress`    | `(profile_id, updated_at DESC)`                         | B-tree         | Continue Watching rail        |
+| `admin_audit_log`   | `(account_id, occurred_at DESC)`                        | B-tree         | Admin activity audit trail    |
+| `admin_audit_log`   | `(priority, occurred_at DESC)`                          | B-tree         | Critical audit event triage   |
+| `playback_sessions` | `(account_id, last_heartbeat_at DESC)`                  | B-tree         | Concurrent stream tracking    |
 | `watchlist_items`   | `(profile_id, title_id)`                                | Unique B-tree  | Idempotent add                |
 | `watchlist_items`   | `(profile_id, added_at DESC)`                           | B-tree         | My List rail                  |
 | `play_events`       | `occurred_at`                                           | BRIN           | Time range scans              |

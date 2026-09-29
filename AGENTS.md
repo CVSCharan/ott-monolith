@@ -52,9 +52,11 @@ npm run demo:reset         # Wipe + re-seed (dev/staging only — blocked in pro
 npm test                   # Vitest unit tests
 npm run test:e2e           # Playwright integration tests
 npm run test:a11y          # axe-core a11y audit
+npm run test:visual        # Playwright visual regression snapshots
 npm run lint               # ESLint (module boundary rules enforced — CI gate)
+npm run lint:fix           # ESLint auto-format & fix
+npm run format             # Prettier format all files
 npm run type-check         # tsc --noEmit
-npm run db:orphan-check    # Every US in doc 03 + endpoint in doc 06 must appear in traceability
 ```
 
 ---
