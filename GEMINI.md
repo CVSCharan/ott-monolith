@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 |---|---|---|
 | **Framework** | Next.js 16 (App Router), React 19, TypeScript | Server Components by default; `src/` directory layout ([ADR-0010](./docs/adr/0010-repo-layout-src-directory.md)). |
 | **Styling** | Tailwind CSS v4 (`@tailwindcss/postcss`) | Top-level `@theme static` tokens only; no raw inline colors/sizes in `.tsx`. |
-| **Database** | PostgreSQL 16 + Prisma 6 | `directUrl` for migrations; partial indexes and GIN indexes in raw migration SQL. |
+| **Database** | PostgreSQL 16 + Prisma 7 (`@prisma/adapter-pg`) | Config in `prisma.config.ts`; driver adapter in `src/lib/db.ts`; partial/GIN indexes in raw migration SQL. |
 | **Auth** | Custom JWT + Argon2id | `httpOnly` cookies; refresh cookie scoped to `Path=/api/auth` with family rotation. |
 | **Storage** | MinIO (local dev) / Cloudflare R2 (prod) | Buckets NOT publicly accessible; all HLS served via manifest proxy route handler. |
 | **Transcoding** | Docker Node worker + FFmpeg | Bounded 50 GB host scratch disk (`worker-scratch`); allowlisted egress; magic-byte check. |

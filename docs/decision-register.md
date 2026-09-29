@@ -45,6 +45,7 @@
 | CF-23 | Scrubber preview sprites vs timeline hover phase ambiguity | Scrubber spritesheets resolved as `[P2]`; MVP timeline uses hover timestamp tooltip and probed 10% poster frame | ✅ Closed (design/frontend-stack-and-libraries.md, doc 07) |
 | CF-24 | Doc 16 claimed `localStorage` needs no consent and set account age to 13+ | Corrected: ePrivacy applies equally to terminal storage (`localStorage` and cookies); account holders must be 18+ (adults) with kids as sub-profiles; added India IT Rules 2021 Grievance Officer requirement; self-hosted seed art; fixed "Elephants Dream" spelling | ✅ Closed (doc 16) |
 | CF-25 | Redis role ambiguous between demo and production | Redis confirmed as MVP component for token-bucket rate limiting in `src/proxy.ts` (10 req/15 min IP + 5 req/15 min account on auth); fail-closed or Postgres fallback on auth endpoints | ✅ Closed (doc 01, doc 04, doc 11, doc 14) |
+| CF-26 | Prisma schema `url` and `directUrl` deprecated in Prisma 7 language server causing IDE lint errors | Migrated connection settings to `prisma.config.ts` via `defineConfig` + `env("DATABASE_URL")`; upgraded to Prisma 7 (`^7.10.0`) with `@prisma/adapter-pg` driver adapter and `pg.Pool` in `src/lib/db.ts` | ✅ Closed (`prisma.config.ts`, `src/lib/db.ts`) |
 
 ---
 

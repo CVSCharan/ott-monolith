@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Inter, Noto_Sans_Devanagari } from "next/font/google";
 import "./globals.css";
+import { WebVitalsReporter } from "@/components/telemetry/WebVitalsReporter";
 
 // Variable fonts: OMIT `weight` parameter completely per Next.js requirements
 const outfit = Outfit({
@@ -48,6 +49,7 @@ export default function RootLayout({
       className={`${outfit.variable} ${inter.variable} ${notoDevanagari.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--color-bg-base)] text-[var(--color-text-primary)] font-[var(--font-ui)] selection:bg-[var(--color-accent-soft)] selection:text-[var(--color-accent-300)]">
+        <WebVitalsReporter />
         {children}
       </body>
     </html>

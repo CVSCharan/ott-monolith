@@ -7,24 +7,33 @@ export interface HealthCheckResult {
   services: {
     database: boolean
     redis: boolean
+    worker: boolean
   }
 }
 
 export async function getReadinessStatus(): Promise<HealthCheckResult> {
-  const [dbHealthy, redisHealthy] = await Promise.all([
+  const [dbHealthy, redisStatus] = await Promise.all([
     checkDatabaseHealth(),
     (async () => {
       const redis = getRedisClient()
-      if (!redis) return false
+      if (!redis) return { connected: false, workerAlive: false }
       try {
-        const ping = await redis.ping()
-        return ping === 'PONG'
+        const [ping, heartbeat] = await Promise.all([
+          redis.ping(),
+          redis.get('worker:heartbeat:transcode'),
+        ])
+        return {
+          connected: ping === 'PONG',
+          workerAlive: Boolean(heartbeat),
+        }
       } catch {
-        return false
+        return { connected: false, workerAlive: false }
       }
     })(),
   ])
 
+  const redisHealthy = redisStatus.connected
+  const workerHealthy = redisStatus.workerAlive
   const allHealthy = dbHealthy && redisHealthy
   const status = allHealthy ? 'ok' : dbHealthy ? 'degraded' : 'down'
 
@@ -34,6 +43,7 @@ export async function getReadinessStatus(): Promise<HealthCheckResult> {
     services: {
       database: dbHealthy,
       redis: redisHealthy,
+      worker: workerHealthy,
     },
   }
 }

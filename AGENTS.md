@@ -22,7 +22,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 |-------|-----------|---------------|
 | Framework | Next.js 16, App Router, TypeScript | Read `node_modules/next/dist/docs/` before any RSC/routing decision |
 | Styling | Tailwind CSS v4 | `@theme` block only — no raw values in `.tsx`; reference tokens |
-| Database | PostgreSQL 16 + Prisma 6 | `directUrl` for migrations; never `migrate deploy` in Vercel build step |
+| Database | PostgreSQL 16 + Prisma 7 (@prisma/adapter-pg) | Config in `prisma.config.ts`; never `migrate deploy` in Vercel build step |
 | Auth | Custom JWT, httpOnly cookies | No `Authorization` header for browser clients; no `NEXT_PUBLIC_*` secrets |
 | Storage | MinIO (local) / Cloudflare R2 (prod) | Bucket NOT publicly accessible in demo; all HLS via proxy Route Handler |
 | Video | FFmpeg Docker worker + hls.js player | Worker is always-on VPS; never Vercel Functions (60 s limit) |
