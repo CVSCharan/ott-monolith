@@ -4,13 +4,25 @@ import * as React from 'react'
 import Link from 'next/link'
 import { Search, Bell, Sparkles, ChevronDown, User, ShieldCheck, LogOut } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { logoutAction } from '@/modules/auth/actions'
 
 export interface NavbarProps {
   isKidsMode?: boolean
   onToggleKidsMode?: () => void
+  onOpenAuth?: (mode: 'login' | 'signup') => void
+  onOpenProfileSwitch?: () => void
+  activeProfileName?: string
+  isAuthenticated?: boolean
 }
 
-export function Navbar({ isKidsMode = false, onToggleKidsMode }: NavbarProps) {
+export function Navbar({
+  isKidsMode = false,
+  onToggleKidsMode,
+  onOpenAuth,
+  onOpenProfileSwitch,
+  activeProfileName = 'John Doe',
+  isAuthenticated = true,
+}: NavbarProps) {
   const [isScrolled, setIsScrolled] = React.useState(false)
   const [isSearchOpen, setIsSearchOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState('')
@@ -156,55 +168,70 @@ export function Navbar({ isKidsMode = false, onToggleKidsMode }: NavbarProps) {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent-500" />
           </button>
 
-          {/* Profile Dropdown */}
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 p-1 rounded-full border border-border hover:border-accent-400 transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-accent-400 group"
-                aria-label="User profile menu"
-              >
-                <div className="w-8 h-8 rounded-full bg-accent-600 flex items-center justify-center text-white text-caption font-bold shadow-sm">
-                  {isKidsMode ? 'KD' : 'JD'}
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-transform duration-fast" />
-              </button>
-            </DropdownMenu.Trigger>
+          {isAuthenticated ? (
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 p-1 rounded-full border border-border hover:border-accent-400 transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-accent-400 group"
+                  aria-label="User profile menu"
+                >
+                  <div className="w-8 h-8 rounded-full bg-accent-600 flex items-center justify-center text-white text-caption font-bold shadow-sm">
+                    {isKidsMode ? 'KD' : activeProfileName.charAt(0)}
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-transform duration-fast" />
+                </button>
+              </DropdownMenu.Trigger>
 
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                className="z-dropdown min-w-48 bg-bg-elevated border border-border rounded-md p-1.5 shadow-modal font-ui text-body-sm text-text-primary outline-none animate-in fade-in-50 duration-fast"
-                sideOffset={8}
-                align="end"
-              >
-                <div className="px-3 py-2 border-b border-border/50 mb-1">
-                  <p className="font-semibold text-text-primary">
-                    {isKidsMode ? 'Kids Profile' : 'John Doe'}
-                  </p>
-                  <p className="text-caption text-text-muted">
-                    {isKidsMode ? 'Restricted to U & U/A 7+' : 'Premium 4K UHD Plan'}
-                  </p>
-                </div>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  className="z-dropdown min-w-48 bg-bg-elevated border border-border rounded-md p-1.5 shadow-modal font-ui text-body-sm text-text-primary outline-none animate-in fade-in-50 duration-fast"
+                  sideOffset={8}
+                  align="end"
+                >
+                  <div className="px-3 py-2 border-b border-border/50 mb-1">
+                    <p className="font-semibold text-text-primary">
+                      {isKidsMode ? 'Kids Profile' : activeProfileName}
+                    </p>
+                    <p className="text-caption text-text-muted">
+                      {isKidsMode ? 'Restricted to U & U/A 7+' : 'Premium 4K UHD Plan'}
+                    </p>
+                  </div>
 
-                <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast">
-                  <User className="w-4 h-4 text-text-muted" />
-                  <span>Switch Profiles</span>
-                </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    onClick={onOpenProfileSwitch}
+                    className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast"
+                  >
+                    <User className="w-4 h-4 text-text-muted" />
+                    <span>Switch Profiles</span>
+                  </DropdownMenu.Item>
 
-                <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast">
-                  <ShieldCheck className="w-4 h-4 text-text-muted" />
-                  <span>Account & Billing</span>
-                </DropdownMenu.Item>
+                  <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer hover:bg-bg-surface hover:text-accent-300 outline-none transition-colors duration-fast">
+                    <ShieldCheck className="w-4 h-4 text-text-muted" />
+                    <span>Account & Billing</span>
+                  </DropdownMenu.Item>
 
-                <DropdownMenu.Separator className="h-px bg-border my-1" />
+                  <DropdownMenu.Separator className="h-px bg-border my-1" />
 
-                <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer text-error hover:bg-error-soft outline-none transition-colors duration-fast">
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out of StreamForge</span>
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+                  <DropdownMenu.Item
+                    onClick={() => logoutAction()}
+                    className="flex items-center gap-2 px-3 py-2 rounded-sm cursor-pointer text-error hover:bg-error-soft outline-none transition-colors duration-fast"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out of StreamForge</span>
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenAuth?.('login')}
+              className="px-4 py-1.5 rounded-md bg-accent-500 hover:bg-accent-600 text-white font-semibold text-body-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </nav>
     </header>
