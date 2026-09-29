@@ -36,7 +36,12 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/legal/dmca" className="hover:text-text-primary transition-colors">
+              <Link href="/legal/grievance" className="hover:text-text-primary transition-colors">
+                Grievance Redressal
+              </Link>
+            </li>
+            <li>
+              <Link href="/legal/contact" className="hover:text-text-primary transition-colors">
                 Content Takedown (DMCA)
               </Link>
             </li>

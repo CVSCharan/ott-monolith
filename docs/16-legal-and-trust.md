@@ -8,15 +8,16 @@
 
 ## Summary Table
 
-| Document                   | Required for Demo?                        | Required for Production? | Owner       |
-| -------------------------- | ----------------------------------------- | ------------------------ | ----------- |
-| Terms of Service           | Stub page, clearly labelled "draft"       | ✅ Yes, legal review     | Legal       |
-| Privacy Policy             | Stub page, clearly labelled "draft"       | ✅ Yes, legal review     | Legal       |
-| Cookie Consent Banner      | No banner for demo                        | ✅ Yes (GDPR/DPDPA)      | Eng + Legal |
-| Takedown Contact (DMCA)    | Email address only                        | ✅ Yes                   | Legal       |
-| Refund/Cancellation Policy | "Demo mode, no real charges" notice       | ✅ Yes, legal review     | Legal       |
-| CC BY Attribution Page     | ✅ Required (seed content is CC-licensed) | ✅ Yes                   | Eng         |
-| Data Export/Deletion       | 501 stub                                  | ✅ Phase 2               | Eng         |
+| Document                   | Route                                  | Status / Implementation                                             | Owner       |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------- | ----------- |
+| Terms of Service           | `/terms` & `/legal/terms`              | ✅ Implemented (Demo disclosure, 18+ rule, plan tiers)              | Legal + Eng |
+| Privacy Policy             | `/privacy` & `/legal/privacy`          | ✅ Implemented (DPDPA 2023, GDPR, children rules, retention table)  | Legal + Eng |
+| Grievance Redressal        | `/legal/grievance`                     | ✅ Implemented (India IT Rules 2021, Resident Officer, Level I-III) | Legal + Eng |
+| Media Attribution (CC BY)  | `/attribution` & `/legal/attributions` | ✅ Implemented (Blender Foundation credits, transcode notes)        | Eng         |
+| Takedown Contact (DMCA)    | `/legal/contact` & `/legal/dmca`       | ✅ Implemented (Designated Agent coordinates, notice checklist)     | Legal + Eng |
+| Cookie Consent Banner      | First-party cookie preferences         | Local storage + essential session cookies (zero 3rd-party ads)      | Eng + Legal |
+| Refund/Cancellation Policy | `/terms` (Section 3)                   | "Demo mode, no real charges" notice                                 | Legal + Eng |
+| Data Export/Deletion       | `/api/account`                         | Soft-delete (30-day grace, then hard delete)                        | Eng         |
 
 ---
 

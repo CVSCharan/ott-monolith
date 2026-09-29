@@ -201,7 +201,19 @@ WHERE status = 'published'
 
 ---
 
-## 11. Canonical Server Actions Index
+## 11. Public Legal & Trust Pages
+
+| Story     | Feature / Capability                     | Surface                                       | Data Access          | Visibility Scope | Tables | Route / File                       | UI Component        | Status    | Milestone |
+| --------- | ---------------------------------------- | --------------------------------------------- | -------------------- | ---------------- | ------ | ---------------------------------- | ------------------- | --------- | --------- |
+| **Trust** | Terms of Use & 18+ Eligibility Gate      | Route (`/terms`, `/legal/terms`)              | Static / ISR content | Public           | None   | `src/app/terms/page.tsx`           | `TermsOfUsePage`    | Completed | `[MVP]`   |
+| **Trust** | Privacy Policy & DPDPA/GDPR Disclosures  | Route (`/privacy`, `/legal/privacy`)          | Static / ISR content | Public           | None   | `src/app/privacy/page.tsx`         | `PrivacyPolicyPage` | Completed | `[MVP]`   |
+| **Trust** | Statutory Grievance Redressal (IT Rules) | Route (`/legal/grievance`)                    | Static / ISR content | Public           | None   | `src/app/legal/grievance/page.tsx` | `GrievancePage`     | Completed | `[MVP]`   |
+| **Trust** | CC BY Media Attribution Center           | Route (`/attribution`, `/legal/attributions`) | Static / ISR content | Public           | None   | `src/app/attribution/page.tsx`     | `AttributionPage`   | Completed | `[MVP]`   |
+| **Trust** | Content Takedown & DMCA Contact          | Route (`/legal/contact`, `/legal/dmca`)       | Static / ISR content | Public           | None   | `src/app/legal/contact/page.tsx`   | `DmcaContactPage`   | Completed | `[MVP]`   |
+
+---
+
+## 12. Canonical Server Actions Index
 
 | Action Name                           | Module                  | Primary Purpose                                    | Mutation Performed                                      | Tables                                                     |
 | ------------------------------------- | ----------------------- | -------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
@@ -230,7 +242,7 @@ WHERE status = 'published'
 
 ---
 
-## 12. Phase 2 Endpoint Reservations
+## 13. Phase 2 Endpoint Reservations
 
 | Endpoint                                | Story     | Purpose                                                    |
 | --------------------------------------- | --------- | ---------------------------------------------------------- |

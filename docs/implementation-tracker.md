@@ -253,6 +253,5 @@ flowchart LR
 - [x] Prisma 7 driver adapter modernization (`prisma.config.ts`, `@prisma/adapter-pg`, `pg.Pool`, `src/lib/db.ts`).
 - [x] Enterprise resilience and error boundaries (`src/app/not-found.tsx`, `src/app/error.tsx`, `src/app/global-error.tsx`, `src/components/common/SectionErrorBoundary.tsx`).
 - [x] Audit logging and stream concurrency models (`AdminAuditLog` with `AuditPriority`, `PlaybackSession` in `prisma/schema.prisma`).
-- [x] Automated Lighthouse CI performance gate (`.lighthouserc.json`, script `npm run test:lhci`, CI step in `.github/workflows/ci.yml`).
-- [ ] Public Legal & Trust Pages (Terms of Use, Privacy Policy, DPDPA 2023 compliance, 18+ gate).
-- [ ] Statutory India IT Rules 2021 Grievance Redressal mechanism section in footer.
+- [x] Public Legal & Trust Pages (Terms of Use, Privacy Policy, DPDPA 2023 compliance, 18+ gate).
+- [x] Statutory India IT Rules 2021 Grievance Redressal mechanism section in footer.
